@@ -19,7 +19,7 @@ public static class FENExtractor
 	{
 		List<PieceData> piecesToCreateData = new List<PieceData>();
 
-		Vector2Int piecePosition = new Vector2Int(0, Board.RANKS);
+		Vector2Int piecePosition = new Vector2Int(0, Board.RANKS - 1);
 
 		foreach (char singleChar in piecesPositions)
 		{
