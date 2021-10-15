@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class Board : MonoBehaviour
@@ -47,5 +48,17 @@ public class Board : MonoBehaviour
                 Squares[x, y].name = newSquarePrefab.name;
             }
         }
+    }
+
+    public static Vector2Int AlgebraicNotationToPosition(string an)
+	{
+        int fileIndex = 0;
+        foreach (char fileSymbols in "abcdefgh")
+		{
+            if (fileSymbols == an[0])
+                return new Vector2Int(fileIndex, (int)char.GetNumericValue(an[1]) - 1);
+            fileIndex++;
+        }
+        throw new FormatException("Forbidden file symbol");
     }
 }
