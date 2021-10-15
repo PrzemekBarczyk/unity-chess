@@ -17,28 +17,15 @@ public class Board : MonoBehaviour
     public const int TOP_RANK = 7;
     public const int BOTTOM_RANK = 0;
 
-    public Square[,] Squares { get; private set; }
+    public Square[,] Squares { get; } = new Square[FILES, RANKS];
 
     void Awake()
     {
-        DestroyBoard();
         CreateBoard();
-    }
-
-    void DestroyBoard()
-    {
-        for (int i = transform.childCount - 1; i >= 0; i--)
-        {
-            DestroyImmediate(transform.GetChild(i).gameObject);
-        }
-
-        Squares = null;
     }
 
     void CreateBoard()
     {
-        Squares = new Square[FILES, RANKS];
-
         for (int y = 0; y < RANKS; y++)
         {
             for (int x = 0; x < FILES; x++)
