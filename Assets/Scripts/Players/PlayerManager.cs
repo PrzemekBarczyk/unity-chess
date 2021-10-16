@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PlayerManager : MonoBehaviour
+public class PlayerManager : MonoSingleton<PlayerManager>
 {
     [SerializeField] Player _humanPlayerPrefab;
     [SerializeField] Player _botPlayerPrefab;
@@ -12,6 +12,11 @@ public class PlayerManager : MonoBehaviour
 
 	public Player CurrentPlayer { get; private set; }
 	public Player NextPlayer { get; private set; }
+
+	new void Awake()
+	{
+		base.Awake();
+	}
 
 	public void SetStartingPlayerColor(ColorType startingPlayerColor)
 	{

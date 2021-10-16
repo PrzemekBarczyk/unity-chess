@@ -15,7 +15,7 @@ public class PlayersSelector : MonoBehaviour
 
 	void Awake()
 	{
-		_playerManager = FindObjectOfType<PlayerManager>();
+		_playerManager = PlayerManager.Instance;
 	}
 
 	public void BotVsBot()

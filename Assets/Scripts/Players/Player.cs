@@ -7,16 +7,16 @@ public abstract class Player : MonoBehaviour
 
 	public PieceSet Pieces { get; private set; }
 
-	PlayerManager _playerManager;
+	PieceManager _pieceManager;
 
 	void Awake()
 	{
-		_playerManager = FindObjectOfType<PlayerManager>();
+		_pieceManager = PieceManager.Instance;
 	}
 
 	public void Initialize(ColorType color)
 	{
 		Color = color;
-		Pieces = Color == ColorType.White ? GameObject.Find("White Pieces").GetComponent<PieceSet>() : GameObject.Find("Black Pieces").GetComponent<PieceSet>();
+		Pieces = Color == ColorType.White ? _pieceManager.WhitePieces : _pieceManager.BlackPieces;
 	}
 }

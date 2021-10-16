@@ -1,20 +1,18 @@
 using UnityEngine;
 
-public class GameManager : MonoBehaviour
+public class GameManager : MonoSingleton<GameManager>
 {
 	[SerializeField] string _startChessPositionInFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-	PieceSet _whitePieces;
-	PieceSet _blackPieces;
-
+	PieceManager _pieces;
 	PlayerManager _players;
 
-	void Awake()
+	new void Awake()
 	{
-		_whitePieces = GameObject.Find("White Pieces").GetComponent<PieceSet>();
-		_blackPieces = GameObject.Find("Black Pieces").GetComponent<PieceSet>();
+		base.Awake();
 
-		_players = FindObjectOfType<PlayerManager>();
+		_pieces = PieceManager.Instance;
+		_players = PlayerManager.Instance;
 
 		ExtractDataFromFEN();
     }
@@ -23,8 +21,8 @@ public class GameManager : MonoBehaviour
 	{
 		ExtractedFENData extractedFENData = FENExtractor.FENToBoardPositionData(_startChessPositionInFEN);
 
-		_whitePieces.CreatePieces(extractedFENData.PiecesToCreate);
-		_blackPieces.CreatePieces(extractedFENData.PiecesToCreate);
+		_pieces.WhitePieces.CreatePieces(extractedFENData.PiecesToCreate);
+		_pieces.BlackPieces.CreatePieces(extractedFENData.PiecesToCreate);
 		_players.SetStartingPlayerColor(extractedFENData.PlayerToMoveColor);
 	}
 }

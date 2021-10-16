@@ -14,7 +14,7 @@ public abstract class Piece : MonoBehaviour
 
 	protected void Awake()
 	{
-		_board = FindObjectOfType<Board>();
+		_board = Board.Instance;
 		ChangeSquare(_board.Squares[(int)transform.position.x, (int)transform.position.y]);
 	}
 

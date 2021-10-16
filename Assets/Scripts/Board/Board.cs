@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class Board : MonoBehaviour
+public class Board : MonoSingleton<Board>
 {
     [SerializeField] Square _whiteSquarePrefab;
     [SerializeField] Square _blackSquarePrefab;
@@ -19,8 +19,10 @@ public class Board : MonoBehaviour
 
     public Square[,] Squares { get; } = new Square[FILES, RANKS];
 
-    void Awake()
+    new void Awake()
     {
+        base.Awake();
+
         CreateBoard();
     }
 
