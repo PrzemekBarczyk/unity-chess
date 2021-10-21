@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public class Bishop : Piece
 {
     public override PieceType Type => PieceType.Bishop;
@@ -5,5 +7,15 @@ public class Bishop : Piece
 	new void Awake()
 	{
 		base.Awake();
+	}
+
+	public override void FindLegalMoves()
+	{
+		ClearLegalMoves();
+
+		AddSlidingMoves(new Vector2Int(1, 1));
+		AddSlidingMoves(new Vector2Int(1, -1));
+		AddSlidingMoves(new Vector2Int(-1, -1));
+		AddSlidingMoves(new Vector2Int(-1, 1));
 	}
 }

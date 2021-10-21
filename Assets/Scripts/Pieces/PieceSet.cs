@@ -35,4 +35,21 @@ public class PieceSet : MonoBehaviour
 			}
 		}
 	}
+
+	public void FindLegalMoves()
+	{
+		foreach (Piece piece in AlivePieces())
+			piece.FindLegalMoves();
+	}
+
+	public List<Piece> AlivePieces()
+	{
+		List<Piece> alivePieces = new List<Piece>();
+		foreach (Piece piece in Pieces)
+		{
+			if (piece.IsAlive)
+				alivePieces.Add(piece);
+		}
+		return alivePieces;
+	}
 }
