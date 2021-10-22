@@ -12,10 +12,12 @@ public class PlayersSelector : MonoBehaviour
 	ColorType _secondPlayerColor;
 
 	PlayerManager _playerManager;
+	GameManager _gameManager;
 
 	void Awake()
 	{
 		_playerManager = PlayerManager.Instance;
+		_gameManager = GameManager.Instance;
 	}
 
 	public void BotVsBot()
@@ -48,6 +50,7 @@ public class PlayersSelector : MonoBehaviour
 		_secondPlayerColor = ColorType.White;
 		_selectColorMenu.SetActive(false);
 		_playerManager.CreatePlayers(new PlayerData(_mainPlayerColor, _mainPlayerType), new PlayerData(_secondPlayerColor, _secondPlayerType));
+		_gameManager.StartGame();
 	}
 
 	public void SelectWhite()
@@ -56,5 +59,6 @@ public class PlayersSelector : MonoBehaviour
 		_secondPlayerColor = ColorType.Black;
 		_selectColorMenu.SetActive(false);
 		_playerManager.CreatePlayers(new PlayerData(_mainPlayerColor, _mainPlayerType), new PlayerData(_secondPlayerColor, _secondPlayerType));
+		_gameManager.StartGame();
 	}
 }

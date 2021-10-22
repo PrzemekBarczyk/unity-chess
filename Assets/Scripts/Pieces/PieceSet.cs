@@ -42,6 +42,16 @@ public class PieceSet : MonoBehaviour
 			piece.FindLegalMoves();
 	}
 
+	public bool HasLegalMoves()
+	{
+		foreach (Piece piece in AlivePieces())
+		{
+			if (piece.LegalMoves.Count > 0)
+				return true;
+		}
+		return false;
+	}
+
 	public List<Piece> AlivePieces()
 	{
 		List<Piece> alivePieces = new List<Piece>();

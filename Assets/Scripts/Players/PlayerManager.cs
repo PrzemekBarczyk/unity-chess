@@ -45,4 +45,10 @@ public class PlayerManager : MonoSingleton<PlayerManager>
 		CurrentPlayer = _startingPlayerColor == WhitePlayer.Color ? WhitePlayer : BlackPlayer;
 		NextPlayer = _startingPlayerColor == WhitePlayer.Color ? BlackPlayer : WhitePlayer;
 	}
+
+	public void SwitchTurn()
+	{
+		CurrentPlayer = CurrentPlayer.Color == ColorType.White ? BlackPlayer : WhitePlayer;
+		NextPlayer = NextPlayer.Color == ColorType.White ? BlackPlayer : WhitePlayer;
+	}
 }
