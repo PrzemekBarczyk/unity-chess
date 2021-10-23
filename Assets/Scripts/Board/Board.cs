@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Board : MonoSingleton<Board>
@@ -37,6 +38,33 @@ public class Board : MonoSingleton<Board>
                 Squares[x, y].name = newSquarePrefab.name;
             }
         }
+    }
+
+    public void DisplayLegalMovesIndicators(List<MoveData> legalMoves)
+    {
+        foreach (MoveData move in legalMoves)
+        {
+            if (move.EncounteredPiece != null) move.NewSquare.DisplayValidForAttackIndicator();
+            else move.NewSquare.DisplayValidForMoveIndicator();
+        }
+    }
+
+    public void HideLegalMovesIndicators(List<MoveData> legalMoves)
+    {
+        foreach (MoveData move in legalMoves)
+            move.NewSquare.HideValidMovementIndicators();
+    }
+
+    public void DisplayLastMoveIndicators(MoveData lastMove)
+    {
+        lastMove.OldSquare.DisplayLastMoveIndicator();
+        lastMove.NewSquare.DisplayLastMoveIndicator();
+    }
+
+    public void HideLastMoveIndicators(MoveData lastMove)
+    {
+        lastMove.OldSquare.HideLastMoveIndicator();
+        lastMove.NewSquare.HideLastMoveIndicator();
     }
 
     public static Vector2Int AlgebraicNotationToPosition(string an)

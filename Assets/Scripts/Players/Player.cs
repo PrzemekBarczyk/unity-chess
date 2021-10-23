@@ -7,14 +7,14 @@ public abstract class Player : MonoBehaviour
 	public ColorType Color { get; private set; }
 	public abstract PlayerType Type { get; }
 
-	public PieceSet Pieces { get; private set; }
+	public PieceSet Pieces { get; protected set; }
 
 	public MoveData? LastMove { get; private set; }
 	public MoveData MoveToMake { get; private set; }
 
 	PieceManager _pieceManager;
 
-	void Awake()
+	protected void Awake()
 	{
 		_pieceManager = PieceManager.Instance;
 	}

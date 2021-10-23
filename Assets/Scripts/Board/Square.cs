@@ -1,9 +1,15 @@
 using System;
 using UnityEngine;
 
+[RequireComponent(typeof(BoxCollider))]
 public class Square : MonoBehaviour
 {
-	[SerializeField] ColorType _colorType;
+    [Header("Indicators")]
+    [SerializeField] GameObject _attackIndicator;
+    [SerializeField] GameObject _emptyFieldIndicator;
+    [SerializeField] GameObject _lastMoveIndicator;
+
+    [SerializeField] ColorType _colorType;
 
 	public ColorType ColorType => _colorType;
 
@@ -13,15 +19,46 @@ public class Square : MonoBehaviour
 
 	public bool IsOccupied => Piece != null;
 
+    public bool OnTopRank { get => Position.y == Board.TOP_RANK; }
+    public bool OnBottomRank { get => Position.y == Board.BOTTOM_RANK; }
+
+    GameManager _gameManager;
+    PlayerManager _playerManager;
     Board _board;
 
 	void Awake()
 	{
-        _board = Board.Instance;
 		Position = Vector2Int.RoundToInt(transform.position);
 	}
 
-	public bool IsPromotionSquare(ColorType pieceColor)
+    void Start()
+    {
+        _gameManager = GameManager.Instance;
+        _playerManager = PlayerManager.Instance;
+        _board = Board.Instance;
+    }
+
+    void OnMouseDown()
+    {
+        if (_gameManager.State != State.Playing) return;
+        if (_playerManager.CurrentPlayer is HumanPlayer)
+        {
+            HumanPlayer player = _playerManager.CurrentPlayer as HumanPlayer;
+            player.OnSquareSelected(this);
+        }
+    }
+
+    void OnMouseUp()
+    {
+        if (_gameManager.State != State.Playing) return;
+        if (_playerManager.CurrentPlayer is HumanPlayer)
+        {
+            HumanPlayer player = _playerManager.CurrentPlayer as HumanPlayer;
+            player.OnSuareDeselected();
+        }
+    }
+
+    public bool IsPromotionSquare(ColorType pieceColor)
 	{
 		return pieceColor == ColorType.White ? (Position.y == Board.TOP_RANK) : (Position.y == Board.BOTTOM_RANK);
 	}
@@ -136,4 +173,18 @@ public class Square : MonoBehaviour
 
         return false;
     }
+
+    public void DisplayValidForAttackIndicator() => _attackIndicator.SetActive(true);
+
+    public void DisplayValidForMoveIndicator() => _emptyFieldIndicator.SetActive(true);
+
+    public void HideValidMovementIndicators()
+    {
+        _attackIndicator.SetActive(false);
+        _emptyFieldIndicator.SetActive(false);
+    }
+
+    public void DisplayLastMoveIndicator() => _lastMoveIndicator.SetActive(true);
+
+    public void HideLastMoveIndicator() => _lastMoveIndicator.SetActive(false);
 }

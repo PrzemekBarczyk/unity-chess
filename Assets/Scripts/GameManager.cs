@@ -11,6 +11,7 @@ public class GameManager : MonoSingleton<GameManager>
 
 	PieceManager _pieces;
 	PlayerManager _players;
+    Board _board;
 
 	new void Awake()
 	{
@@ -18,6 +19,7 @@ public class GameManager : MonoSingleton<GameManager>
 
 		_pieces = PieceManager.Instance;
 		_players = PlayerManager.Instance;
+        _board = Board.Instance;
 
 		ExtractDataFromFEN();
     }
@@ -68,12 +70,14 @@ public class GameManager : MonoSingleton<GameManager>
 
     void OnMoveBegin()
     {
-        
+        MoveData? lastMove = _players.CurrentPlayer.LastMove;
+        if (lastMove.HasValue) _board.HideLastMoveIndicators(lastMove.Value);
     }
 
     void OnMoveEnded()
     {
-        
+        MoveData? lastMove = _players.CurrentPlayer.LastMove;
+        _board.DisplayLastMoveIndicators(lastMove.Value);
     }
 
     State CheckGameState()
