@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Knight : Piece
+public class Knight : JumpingPiece
 {
     public override PieceType Type => PieceType.Knight;
 
@@ -9,24 +9,17 @@ public class Knight : Piece
 		base.Awake();
 	}
 
-	public override void FindLegalMoves()
+	public override void GenerateLegalMoves()
 	{
-		ClearLegalMoves();
+		LegalMoves.Clear();
 
-		AddValidJumpMove(new Vector2Int(-1, 2));
-		AddValidJumpMove(new Vector2Int(1, 2));
-		AddValidJumpMove(new Vector2Int(2, 1));
-		AddValidJumpMove(new Vector2Int(2, -1));
-		AddValidJumpMove(new Vector2Int(1, -2));
-		AddValidJumpMove(new Vector2Int(-1, -2));
-		AddValidJumpMove(new Vector2Int(-2, -1));
-		AddValidJumpMove(new Vector2Int(-2, 1));
-	}
-
-	void AddValidJumpMove(Vector2Int offset)
-	{
-		Vector2Int checkedPosition = Square.Position + offset;
-
-		TryAddSingleMove(checkedPosition);
+		FindJumpMove(new Vector2Int(-1, 2));
+		FindJumpMove(new Vector2Int(1, 2));
+		FindJumpMove(new Vector2Int(2, 1));
+		FindJumpMove(new Vector2Int(2, -1));
+		FindJumpMove(new Vector2Int(1, -2));
+		FindJumpMove(new Vector2Int(-1, -2));
+		FindJumpMove(new Vector2Int(-2, -1));
+		FindJumpMove(new Vector2Int(-2, 1));
 	}
 }

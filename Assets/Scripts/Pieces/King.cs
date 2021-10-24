@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class King : Piece
+public class King : SlidingPiece
 {
     public override PieceType Type => PieceType.King;
 
@@ -12,26 +12,26 @@ public class King : Piece
 		base.Awake();
 	}
 
-    public override void FindLegalMoves()
+    public override void GenerateLegalMoves()
     {
-        ClearLegalMoves();
+        LegalMoves.Clear();
 
-        AddSlidingMoves(new Vector2Int(-1, 1), 1);
-        AddSlidingMoves(new Vector2Int(0, 1), 1);
-        AddSlidingMoves(new Vector2Int(1, 1), 1);
-        AddSlidingMoves(new Vector2Int(1, 0), 1);
-        AddSlidingMoves(new Vector2Int(1, -1), 1);
-        AddSlidingMoves(new Vector2Int(0, -1), 1);
-        AddSlidingMoves(new Vector2Int(-1, -1), 1);
-        AddSlidingMoves(new Vector2Int(-1, 0), 1);
+        FindSlidingMoves(new Vector2Int(-1, 1), 1);
+        FindSlidingMoves(new Vector2Int(0, 1), 1);
+        FindSlidingMoves(new Vector2Int(1, 1), 1);
+        FindSlidingMoves(new Vector2Int(1, 0), 1);
+        FindSlidingMoves(new Vector2Int(1, -1), 1);
+        FindSlidingMoves(new Vector2Int(0, -1), 1);
+        FindSlidingMoves(new Vector2Int(-1, -1), 1);
+        FindSlidingMoves(new Vector2Int(-1, 0), 1);
 
-        AddCastlingMove(false);
-        AddCastlingMove(true);
+        FindCastlingMove(false);
+        FindCastlingMove(true);
     }
 
-    public void AddCastlingMove(bool rightCastle)
+    public void FindCastlingMove(bool rightCastle)
     {
-        if (rightCastle ? !CanCastleKingside : !CanCastleQueenside) // canCastle tells if rook or king moved since start
+        if (rightCastle ? !CanCastleKingside : !CanCastleQueenside) // canCastle tells if king or proper rook moved since start
             return;
 
         if (IsChecked())
@@ -58,11 +58,12 @@ public class King : Piece
         }
 
         Square rookOldSquare = _board.Squares[rookOldPosition.x, rookOldPosition.y];
-
         Square rookNewSquare = _board.Squares[rookNewPosition.x, rookNewPosition.y];
 
-        Vector2Int checkedPosition = Square.Position + positionModifier;
+        if (rookOldSquare.Piece == null || rookOldSquare.Piece.Color != Color) // rook missing or wrong color
+            return;
 
+        Vector2Int checkedPosition = Square.Position + positionModifier;
         for (int i = 0; i < 2; i++) // squares king has to move over
         {
             Square checkedSuare = _board.Squares[checkedPosition.x, checkedPosition.y];
@@ -73,23 +74,23 @@ public class King : Piece
             checkedPosition += positionModifier;
         }
 
-        Square validSquare = _board.Squares[newKingPosition.x, newKingPosition.y];
-        LegalMoves.Add(new MoveData(this, Square, validSquare, null, MoveType.Castle, rookOldSquare, rookNewSquare));
+        Square newKingSquare = _board.Squares[newKingPosition.x, newKingPosition.y];
+        LegalMoves.Add(new MoveData(this, Square, newKingSquare, null, MoveType.Castle, rookOldSquare, rookNewSquare));
     }
 
     public override void Move(MoveData moveToMake, bool updateGraphic = false)
     {
+        base.Move(moveToMake, updateGraphic);
+
         CanCastleQueenside = false;
         CanCastleKingside = false;
 
         if (moveToMake.Type == MoveType.Castle)
-		{
+        {
             Rook rook = moveToMake.RookOldSquare.Piece as Rook;
             MoveData rookMove = new MoveData(rook, moveToMake.RookOldSquare, moveToMake.RookNewSquare, null);
             rook.Move(rookMove, updateGraphic);
-		}
-
-        base.Move(moveToMake, updateGraphic);
+        }
     }
 
 	public override void UndoMove(MoveData moveToUndo, bool updateGraphic = false)

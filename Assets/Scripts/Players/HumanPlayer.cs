@@ -21,7 +21,7 @@ public class HumanPlayer : Player
             continue;
 
         MoveData selectedMove = _moveSelector.GetSelectedMove();
-        MoveData selectedMoveWithProperType = selectedMove.Piece.FindLegalMove(selectedMove);
+        MoveData selectedMoveWithProperType = selectedMove.Piece.LegalMoves.Find(x => (x.NewSquare == selectedMove.NewSquare && !selectedMove.IsPromotion) || (x.NewSquare == selectedMove.NewSquare && selectedMove.IsPromotion && x.Type == selectedMove.Type));
 
         return selectedMoveWithProperType;
     }

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Rook : Piece
+public class Rook : SlidingPiece
 {
     public override PieceType Type => PieceType.Rook;
 
@@ -10,23 +10,23 @@ public class Rook : Piece
 
 	}
 
-	public override void FindLegalMoves()
+	public override void GenerateLegalMoves()
 	{
-		ClearLegalMoves();
+		LegalMoves.Clear();
 
-		AddSlidingMoves(new Vector2Int(0, 1));
-		AddSlidingMoves(new Vector2Int(1, 0));
-		AddSlidingMoves(new Vector2Int(0, -1));
-		AddSlidingMoves(new Vector2Int(-1, 0));
+		FindSlidingMoves(new Vector2Int(0, 1));
+		FindSlidingMoves(new Vector2Int(1, 0));
+		FindSlidingMoves(new Vector2Int(0, -1));
+		FindSlidingMoves(new Vector2Int(-1, 0));
 	}
 
 	public override void Move(MoveData moveToMake, bool updateGraphic = false)
 	{
+		base.Move(moveToMake, updateGraphic);
+
 		if (Square.Position.x == Board.LEFT_FILE && Square.Position.y == Board.BOTTOM_RANK)
 			Pieces.King.CanCastleQueenside = false;
 		else if (Square.Position.x == Board.RIGHT_FILE && Square.Position.y == Board.BOTTOM_RANK)
 			Pieces.King.CanCastleKingside = false;
-
-		base.Move(moveToMake, updateGraphic);
 	}
 }

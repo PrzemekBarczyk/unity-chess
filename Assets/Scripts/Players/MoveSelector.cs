@@ -76,7 +76,7 @@ public class MoveSelector : MonoBehaviour
 		{
 			if (!selectedSquare.IsOccupied)
 			{
-				bool isSelectedSquareValidForMove = _selectedPiece.IsMoveLegal(new MoveData(_selectedPiece, _startSquare, selectedSquare, selectedSquare.Piece));
+				bool isSelectedSquareValidForMove = _selectedPiece.LegalMoves.Exists(x => x.OldSquare == _startSquare && x.NewSquare == selectedSquare);
 				if (isSelectedSquareValidForMove)
 				{
 					bool selectedCurrentPlayerPiece = _selectedPiece.Color == _players.CurrentPlayer.Color;
@@ -101,7 +101,7 @@ public class MoveSelector : MonoBehaviour
 			}
 			else // square not empty
 			{
-				bool isSelectedSquareValidForMove = _selectedPiece.IsMoveLegal(new MoveData(_selectedPiece, _startSquare, selectedSquare, selectedSquare.Piece));
+				bool isSelectedSquareValidForMove = _selectedPiece.LegalMoves.Exists(x => x.OldSquare == _startSquare && x.NewSquare == selectedSquare);
 				if (isSelectedSquareValidForMove)
 				{
 					bool selectedCurrentPlayerPiece = _selectedPiece.Color == _players.CurrentPlayer.Color;
@@ -169,7 +169,7 @@ public class MoveSelector : MonoBehaviour
 			yield break;
 		}
 
-		bool isSelectedSquareValidForMove = _selectedPiece.IsMoveLegal(new MoveData(_selectedPiece, _startSquare, selectedSquare, selectedSquare.Piece));
+		bool isSelectedSquareValidForMove = _selectedPiece.LegalMoves.Exists(x => x.OldSquare == _startSquare && x.NewSquare == selectedSquare);
 		if (isSelectedSquareValidForMove)
 		{
 			bool selectedCurrentPlayerPiece = _selectedPiece.Color == _players.CurrentPlayer.Color;

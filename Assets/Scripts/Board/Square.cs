@@ -113,9 +113,9 @@ public class Square : MonoBehaviour
 
                 Vector2Int distance = checkedPosition - Position;
 
-                if (encounteredPiece.Type == PieceType.Pawn)
+                if (encounteredPiece is Pawn pawn)
                 {
-                    if (Mathf.Abs(distance.x) == 1 && distance.y == -1 * encounteredPiece.DirectionModifier)
+                    if (Mathf.Abs(distance.x) == 1 && distance.y == -1 * pawn.DirectionModifier)
                         return true;
                 }
                 else if (encounteredPiece.Type == PieceType.Rook)

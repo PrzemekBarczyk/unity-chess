@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Queen : Piece
+public class Queen : SlidingPiece
 {
     public override PieceType Type => PieceType.Queen;
 
@@ -9,17 +9,17 @@ public class Queen : Piece
 		base.Awake();
 	}
 
-	public override void FindLegalMoves()
+	public override void GenerateLegalMoves()
 	{
-		ClearLegalMoves();
+		LegalMoves.Clear();
 
-		AddSlidingMoves(new Vector2Int(0, 1));
-		AddSlidingMoves(new Vector2Int(1, 1));
-		AddSlidingMoves(new Vector2Int(1, 0));
-		AddSlidingMoves(new Vector2Int(1, -1));
-		AddSlidingMoves(new Vector2Int(0, -1));
-		AddSlidingMoves(new Vector2Int(-1, -1));
-		AddSlidingMoves(new Vector2Int(-1, 0));
-		AddSlidingMoves(new Vector2Int(-1, 1));
+		FindSlidingMoves(new Vector2Int(0, 1));
+		FindSlidingMoves(new Vector2Int(1, 1));
+		FindSlidingMoves(new Vector2Int(1, 0));
+		FindSlidingMoves(new Vector2Int(1, -1));
+		FindSlidingMoves(new Vector2Int(0, -1));
+		FindSlidingMoves(new Vector2Int(-1, -1));
+		FindSlidingMoves(new Vector2Int(-1, 0));
+		FindSlidingMoves(new Vector2Int(-1, 1));
 	}
 }

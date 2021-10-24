@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Bishop : Piece
+public class Bishop : SlidingPiece
 {
     public override PieceType Type => PieceType.Bishop;
 
@@ -9,13 +9,13 @@ public class Bishop : Piece
 		base.Awake();
 	}
 
-	public override void FindLegalMoves()
+	public override void GenerateLegalMoves()
 	{
-		ClearLegalMoves();
+		LegalMoves.Clear();
 
-		AddSlidingMoves(new Vector2Int(1, 1));
-		AddSlidingMoves(new Vector2Int(1, -1));
-		AddSlidingMoves(new Vector2Int(-1, -1));
-		AddSlidingMoves(new Vector2Int(-1, 1));
+		FindSlidingMoves(new Vector2Int(1, 1));
+		FindSlidingMoves(new Vector2Int(1, -1));
+		FindSlidingMoves(new Vector2Int(-1, -1));
+		FindSlidingMoves(new Vector2Int(-1, 1));
 	}
 }

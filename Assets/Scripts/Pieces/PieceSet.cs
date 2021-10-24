@@ -39,7 +39,7 @@ public class PieceSet : MonoBehaviour
 	public void FindLegalMoves()
 	{
 		foreach (Piece piece in AlivePieces())
-			piece.FindLegalMoves();
+			piece.GenerateLegalMoves();
 	}
 
 	public bool HasLegalMoves()

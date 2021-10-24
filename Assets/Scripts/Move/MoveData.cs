@@ -26,4 +26,15 @@ public struct MoveData
 		RookOldSquare = rookOldSquare;
 		RookNewSquare = rookNewSquare;
 	}
+
+	public bool IsCheckFriendly()
+	{
+		Piece.Move(this, updateGraphic: false);
+
+		bool isKingChecked = Piece.Pieces.King.IsChecked();
+
+		Piece.UndoMove(this, updateGraphic: false);
+
+		return !isKingChecked;
+	}
 }
