@@ -11,7 +11,7 @@ public abstract class Piece : MonoBehaviour
 
     public abstract PieceType Type { get; }
 
-	public Square Square { get; private set; }
+	public Square Square { get; set; }
 
 	public List<MoveData> LegalMoves { get; private set; } = new List<MoveData>();
 

@@ -18,6 +18,8 @@ public class MoveSelector : MonoBehaviour
 
 	bool _dragSelectedPieceWithCursor;
 
+	bool _pickingPromotion;
+
 	HumanPlayer _player;
 
 	PlayerManager _players;
@@ -205,13 +207,28 @@ public class MoveSelector : MonoBehaviour
 
 	IEnumerator PickMove()
 	{
+		if (_pickingPromotion)
+		{
+			yield break;
+		}
+
+		_pickingPromotion = true;
+
 		_board.HideLegalMovesIndicators(_selectedPiece.LegalMoves);
 		_endSquare.DisplayLastMoveIndicator();
 
 		bool isPromotionMove = (_selectedPiece is Pawn) && (_player.Color == ColorType.White ? _endSquare.OnTopRank : _endSquare.OnBottomRank);
 		if (isPromotionMove)
 		{
-			yield return null;
+			_endSquare.DisplayPromotionPanel();
+
+			_selectedPiece.transform.position = new Vector3(_endSquare.Position.x, _endSquare.Position.y);
+
+			yield return new WaitUntil(() => _endSquare.PromotionPanel.IsPromotionSelected());
+
+			_selectedMove = new MoveData(_selectedPiece, _startSquare, _endSquare, _endSquare.Piece, _endSquare.PromotionPanel.PromotionType);
+
+			_endSquare.HidePromotionPanel();
 		}
 		else
 		{
@@ -223,5 +240,6 @@ public class MoveSelector : MonoBehaviour
 		_startSquare = null;
 		_endSquare = null;
 		_dragSelectedPieceWithCursor = false;
+		_pickingPromotion = false;
 	}
 }

@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 
+[RequireComponent(typeof(PawnPromotions))]
 public class Pawn : SlidingPiece
 {
     public override PieceType Type => PieceType.Pawn;
@@ -9,14 +10,25 @@ public class Pawn : SlidingPiece
 
 	public int DirectionModifier => Color == ColorType.White ? 1 : -1;
 
+	bool IsPromoted { get => _pawnPromotions.CurrentPromotion != null; }
+
+	PawnPromotions _pawnPromotions;
+
 	new void Awake()
 	{
 		base.Awake();
+		_pawnPromotions = GetComponent<PawnPromotions>();
 	}
 
 	public override void GenerateLegalMoves()
 	{
 		LegalMoves.Clear();
+
+		if (IsPromoted)
+		{
+			_pawnPromotions.CurrentPromotion.GenerateLegalMoves();
+			return;
+		}
 
 		if (OnStartingPosition) FindSlidingMoves(new Vector2Int(0, 1 * DirectionModifier), 2, canAttack: false, canMoveOnEmptySquare: true);
 		else FindSlidingMoves(new Vector2Int(0, 1 * DirectionModifier), 1, canAttack: false, canMoveOnEmptySquare: true, canPromote: true);
@@ -64,20 +76,19 @@ public class Pawn : SlidingPiece
 
 	public override void Move(MoveData moveToMake, bool updateGraphic = false)
 	{
-		//if (moveToMake.IsPromotion)
-			// TODO
-
 		base.Move(moveToMake, updateGraphic);
 
 		if (moveToMake.OldSquare.Position.y == (Color == ColorType.White ? 1 : 6) && moveToMake.NewSquare.Position.y == (Color == ColorType.White ? 3 : 4))
 			_pieceManager.EnPassantTarget = this;
+		else if (moveToMake.IsPromotion)
+			_pawnPromotions.Promote(moveToMake.Type, updateGraphic);
 	}
 
 	public override void UndoMove(MoveData moveToUndo, bool updateGraphic = false)
 	{
-		//if (moveToUndo.IsPromotion)
-			// TODO
-
 		base.UndoMove(moveToUndo, updateGraphic);
+
+		if (moveToUndo.IsPromotion)
+			_pawnPromotions.UndoPromotion(updateGraphic);
 	}
 }

@@ -112,6 +112,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c432ab4b976cb948afadd8039bf21c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _whitePromotionPanelPrefab: {fileID: 1014224089326485327, guid: 296a4b5fce3c0224ea83a17a9a0daf3a, type: 3}
+  _blackPromotionPanelPrefab: {fileID: 1075378277909782033, guid: 01db96b4f77a00549ba62e1e4d414473, type: 3}
   _attackIndicator: {fileID: 3382470061063543789}
   _emptyFieldIndicator: {fileID: 8441434942480803884}
   _lastMoveIndicator: {fileID: 7251612174381125905}

@@ -4,6 +4,12 @@ using UnityEngine;
 [RequireComponent(typeof(BoxCollider))]
 public class Square : MonoBehaviour
 {
+    [Header("Prefabs")]
+    [SerializeField] PromotionPanel _whitePromotionPanelPrefab;
+    [SerializeField] PromotionPanel _blackPromotionPanelPrefab;
+
+    public PromotionPanel PromotionPanel { get; private set; }
+
     [Header("Indicators")]
     [SerializeField] GameObject _attackIndicator;
     [SerializeField] GameObject _emptyFieldIndicator;
@@ -36,6 +42,18 @@ public class Square : MonoBehaviour
         _gameManager = GameManager.Instance;
         _playerManager = PlayerManager.Instance;
         _board = Board.Instance;
+
+        CreatePromotionPanel();
+    }
+
+    void CreatePromotionPanel()
+	{
+        if (OnTopRank || OnBottomRank)
+        {
+            PromotionPanel = Instantiate(OnTopRank ? _whitePromotionPanelPrefab : _blackPromotionPanelPrefab, transform.position, transform.rotation, transform);
+            PromotionPanel.name = PromotionPanel.name.Replace("(Clone)", "");
+            PromotionPanel.gameObject.SetActive(false);
+        }
     }
 
     void OnMouseDown()
@@ -187,4 +205,13 @@ public class Square : MonoBehaviour
     public void DisplayLastMoveIndicator() => _lastMoveIndicator.SetActive(true);
 
     public void HideLastMoveIndicator() => _lastMoveIndicator.SetActive(false);
+
+    public void DisplayPromotionPanel()
+    {
+        if (PromotionPanel != null) PromotionPanel.gameObject.SetActive(true);
+    }
+    public void HidePromotionPanel()
+    {
+        if (PromotionPanel != null) PromotionPanel.gameObject.SetActive(false);
+    }
 }
