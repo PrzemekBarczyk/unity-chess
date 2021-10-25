@@ -50,6 +50,7 @@ public class PlayersSelector : MonoBehaviour
 		_secondPlayerColor = ColorType.White;
 		_selectColorMenu.SetActive(false);
 		_playerManager.CreatePlayers(new PlayerData(_mainPlayerColor, _mainPlayerType), new PlayerData(_secondPlayerColor, _secondPlayerType));
+		Camera.main.GetComponent<CameraController>().BlackPlayerPOV();
 		_gameManager.StartGame();
 	}
 
