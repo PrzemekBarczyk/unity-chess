@@ -36,7 +36,7 @@ public class PieceSet : MonoBehaviour
 		}
 	}
 
-	public void FindLegalMoves()
+	public void GenerateLegalMoves()
 	{
 		foreach (Piece piece in AlivePieces())
 			piece.GenerateLegalMoves();
@@ -50,6 +50,20 @@ public class PieceSet : MonoBehaviour
 				return true;
 		}
 		return false;
+	}
+
+	public List<MoveData> GetLegalMoves()
+	{
+		List<MoveData> legalMoves = new List<MoveData>();
+		foreach (Piece piece in Pieces)
+		{
+			if (piece.IsAlive)
+			{
+				foreach (MoveData move in piece.LegalMoves)
+					legalMoves.Add(move);
+			}
+		}
+		return legalMoves;
 	}
 
 	public List<Piece> AlivePieces()

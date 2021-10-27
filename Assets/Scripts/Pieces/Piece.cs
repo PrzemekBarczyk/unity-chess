@@ -17,6 +17,9 @@ public abstract class Piece : MonoBehaviour
 
 	public PieceSet Pieces { get; private set; }
 
+	public abstract int Value { get; }
+	public abstract int[,] PositionsValues { get; }
+
 	GameManager _gameManager;
 	protected PieceManager _pieceManager;
 	protected Board _board;

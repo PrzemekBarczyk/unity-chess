@@ -2,12 +2,26 @@ using UnityEngine;
 
 public class Rook : SlidingPiece
 {
-    public override PieceType Type => PieceType.Rook;
+	public override PieceType Type => PieceType.Rook;
+
+	public static int VALUE => 500;
+	public override int Value { get => VALUE; }
+
+	int[,] _positionsValues = {
+			{  0,  0,  0,  0,  0,  0,  0,  0 },
+			{  5, 10, 10, 10, 10, 10, 10,  5 },
+			{ -5,  0,  0,  0,  0,  0,  0, -5 },
+			{ -5,  0,  0,  0,  0,  0,  0, -5 },
+			{ -5,  0,  0,  0,  0,  0,  0, -5 },
+			{ -5,  0,  0,  0,  0,  0,  0, -5 },
+			{ -5,  0,  0,  0,  0,  0,  0, -5 },
+			{  0,  0,  0,  5,  5,  0,  0,  0 }
+	};
+	public override int[,] PositionsValues => _positionsValues;
 
 	new void Awake()
 	{
 		base.Awake();
-
 	}
 
 	public override void GenerateLegalMoves()

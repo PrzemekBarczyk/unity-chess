@@ -15,7 +15,7 @@ public class HumanPlayer : Player
 
     protected override MoveData SelectMove() // runs in separate thread 
     {
-        Pieces.FindLegalMoves();
+        Pieces.GenerateLegalMoves();
 
         while (!_moveSelector.IsMoveSelected)
             continue;

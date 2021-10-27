@@ -6,6 +6,21 @@ public class Pawn : SlidingPiece
 {
     public override PieceType Type => PieceType.Pawn;
 
+	public static int VALUE => 100;
+	public override int Value => VALUE;
+
+	int[,] _positionsValues = {
+			{ 0,   0,  0,  0,  0,  0,  0,  0 },
+			{ 50, 50, 50, 50, 50, 50, 50, 50 },
+			{ 10, 10, 20, 30, 30, 20, 10, 10 },
+			{ 5,   5, 10, 25, 25, 10,  5,  5 },
+			{ 0,   0,  0, 20, 20,  0,  0,  0 },
+			{ 5,  -5,-10,  0,  0,-10, -5,  5 },
+			{ 5,  10, 10,-20,-20, 10, 10,  5 },
+			{ 0,   0,  0,  0,  0,  0,  0,  0 }
+	};
+	public override int[,] PositionsValues => _positionsValues;
+
 	public bool OnStartingPosition => Square.Position.y == (Color == ColorType.White ? 1 : 6);
 
 	public int DirectionModifier => Color == ColorType.White ? 1 : -1;

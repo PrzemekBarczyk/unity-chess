@@ -82,7 +82,7 @@ public class GameManager : MonoSingleton<GameManager>
 
     State CheckGameState()
     {
-        _players.NextPlayer.Pieces.FindLegalMoves();
+        _players.NextPlayer.Pieces.GenerateLegalMoves();
 
         if (!_players.NextPlayer.Pieces.HasLegalMoves())
         {

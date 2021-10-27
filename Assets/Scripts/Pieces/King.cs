@@ -4,6 +4,21 @@ public class King : SlidingPiece
 {
     public override PieceType Type => PieceType.King;
 
+    public static int VALUE => 9000;
+    public override int Value { get => VALUE; }
+
+    int[,] _positionsValues = {
+            { -30, -40, -40, -50, -50, -40, -40, -30 },
+            { -30, -40, -40, -50, -50, -40, -40, -30 },
+            { -30, -40, -40, -50, -50, -40, -40, -30 },
+            { -30, -40, -40, -50, -50, -40, -40, -30 },
+            { -20, -30, -30, -40, -40, -30, -30, -20 },
+            { -10, -20, -20, -20, -20, -20, -20, -10 },
+            {  20,  20,   0,   0,   0,   0,  20,  20 },
+            {  20,  30,  10,   0,   0,  10,  30,  20 }
+    };
+    public override int[,] PositionsValues => _positionsValues;
+
     public bool CanCastleKingside { get; set; }
     public bool CanCastleQueenside { get; set; }
 
