@@ -5,6 +5,9 @@ using UnityEngine;
 public class GameManager : MonoSingleton<GameManager>
 {
 	[SerializeField] string _startChessPositionInFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    public string StartChessPositionInFEN { get => _startChessPositionInFEN; set => _startChessPositionInFEN = value; }
+
+    public ExtractedFENData ExtractedFENData { get; private set; }
 
     public State State { get; private set; } = State.Playing;
     public Stack<HistoryData> History { get; private set; } = new Stack<HistoryData>();
@@ -26,16 +29,16 @@ public class GameManager : MonoSingleton<GameManager>
 
     void ExtractDataFromFEN()
 	{
-		ExtractedFENData extractedFENData = FENExtractor.FENToBoardPositionData(_startChessPositionInFEN);
+		ExtractedFENData = FENExtractor.FENToBoardPositionData(_startChessPositionInFEN);
 
-		_pieces.WhitePieces.CreatePieces(extractedFENData.PiecesToCreate);
-		_pieces.BlackPieces.CreatePieces(extractedFENData.PiecesToCreate);
-		_players.SetStartingPlayerColor(extractedFENData.PlayerToMoveColor);
-		_pieces.WhitePieces.King.CanCastleKingside = extractedFENData.HasWhiteCastleKingsideRights;
-		_pieces.WhitePieces.King.CanCastleQueenside = extractedFENData.HasWhiteCastleQueensideRights;
-		_pieces.BlackPieces.King.CanCastleKingside = extractedFENData.HasBlackCastleKingsideRights;
-		_pieces.BlackPieces.King.CanCastleQueenside = extractedFENData.HasBlackCastleQueensideRights;
-		_pieces.SetEnPassantTarget(extractedFENData.EnPassantTargetPiecePosition);
+		_pieces.WhitePieces.CreatePieces(ExtractedFENData.PiecesToCreate);
+		_pieces.BlackPieces.CreatePieces(ExtractedFENData.PiecesToCreate);
+		_players.SetStartingPlayerColor(ExtractedFENData.PlayerToMoveColor);
+		_pieces.WhitePieces.King.CanCastleKingside = ExtractedFENData.HasWhiteCastleKingsideRights;
+		_pieces.WhitePieces.King.CanCastleQueenside = ExtractedFENData.HasWhiteCastleQueensideRights;
+		_pieces.BlackPieces.King.CanCastleKingside = ExtractedFENData.HasBlackCastleKingsideRights;
+		_pieces.BlackPieces.King.CanCastleQueenside = ExtractedFENData.HasBlackCastleQueensideRights;
+		_pieces.SetEnPassantTarget(ExtractedFENData.EnPassantTargetPiecePosition);
 	}
 
     public void StartGame() // called after color selection
