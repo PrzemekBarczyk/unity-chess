@@ -399,10 +399,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ce3f40b1860a954396d0ccf08a2d0af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _testedFEN: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
-  _correctResults: 010000000000000014000000000000009001000000000000c622000000000000a102030000000000493e4a000000000064b7180700000000
-  _maxDepth: 5
-  _resultText: {fileID: 62225599}
+  _test: {fileID: 11400000, guid: 2eaeacb4cba51a947acc45d4ce738fd5, type: 2}
+  _resultTextField: {fileID: 62225599}
 --- !u!4 &558826522
 Transform:
   m_ObjectHideFlags: 0
@@ -493,8 +491,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3b44e17d03786c478ff3ea646e162c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _startChessPositionInFEN: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -
-    0 1
+  _startChessPositionInFEN: r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R
+    w KQkq - 0 1
 --- !u!4 &1060471295
 Transform:
   m_ObjectHideFlags: 0

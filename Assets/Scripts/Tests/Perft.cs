@@ -5,11 +5,9 @@ using UnityEngine.UI;
 
 public class Perft : MonoBehaviour
 {
-    [SerializeField] string _testedFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    [SerializeField] ulong[] _correctResults;
-    [SerializeField] [Range(0, 10)] ushort _maxDepth = 4;
+    [SerializeField] SinglePerftInfo _test;
 
-    [SerializeField] Text _resultText;
+    [SerializeField] Text _resultTextField;
 
     PieceSet _startingPieces;
 
@@ -18,12 +16,12 @@ public class Perft : MonoBehaviour
 
     void OnValidate()
     {
-        GameManager.Instance.StartChessPositionInFEN = _testedFEN;
+        GameManager.Instance.StartChessPositionInFEN = _test.TestedFEN;
     }
 
     void Start()
     {
-        _resultText.text = "Tested position:\n" + _testedFEN + "\n\n";
+        _resultTextField.text = "Tested position:\n" + _test.TestedFEN + "\n\n";
 
         _gameManager = GameManager.Instance;
         _pieceManager = PieceManager.Instance;
@@ -40,23 +38,23 @@ public class Perft : MonoBehaviour
 
     IEnumerator PerftTest()
     {
-        int depth = Mathf.Min(_maxDepth, _correctResults.Length);
+        int depth = Mathf.Min(_test.MaxDepth, _test.CorrectResults.Length);
 
         for (int i = 0; i <= depth; i++)
         {
             ulong nodesNumber = Search(_startingPieces, i);
 
-            if (nodesNumber == _correctResults[i])
+            if (nodesNumber == _test.CorrectResults[i])
             {
-                _resultText.text += "Depth: " + i + "  Result: " + nodesNumber + "  <color=green>PASSED</color>\n";
+                _resultTextField.text += "Depth: " + i + "  Result: " + nodesNumber + "  <color=green>PASSED</color>\n";
             }
             else
             {
-                _resultText.text += "Depth: " + i + "  Result: " + nodesNumber + "  <color=red>FAILED</color> (" + _correctResults[i] + ")\n";
+                _resultTextField.text += "Depth: " + i + "  Result: " + nodesNumber + "  <color=red>FAILED</color> (" + _test.CorrectResults[i] + ")\n";
             }
             yield return null;
         }
-        _resultText.text += "PERFT FINISHED";
+        _resultTextField.text += "PERFT FINISHED";
     }
 
     ulong Search(PieceSet currentPieces, int depth)
