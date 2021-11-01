@@ -100,6 +100,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb15466bfb4ac434ca801261f3baeb2c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _mainScript: 1
   _color: 1
 --- !u!114 &1405354624214559825
 MonoBehaviour:
@@ -113,10 +114,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c538b7f06b5570f47bc4a04744a79e66, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _queen: {fileID: 4465491591803792717}
-  _rook: {fileID: 2235645352547354375}
-  _bishop: {fileID: 1418776444196620694}
-  _knight: {fileID: 2304029666526710913}
   _pawnSprite: {fileID: 21300000, guid: c67882ff0935904479768b04d5b0ccbb, type: 3}
   _queenSprite: {fileID: 21300000, guid: 7e69397cdcfaad54d930bd6a8309a6d7, type: 3}
   _rookSprite: {fileID: 21300000, guid: a1fac3d54f731e8428f0d8aa2193fba2, type: 3}
@@ -134,6 +131,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8907c98b56962b4b8f26490249efc19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _mainScript: 0
   _color: 1
 --- !u!114 &2235645352547354375
 MonoBehaviour:
@@ -147,6 +145,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8adc0b3647284544da843e2fc33ef93d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _mainScript: 0
   _color: 1
 --- !u!114 &1418776444196620694
 MonoBehaviour:
@@ -160,6 +159,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7f93a9f6514eab47836e1eb7a6f4bf3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _mainScript: 0
   _color: 1
 --- !u!114 &2304029666526710913
 MonoBehaviour:
@@ -173,4 +173,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2aeb78f4005696542bdd7ad5fbe8fe23, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _mainScript: 0
   _color: 1

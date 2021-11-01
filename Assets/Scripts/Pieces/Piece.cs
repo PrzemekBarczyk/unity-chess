@@ -3,6 +3,8 @@ using UnityEngine;
 
 public abstract class Piece : MonoBehaviour
 {
+	[SerializeField] public bool _mainScript = true;
+
 	public bool IsAlive { get; private set; } = true;
 
     [SerializeField] ColorType _color;
@@ -32,8 +34,11 @@ public abstract class Piece : MonoBehaviour
 
 		Pieces = Color == ColorType.White ? _pieceManager.WhitePieces : _pieceManager.BlackPieces;
 
-		Square = _board.Squares[(int)transform.position.x, (int)transform.position.y];
-		Square.Piece = this;
+		if (_mainScript)
+		{
+			Square = _board.Squares[(int)transform.position.x, (int)transform.position.y];
+			Square.Piece = this;
+		}
 	}
 
 	public abstract void GenerateLegalMoves();
