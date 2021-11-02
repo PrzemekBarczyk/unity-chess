@@ -80,4 +80,34 @@ public class Perft : MonoBehaviour
 
         return nodes;
     }
+
+    ulong Divide(PieceSet currentPieces, int depth)
+	{
+        if (depth == 0)
+        {
+            return 1;
+        }
+
+        currentPieces.GenerateLegalMoves();
+        List<MoveData> legalMoves = currentPieces.GetLegalMoves();
+
+        PieceSet nextPieces = currentPieces.Color == ColorType.White ? _pieceManager.BlackPieces : _pieceManager.WhitePieces;
+
+        ulong nodes = 0;
+
+        foreach (MoveData legalMove in legalMoves)
+        {
+            legalMove.Piece.Move(legalMove);
+            ulong localNodes = Divide(nextPieces, depth - 1);
+            nodes += localNodes;
+            legalMove.Piece.UndoMove(legalMove);
+
+            if (depth == _test.MaxDepth)
+			{
+                Debug.Log(legalMove.OldSquare.Position + "" + legalMove.NewSquare.Position + " " + localNodes);
+			}
+        }
+
+        return nodes;
+    }
 }
