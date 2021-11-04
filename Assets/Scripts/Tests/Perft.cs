@@ -42,15 +42,18 @@ public class Perft : MonoBehaviour
 
         for (int i = 0; i <= depth; i++)
         {
+            var timer = new System.Diagnostics.Stopwatch();
+            timer.Start();
             ulong nodesNumber = Search(_startingPieces, i);
+            timer.Stop();
 
             if (nodesNumber == _test.CorrectResults[i])
             {
-                _resultTextField.text += "Depth: " + i + "  Result: " + nodesNumber + "  <color=green>PASSED</color>\n";
+                _resultTextField.text += "Depth: " + i + "  Result: " + nodesNumber + " Time: " + timer.ElapsedMilliseconds + "ms  <color=green>PASSED</color>\n";
             }
             else
             {
-                _resultTextField.text += "Depth: " + i + "  Result: " + nodesNumber + "  <color=red>FAILED</color> (" + _test.CorrectResults[i] + ")\n";
+                _resultTextField.text += "Depth: " + i + "  Result: " + nodesNumber + " Time: " + timer.ElapsedMilliseconds + "ms  <color=red>FAILED</color> (" + _test.CorrectResults[i] + ")\n";
             }
             yield return null;
         }
