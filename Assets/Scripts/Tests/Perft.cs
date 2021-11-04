@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -44,7 +45,7 @@ public class Perft : MonoBehaviour
         {
             var timer = new System.Diagnostics.Stopwatch();
             timer.Start();
-            ulong nodesNumber = Search(_startingPieces, i);
+            ulong nodesNumber = FasterSearch(_startingPieces, i);
             timer.Stop();
 
             if (nodesNumber == _test.CorrectResults[i])
@@ -78,6 +79,35 @@ public class Perft : MonoBehaviour
         {
             legalMove.Piece.Move(legalMove);
             nodes += Search(nextPieces, depth - 1);
+            legalMove.Piece.UndoMove(legalMove);
+        }
+
+        return nodes;
+    }
+
+    ulong FasterSearch(PieceSet currentPieces, int depth)
+	{
+        if (depth <= 0)
+		{
+            return 1;
+		}
+
+        currentPieces.GenerateLegalMoves();
+        List<MoveData> legalMoves = currentPieces.GetLegalMoves();
+
+        if (depth == 1)
+        {
+            return Convert.ToUInt64(legalMoves.Count);
+        }
+
+        PieceSet nextPieces = currentPieces.Color == ColorType.White ? _pieceManager.BlackPieces : _pieceManager.WhitePieces;
+
+        ulong nodes = 0;
+
+        foreach (MoveData legalMove in legalMoves)
+        {
+            legalMove.Piece.Move(legalMove);
+            nodes += FasterSearch(nextPieces, depth - 1);
             legalMove.Piece.UndoMove(legalMove);
         }
 
