@@ -64,6 +64,9 @@ public class PawnPromotions: MonoBehaviour
 
 		CurrentPromotion.Square = _pawnScript.Square;
 		CurrentPromotion.Square.Piece = CurrentPromotion;
+
+		_pawnScript.Pieces.Pieces.Add(CurrentPromotion);
+		CurrentPromotion.Pieces.Pieces.Remove(_pawnScript);
 	}
 
 	void PromoteToQueen()
@@ -89,6 +92,11 @@ public class PawnPromotions: MonoBehaviour
 
 	public void UndoPromotion(bool changeSprite)
 	{
+		CurrentPromotion.Pieces.Pieces.Add(_pawnScript);
+		_pawnScript.Pieces.Pieces.Remove(CurrentPromotion);
+
+		_pawnScript.Square.Piece = _pawnScript;
+
 		CurrentPromotion = null;
 		CurrentSprite = _pawnSprite;
 

@@ -67,8 +67,7 @@ public abstract class Piece : MonoBehaviour
 
 		if (updateGraphic) transform.position = new Vector3(Square.Position.x, Square.Position.y);
 
-		if (!(this is Pawn)) // removes unactive old en passants
-			_pieceManager.EnPassantTarget = null;
+		_pieceManager.EnPassantTarget = null; // removes unactive old en passants
 	}
 
 	public virtual void UndoMove(MoveData moveToUndo, bool updateGraphic = false)

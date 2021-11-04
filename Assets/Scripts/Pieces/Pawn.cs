@@ -25,8 +25,6 @@ public class Pawn : SlidingPiece
 
 	public int DirectionModifier => Color == ColorType.White ? 1 : -1;
 
-	bool IsPromoted { get => _pawnPromotions.CurrentPromotion != null; }
-
 	PawnPromotions _pawnPromotions;
 
 	new void Awake()
@@ -38,12 +36,6 @@ public class Pawn : SlidingPiece
 	public override void GenerateLegalMoves()
 	{
 		LegalMoves.Clear();
-
-		if (IsPromoted)
-		{
-			_pawnPromotions.CurrentPromotion.GenerateLegalMoves();
-			return;
-		}
 
 		if (OnStartingPosition) FindSlidingMoves(new Vector2Int(0, 1 * DirectionModifier), 2, canAttack: false, canMoveOnEmptySquare: true);
 		else FindSlidingMoves(new Vector2Int(0, 1 * DirectionModifier), 1, canAttack: false, canMoveOnEmptySquare: true, canPromote: true);
@@ -64,8 +56,12 @@ public class Pawn : SlidingPiece
 		Square squareOnLeft = null, squareOnRight = null;
 		try
 		{
-			squareOnLeft = _board.Squares[(Square.Position.x - 1), Square.Position.y];
-			squareOnRight = _board.Squares[(Square.Position.x + 1), Square.Position.y];
+			squareOnLeft = _board.Squares[Square.Position.x - 1, Square.Position.y];
+		}
+		catch (IndexOutOfRangeException) { } // do nothing
+		try
+		{
+			squareOnRight = _board.Squares[Square.Position.x + 1, Square.Position.y];
 		}
 		catch (IndexOutOfRangeException) { } // do nothing
 

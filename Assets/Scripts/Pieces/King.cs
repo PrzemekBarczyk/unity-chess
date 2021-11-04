@@ -75,7 +75,10 @@ public class King : SlidingPiece
         Square rookOldSquare = _board.Squares[rookOldPosition.x, rookOldPosition.y];
         Square rookNewSquare = _board.Squares[rookNewPosition.x, rookNewPosition.y];
 
-        if (rookOldSquare.Piece == null || rookOldSquare.Piece.Color != Color) // rook missing or wrong color
+        if (rookOldSquare.Piece == null || !(rookOldSquare.Piece is Rook) || rookOldSquare.Piece.Color != Color) // rook missing or wrong color
+            return;
+
+        if (!rightCastle && _board.Squares[rookOldPosition.x + 1, rookOldPosition.y].IsOccupied)
             return;
 
         Vector2Int checkedPosition = Square.Position + positionModifier;
