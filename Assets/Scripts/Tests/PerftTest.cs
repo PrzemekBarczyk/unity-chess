@@ -5,6 +5,10 @@ using UnityEngine.UI;
 
 public class PerftTest : MonoBehaviour
 {
+	enum TestType { Perft, Divide }
+
+	[SerializeField] TestType _testType;
+
     [SerializeField] SinglePerftInfo _test;
 
     [SerializeField] Text _resultTextField;
@@ -15,7 +19,15 @@ public class PerftTest : MonoBehaviour
 
         ChessEngine chessEngine = new ChessEngine(_test.TestedFEN);
 
-		RunPerftTest(chessEngine);
+		switch (_testType)
+		{
+			case TestType.Perft:
+				RunPerftTest(chessEngine);
+				break;
+			case TestType.Divide:
+				RunDivideTest(chessEngine);
+				break;
+		}
     }
 
     public void RunPerftTest(ChessEngine chessEngine)
