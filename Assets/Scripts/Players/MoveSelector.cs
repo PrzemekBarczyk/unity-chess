@@ -1,41 +1,41 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(HumanPlayer))]
 public class MoveSelector : MonoBehaviour
 {
-	public bool IsMoveSelected => _selectedMove.HasValue;
+	[SerializeField] SpriteRenderer _draggedPieceSpriteRenderer;
 
-	MoveData? _selectedMove;
+	[SerializeField] PiecesSprites _piecesSprites;
 
-	Piece _selectedPiece;
+	List<Move> _legalMoves;
 
-	Square _startSquare;
-	Square _endSquare;
+	public bool IsMoveSelected { get; private set; }
+	Move _selectedMove;
 
-	uint _selectedSamePieceCounter;
+	GraphicalSquare _selectedPieceSquare; // every occupied square can be selected
+	GraphicalSquare _startSquare; // only legal
+	GraphicalSquare _endSquare; // only legal
 
-	bool _dragSelectedPieceWithCursor;
+	byte _droppedPiecInSameSquareCounter = 0;
 
 	bool _pickingPromotion;
 
-	HumanPlayer _player;
+	HumanPlayer _humanPlayer;
 
-	PlayerManager _players;
-	Board _board;
+	GraphicalBoard _board;
 
-	void Awake()
+	void Start()
 	{
-		_players = PlayerManager.Instance;
-		_board = Board.Instance;
-
-		_player = GetComponent<HumanPlayer>();
+		_board = GraphicalBoard.Instance;
+		_humanPlayer = GetComponent<HumanPlayer>();
 	}
 
 	void Update()
 	{
-		if (_dragSelectedPieceWithCursor)
+		if (_draggedPieceSpriteRenderer.enabled)
 		{
 			DragSelectedPieceAfterCursor();
 		}
@@ -44,105 +44,103 @@ public class MoveSelector : MonoBehaviour
 	void DragSelectedPieceAfterCursor()
 	{
 		Vector2 newPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition) * Vector2.one;
-		_selectedPiece.transform.position = newPosition;
+		_draggedPieceSpriteRenderer.transform.position = newPosition;
 	}
 
-	public MoveData GetSelectedMove()
+	public void SetLegalMoves(List<Move> legalMoves)
 	{
-		MoveData selectedMoveCopy = _selectedMove.Value;
-		_selectedMove = null;
+		_legalMoves = legalMoves;
+	}
+
+	public Move GetSelectedMove()
+	{
+		Move selectedMoveCopy = _selectedMove;
+		IsMoveSelected = false;
 		return selectedMoveCopy;
 	}
 
-	public IEnumerator OnSquareSelected(Square selectedSquare) // called when OnMouseDown triggered on Square
+	public IEnumerator OnSquareSelected(GraphicalSquare selectedSquare) // called when OnMouseDown triggered on Square
 	{
-		bool pieceWasntSelected = _selectedPiece == null;
-		if (pieceWasntSelected)
+		if (_pickingPromotion)
 		{
-			if (selectedSquare.IsOccupied)
-			{
-				_selectedPiece = selectedSquare.Piece;
-				_startSquare = selectedSquare;
-				_dragSelectedPieceWithCursor = true;
-				_selectedSamePieceCounter++;
-				_startSquare.DisplayLastMoveIndicator();
+			yield break;
+		}
 
-				bool selectedCurrentPlayerPiece = _selectedPiece.Color == _players.CurrentPlayer.Color;
-				if (selectedCurrentPlayerPiece)
-				{
-					_board.DisplayLegalMovesIndicators(_selectedPiece.LegalMoves);
-				}
+		// piece selected and selected legal square
+		bool pieceIsSelected = _selectedPieceSquare != null;
+		bool startSquareIsSelected = _startSquare != null;
+		if (pieceIsSelected && startSquareIsSelected) 
+		{
+			bool selectedLegalSquare = _legalMoves.Exists(
+				m => m.OldSquare.Position == Vector2Int.RoundToInt(_startSquare.transform.position) &&
+				m.NewSquare.Position == Vector2Int.RoundToInt(selectedSquare.transform.position)
+			);
+			if (selectedLegalSquare)
+			{
+				StartCoroutine(PickPromotion(selectedSquare)); // make move
+				yield break;
 			}
 		}
-		else // piece wasn't yet selected
+
+		bool selectedGraphicalSquareIsOccupied = selectedSquare.PieceSprite != null;
+		if (selectedGraphicalSquareIsOccupied) // selecting occupied square pick ups piece and display indicator
 		{
-			if (!selectedSquare.IsOccupied)
+			bool isSamePieceSelected = selectedSquare == _selectedPieceSquare;
+			if (pieceIsSelected && !isSamePieceSelected) // if selected different piece
 			{
-				bool isSelectedSquareValidForMove = _selectedPiece.LegalMoves.Exists(x => x.OldSquare == _startSquare && x.NewSquare == selectedSquare);
-				if (isSelectedSquareValidForMove)
+				_droppedPiecInSameSquareCounter = 0;
+
+				// deselect square and hide indicator
+				_selectedPieceSquare.HideSelectionIndicator();
+				_selectedPieceSquare = null;
+
+				// hide legal squares and delete start square (if it was legal square)
+				if (startSquareIsSelected)
 				{
-					bool selectedCurrentPlayerPiece = _selectedPiece.Color == _players.CurrentPlayer.Color;
-					if (selectedCurrentPlayerPiece)
-					{
-						_endSquare = selectedSquare;
-						yield return PickMove();
-					}
-					else // selected opponent piece
-					{
-						yield break;
-					}
-				}
-				else // selected illegal for move square
-				{
-					_board.HideLegalMovesIndicators(_selectedPiece.LegalMoves);
-					_startSquare.HideLastMoveIndicator();
-					_selectedSamePieceCounter = 0;
-					_selectedPiece = null;
+					HideLegalMovesIndicators(_legalMoves.FindAll(
+						m => m.OldSquare.Position.x == _startSquare.transform.position.x &&
+						m.OldSquare.Position.y == _startSquare.transform.position.y
+					));
 					_startSquare = null;
 				}
 			}
-			else // square not empty
+
+			// select square and display indicator
+			_selectedPieceSquare = selectedSquare;
+			_selectedPieceSquare.DisplaySelectionIndicator();
+
+			// select sprite to drag and hide static
+			_draggedPieceSpriteRenderer.sprite = selectedSquare.PieceSprite;
+			_draggedPieceSpriteRenderer.enabled = true;
+			selectedSquare.PieceSprite = null;
+
+			var legalMovesForSelectedGraphicalSquare = _legalMoves.FindAll(
+				m => m.OldSquare.Position == Vector2Int.RoundToInt(selectedSquare.transform.position)
+			);
+			if (legalMovesForSelectedGraphicalSquare.Count > 0) // selected piece is legal
 			{
-				bool isSelectedSquareValidForMove = _selectedPiece.LegalMoves.Exists(x => x.OldSquare == _startSquare && x.NewSquare == selectedSquare);
-				if (isSelectedSquareValidForMove)
-				{
-					bool selectedCurrentPlayerPiece = _selectedPiece.Color == _players.CurrentPlayer.Color;
-					if (selectedCurrentPlayerPiece)
-					{
-						_endSquare = selectedSquare;
-						yield return PickMove();
-					}
-					else // selected opponent piece
-					{
-						yield break;
-					}
-				}
-				else // selected illegal for move square
-				{
-					bool isSelectedSquareAnOldSquare = _startSquare == selectedSquare;
-					if (isSelectedSquareAnOldSquare)
-					{
-						_selectedSamePieceCounter++;
-						_dragSelectedPieceWithCursor = true;
-					}
-					else // selected square is different than previously selected square
-					{
-						_board.HideLegalMovesIndicators(_selectedPiece.LegalMoves);
-						_startSquare.HideLastMoveIndicator();
-						_selectedSamePieceCounter = 0;
+				// display legal moves indicators and save start square
+				DisplayLegalMovesIndicators(legalMovesForSelectedGraphicalSquare);
+				_startSquare = selectedSquare;
+			}
+		}
+		else // selected square is not occupied -> remove old indicators
+		{
+			if (pieceIsSelected)
+			{
+				_droppedPiecInSameSquareCounter = 0;
 
-						_selectedPiece = selectedSquare.Piece;
-						_startSquare = selectedSquare;
-						_dragSelectedPieceWithCursor = true;
-						_selectedSamePieceCounter++;
-						_startSquare.DisplayLastMoveIndicator();
+				// deselect square and hide indicator
+				_selectedPieceSquare.HideSelectionIndicator();
+				_selectedPieceSquare = null;
 
-						bool selectedMyPiece = _selectedPiece.Color == _players.CurrentPlayer.Color;
-						if (selectedMyPiece)
-						{
-							_board.DisplayLegalMovesIndicators(_selectedPiece.LegalMoves);
-						}
-					}
+				// hide legal squares and delete start square
+				if (startSquareIsSelected)
+				{
+					HideLegalMovesIndicators(_legalMoves.FindAll(
+						m => m.OldSquare.Position == Vector2Int.RoundToInt(_startSquare.transform.position)
+					));
+					_startSquare = null;
 				}
 			}
 		}
@@ -150,96 +148,123 @@ public class MoveSelector : MonoBehaviour
 
 	public IEnumerator OnPieceDrop() // called when OnMouseUp triggered on Square
 	{
-		bool pieceWasntSelected = _selectedPiece == null;
-		if (pieceWasntSelected)
-		{
-			yield break;
-		}
-
-		Vector2Int roundedSelectedPieceLastPosition = Vector2Int.RoundToInt(_selectedPiece.transform.position);
-
-		_dragSelectedPieceWithCursor = false;
-
-		Square selectedSquare;
-		try
-		{
-			selectedSquare = _board.Squares[roundedSelectedPieceLastPosition.x, roundedSelectedPieceLastPosition.y];
-		}
-		catch (IndexOutOfRangeException) // piece dropped outside board
-		{
-			_selectedPiece.transform.position = new Vector3(_startSquare.Position.x, _startSquare.Position.y);
-			yield break;
-		}
-
-		bool isSelectedSquareValidForMove = _selectedPiece.LegalMoves.Exists(x => x.OldSquare == _startSquare && x.NewSquare == selectedSquare);
-		if (isSelectedSquareValidForMove)
-		{
-			bool selectedCurrentPlayerPiece = _selectedPiece.Color == _players.CurrentPlayer.Color;
-			if (selectedCurrentPlayerPiece)
-			{
-				_endSquare = selectedSquare;
-				yield return PickMove();
-			}
-			else // selected opponent piece
-			{
-				_selectedPiece.transform.position = new Vector3(_startSquare.Position.x, _startSquare.Position.y);
-				yield break;
-			}
-		}
-		else // dropped piece on illegal square
-		{
-			_selectedPiece.transform.position = new Vector3(_startSquare.Position.x, _startSquare.Position.y);
-
-			bool mouseUpOnSameSquare = selectedSquare == _startSquare;
-			if (mouseUpOnSameSquare)
-			{
-				if (_selectedSamePieceCounter >= 2)
-				{
-					_startSquare.HideLastMoveIndicator();
-					_board.HideLegalMovesIndicators(_selectedPiece.LegalMoves);
-					_selectedPiece = null;
-					_startSquare = null;
-					_selectedSamePieceCounter = 0;
-				}
-			}
-		}
-	}
-
-	IEnumerator PickMove()
-	{
 		if (_pickingPromotion)
 		{
 			yield break;
 		}
 
+		bool isPieceSelected = _selectedPieceSquare != null;
+		if (!isPieceSelected)
+		{
+			yield break;
+		}
+
+		_draggedPieceSpriteRenderer.enabled = false;
+
+		Vector2Int roundedDraggedPieceLastPosition = Vector2Int.RoundToInt(_draggedPieceSpriteRenderer.transform.position);
+
+		GraphicalSquare selectedGraphicalSquare;
+		try
+		{
+			selectedGraphicalSquare = _board.Squares[roundedDraggedPieceLastPosition.x, roundedDraggedPieceLastPosition.y];
+		}
+		catch (IndexOutOfRangeException) // piece dropped outside board
+		{
+			_selectedPieceSquare.PieceSprite = _draggedPieceSpriteRenderer.sprite;
+			yield break;
+		}
+
+		bool selectedLegalSquare = _legalMoves.Exists(
+			m => (m.OldSquare.Position == Vector2Int.RoundToInt(_selectedPieceSquare.transform.position)) &&
+			(m.NewSquare.Position == Vector2Int.RoundToInt(selectedGraphicalSquare.transform.position))
+		);
+		if (selectedLegalSquare) // piece dropped on legal square
+		{
+			StartCoroutine(PickPromotion(selectedGraphicalSquare));
+			yield break;
+		}
+
+		_selectedPieceSquare.PieceSprite = _draggedPieceSpriteRenderer.sprite; // dropped piece on illegal square
+
+		bool droppedPieceOnSameSquare = selectedGraphicalSquare.transform.position == _selectedPieceSquare.transform.position;
+		if (droppedPieceOnSameSquare)
+		{
+			_droppedPiecInSameSquareCounter++;
+			if (_droppedPiecInSameSquareCounter > 1)
+			{
+				_selectedPieceSquare.HideSelectionIndicator();
+				_selectedPieceSquare = null;
+
+				if (_startSquare)
+					HideLegalMovesIndicators(_legalMoves.FindAll(
+						m => m.OldSquare.Position == Vector2Int.RoundToInt(_startSquare.transform.position)
+				));
+				_startSquare = null;
+
+				_droppedPiecInSameSquareCounter = 0;
+			}
+		}
+	}
+
+	IEnumerator PickPromotion(GraphicalSquare endSquare)
+	{
 		_pickingPromotion = true;
 
-		_board.HideLegalMovesIndicators(_selectedPiece.LegalMoves);
-		_endSquare.DisplayLastMoveIndicator();
+		_endSquare = endSquare;
 
-		bool isPromotionMove = (_selectedPiece is Pawn) && (_player.Color == ColorType.White ? _endSquare.OnTopRank : _endSquare.OnBottomRank);
-		if (isPromotionMove)
+		HideLegalMovesIndicators(_legalMoves.FindAll(
+			m => m.OldSquare.Position == Vector2Int.RoundToInt(_startSquare.transform.position)
+		));
+
+		Move selectedMove = _legalMoves.Find(
+			m => m.OldSquare.Position == Vector2Int.RoundToInt(_startSquare.transform.position) &&
+			m.NewSquare.Position == Vector2Int.RoundToInt(_endSquare.transform.position)
+		);
+		if (selectedMove.IsPromotion)
 		{
 			_endSquare.DisplayPromotionPanel();
 
-			_selectedPiece.transform.position = new Vector3(_endSquare.Position.x, _endSquare.Position.y);
-
 			yield return new WaitUntil(() => _endSquare.PromotionPanel.IsPromotionSelected());
 
-			_selectedMove = new MoveData(_selectedPiece, _startSquare, _endSquare, _endSquare.Piece, _endSquare.PromotionPanel.PromotionType);
+			_selectedMove = _legalMoves.Find(
+				m => m.OldSquare.Position == Vector2Int.RoundToInt(_startSquare.transform.position) &&
+				m.NewSquare.Position == Vector2Int.RoundToInt(_endSquare.transform.position) &&
+				m.Type == _endSquare.PromotionPanel.PromotionType);
 
 			_endSquare.HidePromotionPanel();
 		}
 		else
 		{
-			_selectedMove = new MoveData(_selectedPiece, _startSquare, _endSquare, _endSquare.Piece);
+			_selectedMove = _legalMoves.Find(
+				m => m.OldSquare.Position == Vector2Int.RoundToInt(_startSquare.transform.position) &&
+				m.NewSquare.Position == Vector2Int.RoundToInt(_endSquare.transform.position)
+			);
 		}
 
-		_selectedSamePieceCounter = 0;
-		_selectedPiece = null;
+		_selectedPieceSquare.HideSelectionIndicator();
+		_selectedPieceSquare = null;
 		_startSquare = null;
 		_endSquare = null;
-		_dragSelectedPieceWithCursor = false;
+		_draggedPieceSpriteRenderer.enabled = false;
+		_droppedPiecInSameSquareCounter = 0;
 		_pickingPromotion = false;
+		IsMoveSelected = true;
+	}
+
+	public void DisplayLegalMovesIndicators(List<Move> legalMoves)
+	{
+		foreach (Move move in legalMoves)
+		{
+			if (move.EncounteredPiece != null)
+				_board.Squares[move.NewSquare.Position.x, move.NewSquare.Position.y].DisplayValidForAttackIndicator();
+			else
+				_board.Squares[move.NewSquare.Position.x, move.NewSquare.Position.y].DisplayValidForMoveIndicator();
+		}
+	}
+
+	public void HideLegalMovesIndicators(List<Move> legalMoves)
+	{
+		foreach (Move move in legalMoves)
+			_board.Squares[move.NewSquare.Position.x, move.NewSquare.Position.y].HideValidMovementIndicators();
 	}
 }

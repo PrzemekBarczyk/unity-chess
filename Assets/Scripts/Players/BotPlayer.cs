@@ -1,21 +1,10 @@
-using UnityEngine;
-
-[RequireComponent(typeof(SearchAlgorithm))]
 public class BotPlayer : Player
 {
     public override PlayerType Type => PlayerType.Bot;
 
-	[SerializeField] SearchAlgorithm _searchAlgorithm;
-
-	new void Awake()
+	public override Move SelectMove(ChessEngine chessEngine) // runs in separate thread 
 	{
-		base.Awake();
-
-		if (_searchAlgorithm == null) Debug.LogWarning("Search algorithm wasn't assigned");
-	}
-
-	protected override MoveData SelectMove()
-	{
-		return _searchAlgorithm.FindBestMove(Pieces);
+		LastMove = chessEngine.FindBestMove();
+		return chessEngine.FindBestMove();
 	}
 }

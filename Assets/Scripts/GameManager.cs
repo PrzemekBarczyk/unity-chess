@@ -1,45 +1,31 @@
 using System.Collections;
-using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 public class GameManager : MonoSingleton<GameManager>
 {
 	[SerializeField] string _startChessPositionInFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    public string StartChessPositionInFEN { get => _startChessPositionInFEN; set => _startChessPositionInFEN = value; }
-
-    public ExtractedFENData ExtractedFENData { get; private set; }
 
     public State State { get; private set; } = State.Playing;
-    public Stack<HistoryData> History { get; private set; } = new Stack<HistoryData>();
 
-	PieceManager _pieces;
-	PlayerManager _players;
-    Board _board;
+    ChessEngine _chessEngine;
+
+	PlayerManager _playerManager;
+    GraphicalBoard _graphicalBoard;
 
 	new void Awake()
 	{
 		base.Awake();
 
-		_pieces = PieceManager.Instance;
-		_players = PlayerManager.Instance;
-        _board = Board.Instance;
+        _chessEngine = new ChessEngine(_startChessPositionInFEN);
 
-		ExtractDataFromFEN();
+		_playerManager = PlayerManager.Instance;
+        _graphicalBoard = GraphicalBoard.Instance;
+
+        ExtractedFENData extractedFENData = FENExtractor.FENToBoardPositionData(_startChessPositionInFEN);
+        _playerManager.SetStartingPlayerColor(extractedFENData.PlayerToMoveColor);
+        _graphicalBoard.CreateBoard(extractedFENData.PiecesToCreate);
     }
-
-    void ExtractDataFromFEN()
-	{
-		ExtractedFENData = FENExtractor.FENToBoardPositionData(_startChessPositionInFEN);
-
-		_pieces.WhitePieces.CreatePieces(ExtractedFENData.PiecesToCreate);
-		_pieces.BlackPieces.CreatePieces(ExtractedFENData.PiecesToCreate);
-		_players.SetStartingPlayerColor(ExtractedFENData.PlayerToMoveColor);
-		_pieces.WhitePieces.King.CanCastleKingside = ExtractedFENData.HasWhiteCastleKingsideRights;
-		_pieces.WhitePieces.King.CanCastleQueenside = ExtractedFENData.HasWhiteCastleQueensideRights;
-		_pieces.BlackPieces.King.CanCastleKingside = ExtractedFENData.HasBlackCastleKingsideRights;
-		_pieces.BlackPieces.King.CanCastleQueenside = ExtractedFENData.HasBlackCastleQueensideRights;
-		_pieces.SetEnPassantTarget(ExtractedFENData.EnPassantTargetPiecePosition);
-	}
 
     public void StartGame() // called after color selection
     {
@@ -50,56 +36,24 @@ public class GameManager : MonoSingleton<GameManager>
     {
         while (true)
         {
-            OnMoveBegin();
-            yield return _players.CurrentPlayer.Move();
-            OnMoveEnded();
+            Move? moveToMake = null;
+            new Thread(() => moveToMake = _playerManager.CurrentPlayer.SelectMove(_chessEngine)).Start();
 
-            State = CheckGameState();
+            yield return new WaitUntil(() => moveToMake.HasValue); // waits until player selects his move
+
+            _graphicalBoard.UpdateBoard(moveToMake.Value, _playerManager.NextPlayer.LastMove);
+
+            State = _chessEngine.MakeMove(moveToMake.Value);
 
             if (State == State.Playing)
             {
-                _players.SwitchTurn();
-            }
-            else if (State == State.Checkmate)
-            {
-                EndGame(State.Checkmate);
-            }
-            else if (State == State.Draw)
-            {
-                EndGame(State.Draw);
-            }
-        }
-    }
-
-    void OnMoveBegin()
-    {
-        MoveData? lastMove = _players.CurrentPlayer.LastMove;
-        if (lastMove.HasValue) _board.HideLastMoveIndicators(lastMove.Value);
-    }
-
-    void OnMoveEnded()
-    {
-        MoveData? lastMove = _players.CurrentPlayer.LastMove;
-        _board.DisplayLastMoveIndicators(lastMove.Value);
-    }
-
-    State CheckGameState()
-    {
-        _players.NextPlayer.Pieces.GenerateLegalMoves();
-
-        if (!_players.NextPlayer.Pieces.HasLegalMoves())
-        {
-            if (_players.NextPlayer.Pieces.King.IsChecked())
-            {
-                return State.Checkmate;
+                _playerManager.SwitchTurn();
             }
             else
             {
-                return State.Draw;
+                EndGame(State);
             }
         }
-
-        return State.Playing;
     }
 
     public void EndGame(State result)
