@@ -101,7 +101,7 @@ public class Perft
 
             if (depth == maxDepth)
             {
-                _divideResults.Add(legalMove.OldSquare.Position + " " + legalMove.NewSquare.Position + ": " + localNodes);
+                _divideResults.Add(AlgebraicNotation.MoveToAlgebraicNotation(legalMove) + ": " + localNodes);
             }
         }
 

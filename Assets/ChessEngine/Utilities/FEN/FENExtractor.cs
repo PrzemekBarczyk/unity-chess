@@ -108,10 +108,7 @@ public static class FENExtractor
 			return null;
 		}
 
-		Vector2Int enPassantTargetSquarePosition = GraphicalBoard.AlgebraicNotationToPosition(enPassantSquare);
-		Vector2Int enPassantPiecePiecePosition = enPassantTargetSquarePosition + Vector2Int.up * (enPassantTargetSquarePosition.y == 2 ? 1 : -1);
-
-		return enPassantPiecePiecePosition;
+		return AlgebraicNotation.AlgebraicNotationToPosition(enPassantSquare);
 	}
 
 	static int ExtractHalfMoveClock(string halfMovesClock)

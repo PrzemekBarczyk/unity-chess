@@ -80,16 +80,4 @@ public class GraphicalBoard : MonoSingleton<GraphicalBoard>
         Squares[moveToMake.OldSquare.Position.x, moveToMake.OldSquare.Position.y].DisplayLastMoveIndicator();
         Squares[moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y].DisplayLastMoveIndicator();
     }
-
-    public static Vector2Int AlgebraicNotationToPosition(string an)
-	{
-        int fileIndex = 0;
-        foreach (char fileSymbols in "abcdefgh")
-		{
-            if (fileSymbols == an[0])
-                return new Vector2Int(fileIndex, (int)char.GetNumericValue(an[1]) - 1);
-            fileIndex++;
-        }
-        throw new FormatException("Forbidden file symbol");
-    }
 }
