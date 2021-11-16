@@ -22,10 +22,8 @@ public class Queen : SlidingPiece
 
 	public Queen(Board board, PieceSet pieces, ColorType color, Vector2Int position) : base(board, pieces, color, position) { }
 
-	public override List<Move> GenerateLegalMoves()
+	public override void GenerateLegalMoves()
 	{
-		_legalMoves.Clear();
-
 		FindSlidingMoves(new Vector2Int(0, 1));
 		FindSlidingMoves(new Vector2Int(1, 1));
 		FindSlidingMoves(new Vector2Int(1, 0));
@@ -34,7 +32,5 @@ public class Queen : SlidingPiece
 		FindSlidingMoves(new Vector2Int(-1, -1));
 		FindSlidingMoves(new Vector2Int(-1, 0));
 		FindSlidingMoves(new Vector2Int(-1, 1));
-
-		return _legalMoves;
 	}
 }

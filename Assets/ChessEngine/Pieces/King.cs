@@ -25,10 +25,8 @@ public class King : SlidingPiece
 
     public King(Board board, PieceSet pieces, ColorType color, Vector2Int position) : base(board, pieces, color, position) { }
 
-    public override List<Move> GenerateLegalMoves()
+    public override void GenerateLegalMoves()
     {
-        _legalMoves.Clear();
-
         FindSlidingMoves(new Vector2Int(-1, 1), 1);
         FindSlidingMoves(new Vector2Int(0, 1), 1);
         FindSlidingMoves(new Vector2Int(1, 1), 1);
@@ -40,8 +38,6 @@ public class King : SlidingPiece
 
         FindCastlingMove(false);
         FindCastlingMove(true);
-
-        return _legalMoves;
     }
 
     public void FindCastlingMove(bool rightCastle)
@@ -93,7 +89,7 @@ public class King : SlidingPiece
         }
 
         Square newKingSquare = _board.Squares[newKingPosition.x][newKingPosition.y];
-        _legalMoves.Add(new Move(this, Square, newKingSquare, null, MoveType.Castle, rookOldSquare, rookNewSquare));
+        Pieces.LegalMoves.Add(new Move(this, Square, newKingSquare, null, MoveType.Castle, rookOldSquare, rookNewSquare));
     }
 
     public override void Move(Move moveToMake)

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Vector2Int = UnityEngine.Vector2Int;
 
 public enum PieceType { Undefinied, Pawn, Knight, Bishop, Rook, Queen, King }
@@ -12,9 +11,6 @@ public abstract class Piece
 	public Square Square { get; set; }
 
 	public PieceSet Pieces { get; private set; }
-
-	protected List<Move> _legalMoves = new List<Move>();
-	protected Stack<RightsData> _rightsHistory = new Stack<RightsData>();
 
 	public abstract int Value { get; }
 	public abstract int[,] PositionsValues { get; }
@@ -33,7 +29,7 @@ public abstract class Piece
 		_board.Squares[position.x][position.y].Piece = this;
 	}
 
-	public abstract List<Move> GenerateLegalMoves();
+	public abstract void GenerateLegalMoves();
 
 	protected bool SaveMoveIfLegal(Move pseudoLegalMove)
 	{
@@ -45,7 +41,7 @@ public abstract class Piece
 
 		if (!isKingChecked)
 		{
-			_legalMoves.Add(pseudoLegalMove);
+			Pieces.LegalMoves.Add(pseudoLegalMove);
 			return true;
 		}
 
@@ -55,7 +51,7 @@ public abstract class Piece
 	public virtual void Move(Move moveToMake)
 	{
 		RightsData currentRights = new RightsData(_board.EnPassantTarget, Pieces.King.CanCastleKingside, Pieces.King.CanCastleQueenside);
-		_rightsHistory.Push(currentRights);
+		Pieces.RightsData.Push(currentRights);
 
 		if (moveToMake.EncounteredPiece != null)
 		{
@@ -82,7 +78,7 @@ public abstract class Piece
 			moveToUndo.EncounteredPiece.Square.Piece = moveToUndo.EncounteredPiece;
 		}
 
-		RightsData previousRights = _rightsHistory.Pop();
+		RightsData previousRights = Pieces.RightsData.Pop();
 		_board.EnPassantTarget = previousRights.EnPassantTarget;
 		Pieces.King.CanCastleKingside = previousRights.CanCastleKingside;
 		Pieces.King.CanCastleQueenside = previousRights.CanCastleQueenside;

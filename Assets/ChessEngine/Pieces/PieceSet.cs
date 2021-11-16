@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using UnityEngine;
 
 public class PieceSet
 {
@@ -7,6 +6,9 @@ public class PieceSet
 
 	public List<Piece> AllPieces { get; } = new List<Piece>(16);
 	public King King { get; private set; }
+
+	public Stack<RightsData> RightsData { get; private set; } = new Stack<RightsData>(32);
+	public List<Move> LegalMoves { get; private set; } = new List<Move>(128);
 
 	public PieceSet(Board board, ColorType color, List<PieceData> piecesToCreate)
 	{
@@ -54,27 +56,15 @@ public class PieceSet
 
 	public List<Move> GenerateLegalMoves()
 	{
-		List<Move> legalMoves = new List<Move>();
+		LegalMoves.Clear();
 		List<Piece> allPieces = new List<Piece>(AllPieces);
-		foreach (Piece piece in allPieces)
+		for (int i = 0; i < allPieces.Count; i++)
 		{
-			if (piece.IsAlive)
+			if (allPieces[i].IsAlive)
 			{
-				foreach (Move legalMove in piece.GenerateLegalMoves())
-					legalMoves.Add(legalMove);
+				allPieces[i].GenerateLegalMoves();
 			}
 		}
-		return legalMoves;
-	}
-
-	public List<Piece> AlivePieces()
-	{
-		List<Piece> alivePieces = new List<Piece>();
-		foreach (Piece piece in AllPieces)
-		{
-			if (piece.IsAlive)
-				alivePieces.Add(piece);
-		}
-		return alivePieces;
+		return LegalMoves;
 	}
 }

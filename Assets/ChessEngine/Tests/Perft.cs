@@ -41,8 +41,10 @@ public class Perft
 
         ulong nodes = 0;
 
-        foreach (Move legalMove in legalMoves)
+        for (int i = 0; i < legalMoves.Count; i++)
         {
+            Move legalMove = legalMoves[i];
+
             legalMove.Piece.Move(legalMove);
             nodes += Search(nextPieces, depth - 1);
             legalMove.Piece.UndoMove(legalMove);
@@ -69,8 +71,10 @@ public class Perft
 
         ulong nodes = 0;
 
-        foreach (Move legalMove in legalMoves)
+        for (int i = 0; i < legalMoves.Count; i++)
         {
+            Move legalMove = legalMoves[i];
+
             legalMove.Piece.Move(legalMove);
             nodes += FastSearch(nextPieces, depth - 1);
             legalMove.Piece.UndoMove(legalMove);
@@ -92,8 +96,10 @@ public class Perft
 
         ulong nodes = 0;
 
-        foreach (Move legalMove in legalMoves)
+        for (int i = 0; i < legalMoves.Count; i++)
         {
+            Move legalMove = legalMoves[i];
+
             legalMove.Piece.Move(legalMove);
             ulong localNodes = Divide(nextPieces, depth - 1, maxDepth);
             nodes += localNodes;

@@ -25,7 +25,7 @@ public class MinMax : SearchAlgorithm
 			return Evaluate();
 		}
 
-		List<Move> legalMoves = currentPlayerPieces.GenerateLegalMoves();
+		List<Move> legalMoves = new List<Move>(currentPlayerPieces.GenerateLegalMoves());
 
 		if (legalMoves.Count == 0) // no legal moves
 		{
@@ -40,19 +40,21 @@ public class MinMax : SearchAlgorithm
 		{
 			int maxEvaluation = -10000000;
 
-			foreach (Move move in legalMoves)
+			for (int i = 0; i < legalMoves.Count; i++)
 			{
-				move.Piece.Move(move);
+				Move legalMove = legalMoves[i];
+
+				legalMove.Piece.Move(legalMove);
 
 				int evaluation = Search(nextDepthPlayerPieces, depth - 1, false);
 
 				if (evaluation > maxEvaluation)
 				{
 					maxEvaluation = evaluation;
-					if (depth == MAX_DEPTH) _bestMove = move;
+					if (depth == MAX_DEPTH) _bestMove = legalMove;
 				}
 
-				move.Piece.UndoMove(move);
+				legalMove.Piece.UndoMove(legalMove);
 			}
 
 			return maxEvaluation;
@@ -61,19 +63,21 @@ public class MinMax : SearchAlgorithm
 		{
 			int minEvaluation = 10000000;
 
-			foreach (Move move in legalMoves)
+			for (int i = 0; i < legalMoves.Count; i++)
 			{
-				move.Piece.Move(move);
+				Move legalMove = legalMoves[i];
+
+				legalMove.Piece.Move(legalMove);
 
 				int evaluation = Search(nextDepthPlayerPieces, depth - 1, true);
 
 				if (evaluation < minEvaluation)
 				{
 					minEvaluation = evaluation;
-					if (depth == MAX_DEPTH) _bestMove = move;
+					if (depth == MAX_DEPTH) _bestMove = legalMove;
 				}
 
-				move.Piece.UndoMove(move);
+				legalMove.Piece.UndoMove(legalMove);
 			}
 
 			return minEvaluation;

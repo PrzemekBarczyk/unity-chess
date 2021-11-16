@@ -23,8 +23,8 @@ public abstract class SearchAlgorithm
 
 	protected int Evaluate()
 	{
-		int whiteEvaluation = EvaluateSide(_whitePieces.AlivePieces());
-		int blackEvaluation = EvaluateSide(_blackPieces.AlivePieces());
+		int whiteEvaluation = EvaluateSide(_whitePieces.AllPieces);
+		int blackEvaluation = EvaluateSide(_blackPieces.AllPieces);
 
 		int evaluation = blackEvaluation - whiteEvaluation;
 
@@ -33,21 +33,26 @@ public abstract class SearchAlgorithm
 		return evaluation * evaluationModifier;
 	}
 
-	public int EvaluateSide(List<Piece> alivePiecesToEvaluate)
+	public int EvaluateSide(List<Piece> piecesToEvaluate)
 	{
 		int score = 0;
 
-		foreach (Piece piece in alivePiecesToEvaluate)
+		for (int i = 0; i < piecesToEvaluate.Count; i++)
 		{
-			score += piece.Value;
+			Piece piece = piecesToEvaluate[i];
 
-			if (alivePiecesToEvaluate[0].Color == ColorType.Black)
+			if (piece.IsAlive)
 			{
-				score += piece.PositionsValues[piece.Square.Position.y, piece.Square.Position.x];
-			}
-			else // piece is white
-			{
-				score += piece.PositionsValues[Board.RANKS - 1 - piece.Square.Position.y, piece.Square.Position.x];
+				score += piece.Value;
+
+				if (piecesToEvaluate[0].Color == ColorType.Black)
+				{
+					score += piece.PositionsValues[piece.Square.Position.y, piece.Square.Position.x];
+				}
+				else // piece is white
+				{
+					score += piece.PositionsValues[Board.RANKS - 1 - piece.Square.Position.y, piece.Square.Position.x];
+				}
 			}
 		}
 

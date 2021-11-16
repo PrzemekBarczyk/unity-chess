@@ -27,10 +27,8 @@ public class Pawn : SlidingPiece
 
 	public Pawn(Board board, PieceSet pieces, ColorType color, Vector2Int position) : base(board, pieces, color, position) { }
 
-	public override List<Move> GenerateLegalMoves()
+	public override void GenerateLegalMoves()
 	{
-		_legalMoves.Clear();
-
 		if (OnStartingPosition) FindSlidingMoves(new Vector2Int(0, 1 * DirectionModifier), 2, canAttack: false, canMoveOnEmptySquare: true);
 		else FindSlidingMoves(new Vector2Int(0, 1 * DirectionModifier), 1, canAttack: false, canMoveOnEmptySquare: true, canPromote: true);
 
@@ -38,8 +36,6 @@ public class Pawn : SlidingPiece
 		FindSlidingMoves(new Vector2Int(1, 1 * DirectionModifier), 1, canAttack: true, canMoveOnEmptySquare: false, canPromote: true);
 
 		FindEnPassantMoves();
-
-		return _legalMoves;
 	}
 
 	void FindEnPassantMoves()

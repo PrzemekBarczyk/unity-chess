@@ -22,16 +22,12 @@ public class Rook : SlidingPiece
 
 	public Rook(Board board, PieceSet pieces, ColorType color, Vector2Int position) : base(board, pieces, color, position) { }
 
-	public override List<Move> GenerateLegalMoves()
+	public override void GenerateLegalMoves()
 	{
-		_legalMoves.Clear();
-
 		FindSlidingMoves(new Vector2Int(0, 1));
 		FindSlidingMoves(new Vector2Int(1, 0));
 		FindSlidingMoves(new Vector2Int(0, -1));
 		FindSlidingMoves(new Vector2Int(-1, 0));
-
-		return _legalMoves;
 	}
 
 	public override void Move(Move moveToMake)

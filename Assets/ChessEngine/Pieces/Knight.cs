@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Vector2Int = UnityEngine.Vector2Int;
 
 public class Knight : JumpingPiece
@@ -22,10 +21,8 @@ public class Knight : JumpingPiece
 
 	public Knight(Board board, PieceSet pieces, ColorType color, Vector2Int position) : base(board, pieces, color, position) { }
 
-	public override List<Move> GenerateLegalMoves()
+	public override void GenerateLegalMoves()
 	{
-		_legalMoves.Clear();
-
 		FindJumpMove(new Vector2Int(-1, 2));
 		FindJumpMove(new Vector2Int(1, 2));
 		FindJumpMove(new Vector2Int(2, 1));
@@ -34,7 +31,5 @@ public class Knight : JumpingPiece
 		FindJumpMove(new Vector2Int(-1, -2));
 		FindJumpMove(new Vector2Int(-2, -1));
 		FindJumpMove(new Vector2Int(-2, 1));
-
-		return _legalMoves;
 	}
 }
