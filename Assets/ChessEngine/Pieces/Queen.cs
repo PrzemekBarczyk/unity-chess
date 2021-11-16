@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Vector2Int = UnityEngine.Vector2Int;
 
 public class Queen : SlidingPiece

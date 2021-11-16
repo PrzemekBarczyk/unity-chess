@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Vector2Int = UnityEngine.Vector2Int;
 
 public class King : SlidingPiece
@@ -23,6 +22,11 @@ public class King : SlidingPiece
     public bool CanCastleKingside { get; set; }
     public bool CanCastleQueenside { get; set; }
 
+    public static readonly Vector2Int WHITE_KING_AFTER_KINGSIDE_CASTLE_POSITION = new Vector2Int(6, Board.BOTTOM_RANK_INDEX);
+    public static readonly Vector2Int WHITE_KING_AFTER_QUEENSIDE_CASTLE_POSITION = new Vector2Int(2, Board.BOTTOM_RANK_INDEX);
+    public static readonly Vector2Int BLACK_KING_AFTER_KINGSIDE_CASTLE_POSITION = new Vector2Int(6, Board.TOP_RANK_INDEX);
+    public static readonly Vector2Int BLACK_KING_AFTER_QUEENSIDE_CASTLE_POSITION = new Vector2Int(2, Board.TOP_RANK_INDEX);
+
     public King(Board board, PieceSet pieces, ColorType color, Vector2Int position) : base(board, pieces, color, position) { }
 
     public override void GenerateLegalMoves()
@@ -36,45 +40,54 @@ public class King : SlidingPiece
         FindSlidingMoves(new Vector2Int(-1, -1), 1);
         FindSlidingMoves(new Vector2Int(-1, 0), 1);
 
-        FindCastlingMove(false);
-        FindCastlingMove(true);
+        if (CanCastleQueenside) FindCastlingMove(false);
+        if (CanCastleKingside) FindCastlingMove(true);
     }
 
-    public void FindCastlingMove(bool rightCastle)
+    public void FindCastlingMove(bool kingsideCastle)
     {
-        if (rightCastle ? !CanCastleKingside : !CanCastleQueenside) // canCastle tells if king or proper rook moved since start
-            return;
-
-        if (IsChecked())
-            return;
-
         Vector2Int positionModifier;
-        Vector2Int rookOldPosition;
-        Vector2Int rookNewPosition;
+        Square rookOldSquare;
+        Square rookNewSquare;
         Vector2Int newKingPosition;
 
-        if (rightCastle)
+        if (kingsideCastle)
         {
             positionModifier = Vector2Int.right;
-            rookOldPosition = Square.Position + new Vector2Int(3, 0);
-            rookNewPosition = Square.Position + new Vector2Int(1, 0);
-            newKingPosition = Square.Position + new Vector2Int(2, 0);
+            if (Color == ColorType.White)
+			{
+                rookOldSquare = _board.Squares[Rook.WHITE_RIGHT_ROOK_START_POSITION.x][Rook.WHITE_RIGHT_ROOK_START_POSITION.y];
+                rookNewSquare = _board.Squares[Rook.WHITE_ROOK_AFTER_KINGSIDE_CASTLE_POSITION.x][Rook.WHITE_ROOK_AFTER_KINGSIDE_CASTLE_POSITION.y];
+                newKingPosition = WHITE_KING_AFTER_KINGSIDE_CASTLE_POSITION;
+			}
+			else // black
+			{
+                rookOldSquare = _board.Squares[Rook.BLACK_RIGHT_ROOK_START_POSITION.x][Rook.BLACK_RIGHT_ROOK_START_POSITION.y];
+                rookNewSquare = _board.Squares[Rook.BLACK_ROOK_AFTER_KINGSIDE_CASTLE_POSITION.x][Rook.BLACK_ROOK_AFTER_KINGSIDE_CASTLE_POSITION.y];
+                newKingPosition = BLACK_KING_AFTER_KINGSIDE_CASTLE_POSITION;
+            }
         }
-        else
+        else // queenside castle
         {
             positionModifier = Vector2Int.left;
-            rookOldPosition = Square.Position + new Vector2Int(-4, 0);
-            rookNewPosition = Square.Position + new Vector2Int(-1, 0);
-            newKingPosition = Square.Position + new Vector2Int(-2, 0);
+            if (Color == ColorType.White)
+            {
+                rookOldSquare = _board.Squares[Rook.WHITE_LEFT_ROOK_START_POSITION.x][Rook.WHITE_LEFT_ROOK_START_POSITION.y];
+                rookNewSquare = _board.Squares[Rook.WHITE_ROOK_AFTER_QUEENSIDE_CASTLE_POSITION.x][Rook.WHITE_ROOK_AFTER_QUEENSIDE_CASTLE_POSITION.y];
+                newKingPosition = WHITE_KING_AFTER_QUEENSIDE_CASTLE_POSITION;
+            }
+            else // black
+            {
+                rookOldSquare = _board.Squares[Rook.BLACK_LEFT_ROOK_START_POSITION.x][Rook.BLACK_LEFT_ROOK_START_POSITION.y];
+                rookNewSquare = _board.Squares[Rook.BLACK_ROOK_AFTER_QUEENSIDE_CASTLE_POSITION.x][Rook.BLACK_ROOK_AFTER_QUEENSIDE_CASTLE_POSITION.y];
+                newKingPosition = BLACK_KING_AFTER_QUEENSIDE_CASTLE_POSITION;
+            }
         }
 
-        Square rookOldSquare = _board.Squares[rookOldPosition.x][rookOldPosition.y];
-        Square rookNewSquare = _board.Squares[rookNewPosition.x][rookNewPosition.y];
-
-        if (rookOldSquare.Piece == null || !(rookOldSquare.Piece is Rook) || rookOldSquare.Piece.Color != Color) // rook missing or wrong color
+        if (rookOldSquare.Piece == null || !(rookOldSquare.Piece.Type == PieceType.Rook) || rookOldSquare.Piece.Color != Color) // rook missing or wrong color
             return;
 
-        if (!rightCastle && _board.Squares[rookOldPosition.x + 1][rookOldPosition.y].IsOccupied())
+        if (!kingsideCastle && _board.Squares[1][Square.Position.y].IsOccupied())
             return;
 
         Vector2Int checkedPosition = Square.Position + positionModifier;
@@ -87,6 +100,9 @@ public class King : SlidingPiece
 
             checkedPosition += positionModifier;
         }
+
+        if (IsChecked())
+            return;
 
         Square newKingSquare = _board.Squares[newKingPosition.x][newKingPosition.y];
         Pieces.LegalMoves.Add(new Move(this, Square, newKingSquare, null, MoveType.Castle, rookOldSquare, rookNewSquare));

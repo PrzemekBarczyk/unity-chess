@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Vector2Int = UnityEngine.Vector2Int;
 
 public class Pawn : SlidingPiece
@@ -22,6 +21,7 @@ public class Pawn : SlidingPiece
 	public override int[,] PositionsValues => POSITION_VALUES;
 
 	public bool OnStartingPosition => Square.Position.y == (Color == ColorType.White ? 1 : 6);
+	public bool OnPositionValidForEnPassant => Square.Position.y == (Color == ColorType.White ? 4 : 3);
 
 	public int DirectionModifier => Color == ColorType.White ? 1 : -1;
 
@@ -35,43 +35,33 @@ public class Pawn : SlidingPiece
 		FindSlidingMoves(new Vector2Int(-1, 1 * DirectionModifier), 1, canAttack: true, canMoveOnEmptySquare: false, canPromote: true);
 		FindSlidingMoves(new Vector2Int(1, 1 * DirectionModifier), 1, canAttack: true, canMoveOnEmptySquare: false, canPromote: true);
 
-		FindEnPassantMoves();
+		if (OnPositionValidForEnPassant) FindEnPassantMoves(false);
+		if (OnPositionValidForEnPassant) FindEnPassantMoves(true);
 	}
 
-	void FindEnPassantMoves()
+	void FindEnPassantMoves(bool rightEnPassant)
 	{
-		int enPassantRank = Color == ColorType.White ? 4 : 3;
-
-		if (Square.Position.y != enPassantRank)
-			return;
-
-		Square squareOnLeft = null, squareOnRight = null;
-		try
+		Square newSquare;
+		if (rightEnPassant)
 		{
-			squareOnLeft = _board.Squares[Square.Position.x - 1][Square.Position.y];
+			if (Square.Position.x + 1 > Board.RIGHT_FILE_INDEX)
+				return;
+			newSquare = _board.Squares[Square.Position.x + 1][Square.Position.y + DirectionModifier];
 		}
-		catch (IndexOutOfRangeException) { } // do nothing
-		try
+		else
 		{
-			squareOnRight = _board.Squares[Square.Position.x + 1][Square.Position.y];
+			if (Square.Position.x - 1 < Board.LEFT_FILE_INDEX)
+				return;
+			newSquare = _board.Squares[Square.Position.x - 1][Square.Position.y + DirectionModifier];
 		}
-		catch (IndexOutOfRangeException) { } // do nothing
 
-		foreach (Square sideSquare in new Square[] { squareOnLeft, squareOnRight })
+		if (newSquare == _board.EnPassantTarget)
 		{
-			if (sideSquare == null) // square outside the board
-				continue;
+			Piece encounteredPiece = _board.Squares[newSquare.Position.x][Square.Position.y].Piece;
+			Move move = new Move(this, Square, newSquare, encounteredPiece);
 
-			Square newSquare = _board.Squares[sideSquare.Position.x][sideSquare.Position.y + DirectionModifier];
-			if (newSquare == _board.EnPassantTarget)
-			{
-				Move move = new Move(this, Square, newSquare, sideSquare.Piece);
-
-				if (SaveMoveIfLegal(move))
-				{
-					return;
-				}
-			}
+			if (SaveMoveIfLegal(move))
+				return;
 		}
 	}
 
@@ -79,31 +69,32 @@ public class Pawn : SlidingPiece
 	{
 		base.Move(moveToMake);
 
-		if (moveToMake.OldSquare.Position.y == (Color == ColorType.White ? 1 : 6) && moveToMake.NewSquare.Position.y == (Color == ColorType.White ? 3 : 4))
+		bool madeDoubleMove = moveToMake.NewSquare.Position.y == (Color == ColorType.White ? 3 : 4) && moveToMake.OldSquare.Position.y == (Color == ColorType.White ? 1 : 6);
+		if (madeDoubleMove)
 		{
 			_board.EnPassantTarget = _board.Squares[Square.Position.x][Square.Position.y - DirectionModifier];
 		}
 		else if (moveToMake.IsPromotion)
 		{
-			Piece newPiece;
+			Piece promotion;
 			switch (moveToMake.Type)
 			{
 				case MoveType.PromotionToKnight:
-					newPiece = new Knight(_board, Pieces, Color, Square.Position);
+					promotion = new Knight(_board, Pieces, Color, Square.Position);
 					break;
 				case MoveType.PromotionToBishop:
-					newPiece = new Bishop(_board, Pieces, Color, Square.Position);
+					promotion = new Bishop(_board, Pieces, Color, Square.Position);
 					break;
 				case MoveType.PromotionToRook:
-					newPiece = new Rook(_board, Pieces, Color, Square.Position);
+					promotion = new Rook(_board, Pieces, Color, Square.Position);
 					break;
 				case MoveType.PromotionToQueen:
-					newPiece = new Queen(_board, Pieces, Color, Square.Position);
+					promotion = new Queen(_board, Pieces, Color, Square.Position);
 					break;
 				default:
 					throw new Exception();
 			}
-			Pieces.AllPieces.Add(newPiece);
+			Pieces.AllPieces.Add(promotion);
 			Pieces.AllPieces.Remove(this);
 		}
 	}

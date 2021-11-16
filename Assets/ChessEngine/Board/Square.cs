@@ -1,4 +1,3 @@
-using System;
 using Mathf = UnityEngine.Mathf;
 using Vector2Int = UnityEngine.Vector2Int;
 
@@ -57,15 +56,11 @@ public class Square
         {
             checkedPosition += direction;
 
-            Square checkedSquare;
-            try
-            {
-                checkedSquare = _board.Squares[checkedPosition.x][checkedPosition.y];
-            }
-            catch (IndexOutOfRangeException) // square outside board
-            {
+            if (checkedPosition.x < Board.LEFT_FILE_INDEX || checkedPosition.x > Board.RIGHT_FILE_INDEX || // square outside board
+                checkedPosition.y < Board.BOTTOM_RANK_INDEX || checkedPosition.y > Board.TOP_RANK_INDEX)
                 return false;
-            }
+
+            Square checkedSquare = _board.Squares[checkedPosition.x][checkedPosition.y];
 
             if (checkedSquare.IsOccupied())
             {
@@ -76,9 +71,9 @@ public class Square
 
                 Vector2Int distance = checkedPosition - Position;
 
-                if (encounteredPiece.Type == PieceType.Pawn)
+                if (encounteredPiece.Type == PieceType.Queen)
                 {
-                    if (Mathf.Abs(distance.x) == 1 && distance.y == (encounteredPiece.Color == ColorType.White ? -1 : 1))
+                    if (distance.x == 0 || distance.y == 0 || (Mathf.Abs(distance.x) == Mathf.Abs(distance.y)))
                         return true;
                 }
                 else if (encounteredPiece.Type == PieceType.Rook)
@@ -91,9 +86,9 @@ public class Square
                     if (Mathf.Abs(distance.x) == Mathf.Abs(distance.y))
                         return true;
                 }
-                else if (encounteredPiece.Type == PieceType.Queen)
+                else if (encounteredPiece.Type == PieceType.Pawn)
                 {
-                    if (distance.x == 0 || distance.y == 0 || (Mathf.Abs(distance.x) == Mathf.Abs(distance.y)))
+                    if (Mathf.Abs(distance.x) == 1 && distance.y == (encounteredPiece.Color == ColorType.White ? -1 : 1))
                         return true;
                 }
                 else if (encounteredPiece.Type == PieceType.King)
@@ -113,15 +108,11 @@ public class Square
     {
         Vector2Int checkedPosition = Position + offset;
 
-        Square checkedSquare;
-        try
-        {
-            checkedSquare = _board.Squares[checkedPosition.x][checkedPosition.y];
-        }
-        catch (IndexOutOfRangeException) // square outside board
-        {
+        if (checkedPosition.x < Board.LEFT_FILE_INDEX || checkedPosition.x > Board.RIGHT_FILE_INDEX || // square outside board
+            checkedPosition.y < Board.BOTTOM_RANK_INDEX || checkedPosition.y > Board.TOP_RANK_INDEX)
             return false;
-        }
+
+        Square checkedSquare = _board.Squares[checkedPosition.x][checkedPosition.y];
 
         if (checkedSquare.IsOccupied())
         {

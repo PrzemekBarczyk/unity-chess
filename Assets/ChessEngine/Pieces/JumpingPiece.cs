@@ -1,4 +1,3 @@
-using System;
 using Vector2Int = UnityEngine.Vector2Int;
 
 public abstract class JumpingPiece : Piece
@@ -9,15 +8,11 @@ public abstract class JumpingPiece : Piece
 	{
 		Vector2Int checkedPosition = Square.Position + offset;
 
-		Square checkedSquare;
-		try
-		{
-			checkedSquare = _board.Squares[checkedPosition.x][checkedPosition.y];
-		}
-		catch (IndexOutOfRangeException) // square outside board
-		{
+		if (checkedPosition.x < Board.LEFT_FILE_INDEX || checkedPosition.x > Board.RIGHT_FILE_INDEX || // square outside board
+				checkedPosition.y < Board.BOTTOM_RANK_INDEX || checkedPosition.y > Board.TOP_RANK_INDEX)
 			return;
-		}
+
+		Square checkedSquare = _board.Squares[checkedPosition.x][checkedPosition.y];
 
 		if (!checkedSquare.IsOccupied() || // empty square
 			(checkedSquare.IsOccupied() && checkedSquare.Piece.Color != Color)) // opponent piece

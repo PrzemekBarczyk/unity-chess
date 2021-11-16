@@ -1,4 +1,3 @@
-using System;
 using Vector2Int = UnityEngine.Vector2Int;
 
 public abstract class SlidingPiece : Piece
@@ -13,17 +12,13 @@ public abstract class SlidingPiece : Piece
 		{
 			checkedPosition += direction;
 
-			Square checkedSquare;
-			try
-			{
-				checkedSquare = _board.Squares[checkedPosition.x][checkedPosition.y];
-			}
-			catch (IndexOutOfRangeException) // square outside board
-			{
+			if (checkedPosition.x < Board.LEFT_FILE_INDEX || checkedPosition.x > Board.RIGHT_FILE_INDEX || // square outside board
+				checkedPosition.y < Board.BOTTOM_RANK_INDEX || checkedPosition.y > Board.TOP_RANK_INDEX)
 				return;
-			}
 
-			if (!checkedSquare.IsOccupied() && canMoveOnEmptySquare) // empty square
+			Square checkedSquare = _board.Squares[checkedPosition.x][checkedPosition.y];
+
+			if (canMoveOnEmptySquare && !checkedSquare.IsOccupied()) // empty square
 			{
 				if (canPromote && checkedSquare.IsPromotionSquare(Color))
 				{
@@ -38,7 +33,7 @@ public abstract class SlidingPiece : Piece
 					SaveMoveIfLegal(new Move(this, Square, checkedSquare, checkedSquare.Piece));
 				}
 			}
-			else if (checkedSquare.IsOccupied() && checkedSquare.Piece.Color != Color && canAttack) // opponent piece
+			else if (canAttack && checkedSquare.IsOccupied() && checkedSquare.Piece.Color != Color) // opponent piece
 			{
 				if (canPromote && checkedSquare.IsPromotionSquare(Color))
 				{
