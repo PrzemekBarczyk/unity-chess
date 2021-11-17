@@ -29,25 +29,6 @@ public abstract class Piece
 		_board.Squares[position.x][position.y].Piece = this;
 	}
 
-	public abstract void GenerateLegalMoves();
-
-	protected bool SaveMoveIfLegal(Move pseudoLegalMove)
-	{
-		pseudoLegalMove.Piece.Move(pseudoLegalMove);
-
-		bool isKingChecked = pseudoLegalMove.Piece.Pieces.King.IsChecked();
-
-		pseudoLegalMove.Piece.UndoMove(pseudoLegalMove);
-
-		if (!isKingChecked)
-		{
-			Pieces.LegalMoves.Add(pseudoLegalMove);
-			return true;
-		}
-
-		return false;
-	}
-
 	public virtual void Move(Move moveToMake)
 	{
 		RightsData currentRights = new RightsData(_board.EnPassantTarget, Pieces.King.CanCastleKingside, Pieces.King.CanCastleQueenside);

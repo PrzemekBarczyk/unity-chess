@@ -1,6 +1,6 @@
 using Vector2Int = UnityEngine.Vector2Int;
 
-public class Rook : SlidingPiece
+public class Rook : Piece
 {
 	public override PieceType Type => PieceType.Rook;
 
@@ -30,14 +30,6 @@ public class Rook : SlidingPiece
 	public static readonly Vector2Int BLACK_ROOK_AFTER_QUEENSIDE_CASTLE_POSITION = new Vector2Int(3, Board.TOP_RANK_INDEX);
 
 	public Rook(Board board, PieceSet pieces, ColorType color, Vector2Int position) : base(board, pieces, color, position) { }
-
-	public override void GenerateLegalMoves()
-	{
-		FindSlidingMoves(new Vector2Int(0, 1));
-		FindSlidingMoves(new Vector2Int(1, 0));
-		FindSlidingMoves(new Vector2Int(0, -1));
-		FindSlidingMoves(new Vector2Int(-1, 0));
-	}
 
 	public override void Move(Move moveToMake)
 	{

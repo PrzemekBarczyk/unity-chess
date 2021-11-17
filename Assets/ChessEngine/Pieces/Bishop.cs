@@ -1,6 +1,6 @@
 using Vector2Int = UnityEngine.Vector2Int;
 
-public class Bishop : SlidingPiece
+public class Bishop : Piece
 {
     public override PieceType Type => PieceType.Bishop;
 
@@ -20,12 +20,4 @@ public class Bishop : SlidingPiece
 	public override int[,] PositionsValues => POSITION_VALUES;
 
 	public Bishop(Board board, PieceSet pieces, ColorType color, Vector2Int position) : base(board, pieces, color, position) { }
-
-	public override void GenerateLegalMoves()
-	{
-		FindSlidingMoves(new Vector2Int(1, 1));
-		FindSlidingMoves(new Vector2Int(1, -1));
-		FindSlidingMoves(new Vector2Int(-1, -1));
-		FindSlidingMoves(new Vector2Int(-1, 1));
-	}
 }

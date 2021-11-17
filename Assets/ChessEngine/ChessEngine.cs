@@ -7,6 +7,7 @@ public class ChessEngine
 {
 	Board _board;
 	PieceManager _pieceManager;
+	MoveGenerator _moveGenerator;
 	SearchAlgorithm _minMax;
 
 	public Perft Perft { get; private set; }
@@ -19,8 +20,9 @@ public class ChessEngine
 
 		_board = new Board(extractedFENData);
 		_pieceManager = new PieceManager(_board, extractedFENData);
-		_minMax = new MinMax(_pieceManager);
-		Perft = new Perft(_pieceManager);
+		_moveGenerator = new MoveGenerator(_board);
+		_minMax = new MinMax(_moveGenerator, _pieceManager);
+		Perft = new Perft(_moveGenerator, _pieceManager);
 	}
 
 	public Move FindBestMove()
@@ -31,14 +33,14 @@ public class ChessEngine
 	public List<Move> GenerateLegalMoves(ColorType color)
 	{
 		PieceSet pieces = color == ColorType.White ? _pieceManager.WhitePieces : _pieceManager.BlackPieces;
-		return pieces.GenerateLegalMoves();
+		return _moveGenerator.GenerateLegalMoves(pieces);
 	}
 
 	public State MakeMove(Move move)
 	{
 		move.Piece.Move(move);
 
-		List<Move> legalMoves = _pieceManager.NextPieces.GenerateLegalMoves();
+		List<Move> legalMoves = _moveGenerator.GenerateLegalMoves(_pieceManager.NextPieces);
 
 		if (legalMoves.Count == 0)
 		{

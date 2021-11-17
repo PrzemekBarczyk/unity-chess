@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 public class MinMax : SearchAlgorithm
 {
-    public MinMax(PieceManager pieceManager) : base(pieceManager) { }
+    public MinMax(MoveGenerator moveGenerator, PieceManager pieceManager) : base(moveGenerator, pieceManager) { }
 
     public override Move FindBestMove()
     {
@@ -25,7 +25,7 @@ public class MinMax : SearchAlgorithm
 			return Evaluate();
 		}
 
-		List<Move> legalMoves = new List<Move>(currentPlayerPieces.GenerateLegalMoves());
+		List<Move> legalMoves = new List<Move>(_moveGenerator.GenerateLegalMoves(currentPlayerPieces));
 
 		if (legalMoves.Count == 0) // no legal moves
 		{

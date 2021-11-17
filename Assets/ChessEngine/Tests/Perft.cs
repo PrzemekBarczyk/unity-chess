@@ -3,14 +3,16 @@ using System.Collections.Generic;
 
 public class Perft
 {
+    MoveGenerator _moveGenerator;
     PieceManager _pieceManager;
     PieceSet _whitePieces;
     PieceSet _blackPieces;
 
     List<string> _divideResults = new List<string>();
 
-    public Perft(PieceManager pieceManager)
+    public Perft(MoveGenerator moveGenerator, PieceManager pieceManager)
     {
+        _moveGenerator = moveGenerator;
         _pieceManager = pieceManager;
         _whitePieces = _pieceManager.WhitePieces;
         _blackPieces = _pieceManager.BlackPieces;
@@ -35,7 +37,7 @@ public class Perft
             return 1;
         }
 
-        List<Move> legalMoves = new List<Move>(currentPieces.GenerateLegalMoves());
+        List<Move> legalMoves = new List<Move>(_moveGenerator.GenerateLegalMoves(currentPieces));
 
         PieceSet nextPieces = currentPieces.Color == ColorType.White ? _blackPieces : _whitePieces;
 
@@ -60,7 +62,7 @@ public class Perft
             return 1;
         }
 
-        List<Move> legalMoves = new List<Move>(currentPieces.GenerateLegalMoves());
+        List<Move> legalMoves = new List<Move>(_moveGenerator.GenerateLegalMoves(currentPieces));
 
         if (depth == 1)
         {
@@ -90,7 +92,7 @@ public class Perft
             return 1;
         }
 
-        List<Move> legalMoves = new List<Move>(currentPieces.GenerateLegalMoves());
+        List<Move> legalMoves = new List<Move>(_moveGenerator.GenerateLegalMoves(currentPieces));
 
         PieceSet nextPieces = currentPieces.Color == ColorType.White ? _blackPieces : _whitePieces;
 

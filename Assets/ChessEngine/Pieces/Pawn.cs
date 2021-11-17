@@ -1,7 +1,6 @@
-using System;
 using Vector2Int = UnityEngine.Vector2Int;
 
-public class Pawn : SlidingPiece
+public class Pawn : Piece
 {
     public override PieceType Type => PieceType.Pawn;
 
@@ -27,44 +26,6 @@ public class Pawn : SlidingPiece
 
 	public Pawn(Board board, PieceSet pieces, ColorType color, Vector2Int position) : base(board, pieces, color, position) { }
 
-	public override void GenerateLegalMoves()
-	{
-		if (OnStartingPosition) FindSlidingMoves(new Vector2Int(0, 1 * DirectionModifier), 2, canAttack: false, canMoveOnEmptySquare: true);
-		else FindSlidingMoves(new Vector2Int(0, 1 * DirectionModifier), 1, canAttack: false, canMoveOnEmptySquare: true, canPromote: true);
-
-		FindSlidingMoves(new Vector2Int(-1, 1 * DirectionModifier), 1, canAttack: true, canMoveOnEmptySquare: false, canPromote: true);
-		FindSlidingMoves(new Vector2Int(1, 1 * DirectionModifier), 1, canAttack: true, canMoveOnEmptySquare: false, canPromote: true);
-
-		if (OnPositionValidForEnPassant) FindEnPassantMoves(false);
-		if (OnPositionValidForEnPassant) FindEnPassantMoves(true);
-	}
-
-	void FindEnPassantMoves(bool rightEnPassant)
-	{
-		Square newSquare;
-		if (rightEnPassant)
-		{
-			if (Square.Position.x + 1 > Board.RIGHT_FILE_INDEX)
-				return;
-			newSquare = _board.Squares[Square.Position.x + 1][Square.Position.y + DirectionModifier];
-		}
-		else
-		{
-			if (Square.Position.x - 1 < Board.LEFT_FILE_INDEX)
-				return;
-			newSquare = _board.Squares[Square.Position.x - 1][Square.Position.y + DirectionModifier];
-		}
-
-		if (newSquare == _board.EnPassantTarget)
-		{
-			Piece encounteredPiece = _board.Squares[newSquare.Position.x][Square.Position.y].Piece;
-			Move move = new Move(this, Square, newSquare, encounteredPiece);
-
-			if (SaveMoveIfLegal(move))
-				return;
-		}
-	}
-
 	public override void Move(Move moveToMake)
 	{
 		base.Move(moveToMake);
@@ -76,25 +37,29 @@ public class Pawn : SlidingPiece
 		}
 		else if (moveToMake.IsPromotion)
 		{
-			Piece promotion;
 			switch (moveToMake.Type)
 			{
 				case MoveType.PromotionToKnight:
-					promotion = new Knight(_board, Pieces, Color, Square.Position);
+					Knight newKnight = new Knight(_board, Pieces, Color, Square.Position);
+					Pieces.Knights.Add(newKnight);
+					Pieces.AllPieces.Add(newKnight);
 					break;
 				case MoveType.PromotionToBishop:
-					promotion = new Bishop(_board, Pieces, Color, Square.Position);
+					Bishop newBishop = new Bishop(_board, Pieces, Color, Square.Position);
+					Pieces.Bishops.Add(newBishop);
+					Pieces.AllPieces.Add(newBishop);
 					break;
 				case MoveType.PromotionToRook:
-					promotion = new Rook(_board, Pieces, Color, Square.Position);
+					Rook newRook = new Rook(_board, Pieces, Color, Square.Position);
+					Pieces.Rooks.Add(newRook);
+					Pieces.AllPieces.Add(newRook);
 					break;
 				case MoveType.PromotionToQueen:
-					promotion = new Queen(_board, Pieces, Color, Square.Position);
+					Queen newQueen = new Queen(_board, Pieces, Color, Square.Position);
+					Pieces.Queens.Add(newQueen);
+					Pieces.AllPieces.Add(newQueen);
 					break;
-				default:
-					throw new Exception();
 			}
-			Pieces.AllPieces.Add(promotion);
 			Pieces.AllPieces.Remove(this);
 		}
 	}
@@ -103,6 +68,21 @@ public class Pawn : SlidingPiece
 	{
 		if (moveToUndo.IsPromotion)
 		{
+			switch (moveToUndo.Type)
+			{
+				case MoveType.PromotionToKnight:
+					Pieces.Knights.Remove(Square.Piece as Knight);
+					break;
+				case MoveType.PromotionToBishop:
+					Pieces.Bishops.Remove(Square.Piece as Bishop);
+					break;
+				case MoveType.PromotionToRook:
+					Pieces.Rooks.Remove(Square.Piece as Rook);
+					break;
+				case MoveType.PromotionToQueen:
+					Pieces.Queens.Remove(Square.Piece as Queen);
+					break;
+			}
 			Pieces.AllPieces.Remove(Square.Piece);
 			Square.Piece = this;
 			Pieces.AllPieces.Add(this);

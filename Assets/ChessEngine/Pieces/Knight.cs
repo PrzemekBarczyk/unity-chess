@@ -1,6 +1,6 @@
 using Vector2Int = UnityEngine.Vector2Int;
 
-public class Knight : JumpingPiece
+public class Knight : Piece
 {
     public override PieceType Type => PieceType.Knight;
 
@@ -20,16 +20,4 @@ public class Knight : JumpingPiece
 	public override int[,] PositionsValues => POSITION_VALUES;
 
 	public Knight(Board board, PieceSet pieces, ColorType color, Vector2Int position) : base(board, pieces, color, position) { }
-
-	public override void GenerateLegalMoves()
-	{
-		FindJumpMove(new Vector2Int(-1, 2));
-		FindJumpMove(new Vector2Int(1, 2));
-		FindJumpMove(new Vector2Int(2, 1));
-		FindJumpMove(new Vector2Int(2, -1));
-		FindJumpMove(new Vector2Int(1, -2));
-		FindJumpMove(new Vector2Int(-1, -2));
-		FindJumpMove(new Vector2Int(-2, -1));
-		FindJumpMove(new Vector2Int(-2, 1));
-	}
 }
