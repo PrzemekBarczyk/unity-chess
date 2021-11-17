@@ -29,33 +29,6 @@ public class King : Piece
 
     public King(Board board, PieceSet pieces, ColorType color, Vector2Int position) : base(board, pieces, color, position) { }
 
-    public override void Move(Move moveToMake)
-    {
-        base.Move(moveToMake);
-
-        CanCastleQueenside = false;
-        CanCastleKingside = false;
-
-        if (moveToMake.Type == MoveType.Castle)
-        {
-            Rook rook = moveToMake.RookOldSquare.Piece as Rook;
-            Move rookMove = new Move(rook, moveToMake.RookOldSquare, moveToMake.RookNewSquare, null);
-            rook.Move(rookMove);
-        }
-    }
-
-	public override void UndoMove(Move moveToUndo)
-	{
-        if (moveToUndo.Type == MoveType.Castle)
-		{
-            Rook rook = moveToUndo.RookNewSquare.Piece as Rook;
-            Move rookMove = new Move(rook, moveToUndo.RookOldSquare, moveToUndo.RookNewSquare, null);
-            rook.UndoMove(rookMove);
-        }
-
-		base.UndoMove(moveToUndo);
-	}
-
 	public bool IsChecked()
     {
         ColorType attackerColor = Color == ColorType.White ? ColorType.Black : ColorType.White;

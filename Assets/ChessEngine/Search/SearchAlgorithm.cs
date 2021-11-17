@@ -7,15 +7,17 @@ public abstract class SearchAlgorithm
 	protected const ColorType MAXIMIZING_COLOR = ColorType.Black;
 
 	protected MoveGenerator _moveGenerator;
+	protected MoveExecutor _moveExecutor;
 	protected PieceManager _pieceManager;
 	protected PieceSet _whitePieces;
 	protected PieceSet _blackPieces;
 
 	protected Move _bestMove;
 
-	public SearchAlgorithm(MoveGenerator moveGenerator, PieceManager pieceManager)
+	public SearchAlgorithm(MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager)
 	{
 		_moveGenerator = moveGenerator;
+		_moveExecutor = moveExecutor;
 		_pieceManager = pieceManager;
 		_whitePieces = _pieceManager.WhitePieces;
 		_blackPieces = _pieceManager.BlackPieces;

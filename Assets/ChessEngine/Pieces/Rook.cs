@@ -30,18 +30,4 @@ public class Rook : Piece
 	public static readonly Vector2Int BLACK_ROOK_AFTER_QUEENSIDE_CASTLE_POSITION = new Vector2Int(3, Board.TOP_RANK_INDEX);
 
 	public Rook(Board board, PieceSet pieces, ColorType color, Vector2Int position) : base(board, pieces, color, position) { }
-
-	public override void Move(Move moveToMake)
-	{
-		base.Move(moveToMake);
-
-		if (moveToMake.OldSquare.Position.x == Board.LEFT_FILE_INDEX && moveToMake.OldSquare.Position.y == (Color == ColorType.White ? Board.BOTTOM_RANK_INDEX : Board.TOP_RANK_INDEX))
-		{
-			Pieces.King.CanCastleQueenside = false;
-		}
-		else if (moveToMake.OldSquare.Position.x == Board.RIGHT_FILE_INDEX && moveToMake.OldSquare.Position.y == (Color == ColorType.White ? Board.BOTTOM_RANK_INDEX : Board.TOP_RANK_INDEX))
-		{
-			Pieces.King.CanCastleKingside = false;
-		}
-	}
 }

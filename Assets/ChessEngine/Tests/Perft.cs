@@ -4,15 +4,17 @@ using System.Collections.Generic;
 public class Perft
 {
     MoveGenerator _moveGenerator;
+    MoveExecutor _moveExecutor;
     PieceManager _pieceManager;
     PieceSet _whitePieces;
     PieceSet _blackPieces;
 
     List<string> _divideResults = new List<string>();
 
-    public Perft(MoveGenerator moveGenerator, PieceManager pieceManager)
+    public Perft(MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager)
     {
         _moveGenerator = moveGenerator;
+        _moveExecutor = moveExecutor;
         _pieceManager = pieceManager;
         _whitePieces = _pieceManager.WhitePieces;
         _blackPieces = _pieceManager.BlackPieces;
@@ -47,9 +49,9 @@ public class Perft
         {
             Move legalMove = legalMoves[i];
 
-            legalMove.Piece.Move(legalMove);
+            _moveExecutor.MakeMove(legalMove);
             nodes += Search(nextPieces, depth - 1);
-            legalMove.Piece.UndoMove(legalMove);
+            _moveExecutor.UndoMove(legalMove);
         }
 
         return nodes;
@@ -77,9 +79,9 @@ public class Perft
         {
             Move legalMove = legalMoves[i];
 
-            legalMove.Piece.Move(legalMove);
+            _moveExecutor.MakeMove(legalMove);
             nodes += FastSearch(nextPieces, depth - 1);
-            legalMove.Piece.UndoMove(legalMove);
+            _moveExecutor.UndoMove(legalMove);
         }
 
         return nodes;
@@ -102,10 +104,10 @@ public class Perft
         {
             Move legalMove = legalMoves[i];
 
-            legalMove.Piece.Move(legalMove);
+            _moveExecutor.MakeMove(legalMove);
             ulong localNodes = Divide(nextPieces, depth - 1, maxDepth);
             nodes += localNodes;
-            legalMove.Piece.UndoMove(legalMove);
+            _moveExecutor.UndoMove(legalMove);
 
             if (depth == maxDepth)
             {

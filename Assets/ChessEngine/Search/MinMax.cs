@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 public class MinMax : SearchAlgorithm
 {
-    public MinMax(MoveGenerator moveGenerator, PieceManager pieceManager) : base(moveGenerator, pieceManager) { }
+    public MinMax(MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager) : base(moveGenerator, moveExecutor, pieceManager) { }
 
     public override Move FindBestMove()
     {
@@ -44,7 +44,7 @@ public class MinMax : SearchAlgorithm
 			{
 				Move legalMove = legalMoves[i];
 
-				legalMove.Piece.Move(legalMove);
+				_moveExecutor.MakeMove(legalMove);
 
 				int evaluation = Search(nextDepthPlayerPieces, depth - 1, false);
 
@@ -54,7 +54,7 @@ public class MinMax : SearchAlgorithm
 					if (depth == MAX_DEPTH) _bestMove = legalMove;
 				}
 
-				legalMove.Piece.UndoMove(legalMove);
+				_moveExecutor.UndoMove(legalMove);
 			}
 
 			return maxEvaluation;
@@ -67,7 +67,7 @@ public class MinMax : SearchAlgorithm
 			{
 				Move legalMove = legalMoves[i];
 
-				legalMove.Piece.Move(legalMove);
+				_moveExecutor.MakeMove(legalMove);
 
 				int evaluation = Search(nextDepthPlayerPieces, depth - 1, true);
 
@@ -77,7 +77,7 @@ public class MinMax : SearchAlgorithm
 					if (depth == MAX_DEPTH) _bestMove = legalMove;
 				}
 
-				legalMove.Piece.UndoMove(legalMove);
+				_moveExecutor.UndoMove(legalMove);
 			}
 
 			return minEvaluation;

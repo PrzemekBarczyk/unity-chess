@@ -6,10 +6,12 @@ public class MoveGenerator
 	List<Move> _legalMoves = new List<Move>(128);
 
 	Board _board;
+	MoveExecutor _moveExecutor;
 
-	public MoveGenerator(Board board)
+	public MoveGenerator(Board board, MoveExecutor moveExecutor)
 	{
 		_board = board;
+		_moveExecutor = moveExecutor;
 	}
 
 	public List<Move> GenerateLegalMoves(PieceSet pieces)
@@ -299,11 +301,11 @@ public class MoveGenerator
 
 	bool SaveMoveIfLegal(Move pseudoLegalMove)
 	{
-		pseudoLegalMove.Piece.Move(pseudoLegalMove);
+		_moveExecutor.MakeMove(pseudoLegalMove);
 
 		bool isKingChecked = pseudoLegalMove.Piece.Pieces.King.IsChecked();
 
-		pseudoLegalMove.Piece.UndoMove(pseudoLegalMove);
+		_moveExecutor.UndoMove(pseudoLegalMove);
 
 		if (!isKingChecked)
 		{
