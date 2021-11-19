@@ -52,6 +52,7 @@ public class GameManager : MonoSingleton<GameManager>
             else
             {
                 EndGame(State);
+                yield break;
             }
         }
     }

@@ -1,10 +1,13 @@
 using System.Collections.Generic;
 
-public enum State { Undefinied, Playing, Checkmate, Draw, TimeElapsed }
+public enum State { Undefinied, Playing, Checkmate, DrawByStalemate, DrawByFiftyMoveRule, TimeElapsed }
 public enum ColorType {	Undefinied, White, Black }
 
 public class ChessEngine
 {
+	int _halfmoveClock;
+	int _fullmoveNumber;
+
 	Board _board;
 	PieceManager _pieceManager;
 	MoveGenerator _moveGenerator;
@@ -19,6 +22,9 @@ public class ChessEngine
 	public ChessEngine(string fen)
 	{
 		ExtractedFENData extractedFENData = FENExtractor.FENToBoardPositionData(fen);
+
+		_halfmoveClock = extractedFENData.HalfMovesClock;
+		_fullmoveNumber = extractedFENData.FullMovesNumber;
 
 		_board = new Board(extractedFENData);
 		_pieceManager = new PieceManager(_board, extractedFENData);
@@ -46,6 +52,19 @@ public class ChessEngine
 
 		List<Move> legalMoves = _moveGenerator.GenerateLegalMoves(_pieceManager.NextPieces);
 
+		if (move.Piece.Type == PieceType.Pawn || move.EncounteredPiece != null)
+			_halfmoveClock = 0;
+		else
+			_halfmoveClock++;
+
+		if (_pieceManager.CurrentPieces.Color == ColorType.Black)
+			_fullmoveNumber++;
+
+		if (_halfmoveClock >= 50)
+		{
+			return State.DrawByFiftyMoveRule;
+		}
+
 		if (legalMoves.Count == 0)
 		{
 			if (_pieceManager.NextPieces.IsKingChecked())
@@ -54,7 +73,7 @@ public class ChessEngine
 			}
 			else
 			{
-				return State.Draw;
+				return State.DrawByStalemate;
 			}
 		}
 
