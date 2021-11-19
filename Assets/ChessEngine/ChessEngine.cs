@@ -10,6 +10,7 @@ public class ChessEngine
 	MoveGenerator _moveGenerator;
 	MoveExecutor _moveExecutor;
 	SearchAlgorithm _minMax;
+	SearchAlgorithm _alphaBeta;
 
 	public Perft Perft { get; private set; }
 
@@ -24,12 +25,13 @@ public class ChessEngine
 		_moveExecutor = new MoveExecutor(_board);
 		_moveGenerator = new MoveGenerator(_board, _moveExecutor);
 		_minMax = new MinMax(_moveGenerator, _moveExecutor, _pieceManager);
+		_alphaBeta = new AlphaBeta(_moveGenerator, _moveExecutor, _pieceManager);
 		Perft = new Perft(_moveGenerator, _moveExecutor, _pieceManager);
 	}
 
 	public Move FindBestMove()
 	{
-		return _minMax.FindBestMove();
+		return _alphaBeta.FindBestMove();
 	}
 
 	public List<Move> GenerateLegalMoves(ColorType color)
