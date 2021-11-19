@@ -46,7 +46,7 @@ public class ChessEngine
 
 		if (legalMoves.Count == 0)
 		{
-			if (_pieceManager.NextPieces.King.IsChecked())
+			if (_pieceManager.NextPieces.IsKingChecked())
 			{
 				return State.Checkmate;
 			}

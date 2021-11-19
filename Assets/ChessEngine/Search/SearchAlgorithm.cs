@@ -47,15 +47,15 @@ public abstract class SearchAlgorithm
 
 			if (piece.IsAlive)
 			{
-				score += piece.Value;
+				score += PiecesValues.GetValue(piece);
 
 				if (piecesToEvaluate[0].Color == ColorType.Black)
 				{
-					score += piece.PositionsValues[piece.Square.Position.y, piece.Square.Position.x];
+					score += PiecesPositionValues.GetValue(piece)[piece.Square.Position.y, piece.Square.Position.x];
 				}
 				else // piece is white
 				{
-					score += piece.PositionsValues[Board.RANKS - 1 - piece.Square.Position.y, piece.Square.Position.x];
+					score += PiecesPositionValues.GetValue(piece)[Board.RANKS - 1 - piece.Square.Position.y, piece.Square.Position.x];
 				}
 			}
 		}

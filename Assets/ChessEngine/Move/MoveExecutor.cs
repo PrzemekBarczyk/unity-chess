@@ -13,7 +13,7 @@ public class MoveExecutor
 
 	public void MakeMove(Move moveToMake)
 	{
-		RightsData currentRights = new RightsData(_board.EnPassantTarget, moveToMake.Piece.Pieces.King.CanCastleKingside, moveToMake.Piece.Pieces.King.CanCastleQueenside);
+		RightsData currentRights = new RightsData(_board.EnPassantTarget, moveToMake.Piece.Pieces.CanKingCastleKingside, moveToMake.Piece.Pieces.CanKingCastleQueenside);
 		_rightsHistory.Push(currentRights);
 
 		if (moveToMake.EncounteredPiece != null)
@@ -39,31 +39,34 @@ public class MoveExecutor
 
 				if (moveToMake.IsPromotion)
 				{
+					Piece oldPiece = moveToMake.Piece;
+					oldPiece.IsAlive = false;
+
+					Piece promotion;
+
 					switch (moveToMake.Type)
 					{
 						case MoveType.PromotionToKnight:
-							Knight newKnight = new Knight(_board, moveToMake.Piece.Pieces, moveToMake.NewSquare.Piece.Color, moveToMake.NewSquare.Position);
-							newKnight.Pieces.AllPieces.Add(newKnight);
-							newKnight.Pieces.Knights.Add(newKnight);
+							promotion = new Piece(_board, oldPiece.Pieces, oldPiece.Color, PieceType.Knight, oldPiece.Square.Position);
+							promotion.Pieces.Knights.Add(promotion);
 							break;
 						case MoveType.PromotionToBishop:
-							Bishop newBishop = new Bishop(_board, moveToMake.Piece.Pieces, moveToMake.NewSquare.Piece.Color, moveToMake.NewSquare.Position);
-							newBishop.Pieces.AllPieces.Add(newBishop);
-							newBishop.Pieces.Bishops.Add(newBishop);
+							promotion = new Piece(_board, oldPiece.Pieces, oldPiece.Color, PieceType.Bishop, oldPiece.Square.Position);
+							promotion.Pieces.Bishops.Add(promotion);
 							break;
 						case MoveType.PromotionToRook:
-							Rook newRook = new Rook(_board, moveToMake.Piece.Pieces, moveToMake.NewSquare.Piece.Color, moveToMake.NewSquare.Position);
-							newRook.Pieces.AllPieces.Add(newRook);
-							newRook.Pieces.Rooks.Add(newRook);
+							promotion = new Piece(_board, oldPiece.Pieces, oldPiece.Color, PieceType.Rook, oldPiece.Square.Position);
+							promotion.Pieces.Rooks.Add(promotion);
 							break;
 						case MoveType.PromotionToQueen:
-							Queen newQueen = new Queen(_board, moveToMake.Piece.Pieces, moveToMake.NewSquare.Piece.Color, moveToMake.NewSquare.Position);
-							newQueen.Pieces.AllPieces.Add(newQueen);
-							newQueen.Pieces.Queens.Add(newQueen);
+							promotion = new Piece(_board, oldPiece.Pieces, oldPiece.Color, PieceType.Queen, oldPiece.Square.Position);
+							promotion.Pieces.Queens.Add(promotion);
 							break;
+						default:
+							throw new System.Exception("Unknown piece type");
 					}
-					moveToMake.Piece.Pieces.AllPieces.Remove(moveToMake.Piece);
-					return;
+
+					promotion.Pieces.AllPieces.Add(promotion);
 				}
 			}
 		}
@@ -75,21 +78,21 @@ public class MoveExecutor
 			{
 				if (moveToMake.OldSquare.Position.x == Board.LEFT_FILE_INDEX && moveToMake.OldSquare.Position.y == (moveToMake.Piece.Color == ColorType.White ? Board.BOTTOM_RANK_INDEX : Board.TOP_RANK_INDEX))
 				{
-					moveToMake.Piece.Pieces.King.CanCastleQueenside = false;
+					moveToMake.Piece.Pieces.CanKingCastleQueenside = false;
 				}
 				else if (moveToMake.OldSquare.Position.x == Board.RIGHT_FILE_INDEX && moveToMake.OldSquare.Position.y == (moveToMake.Piece.Color == ColorType.White ? Board.BOTTOM_RANK_INDEX : Board.TOP_RANK_INDEX))
 				{
-					moveToMake.Piece.Pieces.King.CanCastleKingside = false;
+					moveToMake.Piece.Pieces.CanKingCastleKingside = false;
 				}
 			}
 			else if (moveToMake.Piece.Type == PieceType.King)
 			{
-				moveToMake.Piece.Pieces.King.CanCastleKingside = false;
-				moveToMake.Piece.Pieces.King.CanCastleQueenside = false;
+				moveToMake.Piece.Pieces.CanKingCastleKingside = false;
+				moveToMake.Piece.Pieces.CanKingCastleQueenside = false;
 
 				if (moveToMake.Type == MoveType.Castle)
 				{
-					Rook rook = moveToMake.RookOldSquare.Piece as Rook;
+					Piece rook = moveToMake.RookOldSquare.Piece;
 					Move rookMove = new Move(rook, moveToMake.RookOldSquare, moveToMake.RookNewSquare, null);
 					MakeMove(rookMove);
 				}
@@ -101,32 +104,32 @@ public class MoveExecutor
 	{
 		if (moveToUndo.IsPromotion)
 		{
+			Piece oldPawn = moveToUndo.Piece;
+			oldPawn.IsAlive = true;
+
+			Piece promotion = moveToUndo.NewSquare.Piece;
+
 			switch (moveToUndo.Type)
 			{
 				case MoveType.PromotionToKnight:
-					moveToUndo.NewSquare.Piece.Pieces.AllPieces.Remove(moveToUndo.NewSquare.Piece);
-					moveToUndo.NewSquare.Piece.Pieces.Knights.Remove(moveToUndo.NewSquare.Piece as Knight);
+					promotion.Pieces.Knights.Remove(promotion);
 					break;
 				case MoveType.PromotionToBishop:
-					moveToUndo.NewSquare.Piece.Pieces.AllPieces.Remove(moveToUndo.NewSquare.Piece);
-					moveToUndo.NewSquare.Piece.Pieces.Bishops.Remove(moveToUndo.NewSquare.Piece as Bishop);
+					promotion.Pieces.Bishops.Remove(promotion);
 					break;
 				case MoveType.PromotionToRook:
-					moveToUndo.NewSquare.Piece.Pieces.AllPieces.Remove(moveToUndo.NewSquare.Piece);
-					moveToUndo.NewSquare.Piece.Pieces.Rooks.Remove(moveToUndo.NewSquare.Piece as Rook);
+					promotion.Pieces.Rooks.Remove(promotion);
 					break;
 				case MoveType.PromotionToQueen:
-					moveToUndo.NewSquare.Piece.Pieces.AllPieces.Remove(moveToUndo.NewSquare.Piece);
-					moveToUndo.NewSquare.Piece.Pieces.Queens.Remove(moveToUndo.NewSquare.Piece as Queen);
+					promotion.Pieces.Queens.Remove(promotion);
 					break;
 			}
 
-			Piece oldPawn = moveToUndo.Piece;
-			oldPawn.Pieces.AllPieces.Add(oldPawn);
+			promotion.Pieces.AllPieces.Remove(promotion);
 		}
 		else if (moveToUndo.Type == MoveType.Castle)
 		{
-			Rook rook = moveToUndo.RookNewSquare.Piece as Rook;
+			Piece rook = moveToUndo.RookNewSquare.Piece;
 			Move rookMove = new Move(rook, moveToUndo.RookOldSquare, moveToUndo.RookNewSquare, null);
 			UndoMove(rookMove);
 		}
@@ -143,7 +146,7 @@ public class MoveExecutor
 
 		RightsData previousRights = _rightsHistory.Pop();
 		_board.EnPassantTarget = previousRights.EnPassantTarget;
-		moveToUndo.Piece.Pieces.King.CanCastleKingside = previousRights.CanCastleKingside;
-		moveToUndo.Piece.Pieces.King.CanCastleQueenside = previousRights.CanCastleQueenside;
+		moveToUndo.Piece.Pieces.CanKingCastleKingside = previousRights.CanCastleKingside;
+		moveToUndo.Piece.Pieces.CanKingCastleQueenside = previousRights.CanCastleQueenside;
 	}
 }

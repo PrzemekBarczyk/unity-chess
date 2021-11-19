@@ -11,10 +11,10 @@ public class PieceManager
         WhitePieces = new PieceSet(board, ColorType.White, extractedFENData.PiecesToCreate);
         BlackPieces = new PieceSet(board, ColorType.Black, extractedFENData.PiecesToCreate);
 
-        WhitePieces.King.CanCastleKingside = extractedFENData.HasWhiteCastleKingsideRights;
-        WhitePieces.King.CanCastleQueenside = extractedFENData.HasWhiteCastleQueensideRights;
-        BlackPieces.King.CanCastleKingside = extractedFENData.HasBlackCastleKingsideRights;
-        BlackPieces.King.CanCastleQueenside = extractedFENData.HasBlackCastleQueensideRights;
+        WhitePieces.CanKingCastleKingside = extractedFENData.HasWhiteCastleKingsideRights;
+        WhitePieces.CanKingCastleQueenside = extractedFENData.HasWhiteCastleQueensideRights;
+        BlackPieces.CanKingCastleKingside = extractedFENData.HasBlackCastleKingsideRights;
+        BlackPieces.CanKingCastleQueenside = extractedFENData.HasBlackCastleQueensideRights;
 
         CurrentPieces = extractedFENData.PlayerToMoveColor == ColorType.White ? WhitePieces : BlackPieces;
         NextPieces = extractedFENData.PlayerToMoveColor == ColorType.White ? BlackPieces : WhitePieces;

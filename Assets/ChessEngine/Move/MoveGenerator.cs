@@ -18,7 +18,7 @@ public class MoveGenerator
 	{
 		_legalMoves.Clear();
 
-		GeneratePawnMoves(pieces.Pawns);
+		GeneratePawnMoves(pieces.Pawns, pieces.Color == ColorType.White ? 1 : -1);
 		GenerateKnightsMoves(pieces.Knights);
 		GenerateBishopMoves(pieces.Bishops);
 		GenerateRookMoves(pieces.Rooks);
@@ -28,30 +28,32 @@ public class MoveGenerator
 		return _legalMoves;
 	}
 
-	void GeneratePawnMoves(List<Pawn> pawns)
+	void GeneratePawnMoves(List<Piece> pawns, int directionModifier)
 	{
 		for (int i = 0; i < pawns.Count; i++)
 		{
-			Pawn pawn = pawns[i];
+			Piece pawn = pawns[i];
 
 			if (pawn.IsAlive)
 			{
-				if (pawn.OnStartingPosition) FindSlidingMoves(pawn, new Vector2Int(0, pawn.DirectionModifier), 2, canAttack: false, canMoveOnEmptySquare: true);
-				else FindSlidingMoves(pawn, new Vector2Int(0, pawn.DirectionModifier), 1, canAttack: false, canMoveOnEmptySquare: true, canPromote: true);
+				bool isPawnOnStartingPosition = pawn.Square.Position.y == (pawn.Color == ColorType.White ? 1 : 6);
+				if (isPawnOnStartingPosition) FindSlidingMoves(pawn, new Vector2Int(0, directionModifier), 2, canAttack: false, canMoveOnEmptySquare: true);
+				else FindSlidingMoves(pawn, new Vector2Int(0, directionModifier), 1, canAttack: false, canMoveOnEmptySquare: true, canPromote: true);
 
-				FindSlidingMoves(pawn, new Vector2Int(-1, pawn.DirectionModifier), 1, canAttack: true, canMoveOnEmptySquare: false, canPromote: true);
-				FindSlidingMoves(pawn, new Vector2Int(1, pawn.DirectionModifier), 1, canAttack: true, canMoveOnEmptySquare: false, canPromote: true);
+				FindSlidingMoves(pawn, new Vector2Int(-1, directionModifier), 1, canAttack: true, canMoveOnEmptySquare: false, canPromote: true);
+				FindSlidingMoves(pawn, new Vector2Int(1, directionModifier), 1, canAttack: true, canMoveOnEmptySquare: false, canPromote: true);
 
-				if (pawn.OnPositionValidForEnPassant)
+				bool isPieceOnPositionValidForEnPassant = pawn.Square.Position.y == (pawn.Color == ColorType.White ? 4 : 3);
+				if (isPieceOnPositionValidForEnPassant)
 				{
-					FindEnPassantMoves(pawn, false);
-					FindEnPassantMoves(pawn, true);
+					FindEnPassantMoves(pawn, directionModifier, false);
+					FindEnPassantMoves(pawn, directionModifier, true);
 				}
 			}
 		}
 	}
 
-	void GenerateKnightsMoves(List<Knight> knights)
+	void GenerateKnightsMoves(List<Piece> knights)
 	{
 		for (int i = 0; i < knights.Count; i++)
 		{
@@ -71,7 +73,7 @@ public class MoveGenerator
 		}
 	}
 
-	void GenerateBishopMoves(List<Bishop> bishops)
+	void GenerateBishopMoves(List<Piece> bishops)
 	{
 		for (int i = 0; i < bishops.Count; i++)
 		{
@@ -87,7 +89,7 @@ public class MoveGenerator
 		}
 	}
 
-	void GenerateRookMoves(List<Rook> rooks)
+	void GenerateRookMoves(List<Piece> rooks)
 	{
 		for (int i = 0; i < rooks.Count; i++)
 		{
@@ -103,7 +105,7 @@ public class MoveGenerator
 		}
 	}
 
-	void GenerateQueensMoves(List<Queen> queens)
+	void GenerateQueensMoves(List<Piece> queens)
 	{
 		for (int i = 0; i < queens.Count; i++)
 		{
@@ -123,7 +125,7 @@ public class MoveGenerator
 		}
 	}
 
-	void GenerateKingMoves(King king)
+	void GenerateKingMoves(Piece king)
 	{
 		if (king.IsAlive)
 		{
@@ -136,8 +138,8 @@ public class MoveGenerator
 			FindSlidingMoves(king, new Vector2Int(-1, -1), 1);
 			FindSlidingMoves(king, new Vector2Int(-1, 0), 1);
 
-			if (king.CanCastleQueenside) FindCastlingMove(king, false);
-			if (king.CanCastleKingside) FindCastlingMove(king, true);
+			if (king.Pieces.CanKingCastleQueenside) FindCastlingMove(king, false);
+			if (king.Pieces.CanKingCastleKingside) FindCastlingMove(king, true);
 		}
 	}
 
@@ -209,20 +211,20 @@ public class MoveGenerator
 		}
 	}
 
-	void FindEnPassantMoves(Pawn pawn, bool rightEnPassant)
+	void FindEnPassantMoves(Piece pawn, int directionModifier, bool rightEnPassant)
 	{
 		Square newSquare;
 		if (rightEnPassant)
 		{
 			if (pawn.Square.Position.x + 1 > Board.RIGHT_FILE_INDEX)
 				return;
-			newSquare = _board.Squares[pawn.Square.Position.x + 1][pawn.Square.Position.y + pawn.DirectionModifier];
+			newSquare = _board.Squares[pawn.Square.Position.x + 1][pawn.Square.Position.y + directionModifier];
 		}
 		else
 		{
 			if (pawn.Square.Position.x - 1 < Board.LEFT_FILE_INDEX)
 				return;
-			newSquare = _board.Squares[pawn.Square.Position.x - 1][pawn.Square.Position.y + pawn.DirectionModifier];
+			newSquare = _board.Squares[pawn.Square.Position.x - 1][pawn.Square.Position.y + directionModifier];
 		}
 
 		if (newSquare == _board.EnPassantTarget)
@@ -303,7 +305,8 @@ public class MoveGenerator
 	{
 		_moveExecutor.MakeMove(pseudoLegalMove);
 
-		bool isKingChecked = pseudoLegalMove.Piece.Pieces.King.IsChecked();
+		Piece king = pseudoLegalMove.Piece.Pieces.King;
+		bool isKingChecked = king.Square.IsAttackedBy(king.Color == ColorType.White ? ColorType.Black : ColorType.White);
 
 		_moveExecutor.UndoMove(pseudoLegalMove);
 

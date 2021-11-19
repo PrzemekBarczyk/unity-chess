@@ -5,14 +5,15 @@ public class PieceSet
 	public ColorType Color { get; }
 
 	public List<Piece> AllPieces { get; } = new List<Piece>(16);
-	public List<Pawn> Pawns { get; } = new List<Pawn>(8);
-	public List<Knight> Knights { get; } = new List<Knight>(2);
-	public List<Bishop> Bishops { get; } = new List<Bishop>(2);
-	public List<Rook> Rooks { get; } = new List<Rook>(2);
-	public List<Queen> Queens { get; } = new List<Queen>(2);
-	public King King { get; private set; }
+	public List<Piece> Pawns { get; } = new List<Piece>(8);
+	public List<Piece> Knights { get; } = new List<Piece>(4);
+	public List<Piece> Bishops { get; } = new List<Piece>(4);
+	public List<Piece> Rooks { get; } = new List<Piece>(4);
+	public List<Piece> Queens { get; } = new List<Piece>(4);
+	public Piece King { get; private set; }
 
-	public Stack<RightsData> RightsData { get; private set; } = new Stack<RightsData>(32);
+	public bool CanKingCastleKingside { get; set; }
+	public bool CanKingCastleQueenside { get; set; }
 
 	public PieceSet(Board board, ColorType color, List<PieceData> piecesToCreate)
 	{
@@ -26,40 +27,35 @@ public class PieceSet
 		{
 			if (pieceToCreate.Color == Color)
 			{
+				Piece newPiece = new Piece(board, this, Color, pieceToCreate.Type, pieceToCreate.Position);
 				switch (pieceToCreate.Type)
 				{
 					case PieceType.Pawn:
-						Pawn newPawn = new Pawn(board, this, Color, pieceToCreate.Position);
-						Pawns.Add(newPawn);
-						AllPieces.Add(newPawn);
+						Pawns.Add(newPiece);
 						break;
 					case PieceType.Knight:
-						Knight newKnight = new Knight(board, this, Color, pieceToCreate.Position);
-						Knights.Add(newKnight);
-						AllPieces.Add(newKnight);
+						Knights.Add(newPiece);
 						break;
 					case PieceType.Bishop:
-						Bishop newBishop = new Bishop(board, this, Color, pieceToCreate.Position);
-						Bishops.Add(newBishop);
-						AllPieces.Add(newBishop);
+						Bishops.Add(newPiece);
 						break;
 					case PieceType.Rook:
-						Rook newRook = new Rook(board, this, Color, pieceToCreate.Position);
-						Rooks.Add(newRook);
-						AllPieces.Add(newRook);
+						Rooks.Add(newPiece);
 						break;
 					case PieceType.Queen:
-						Queen newQueen = new Queen(board, this, Color, pieceToCreate.Position);
-						Queens.Add(newQueen);
-						AllPieces.Add(newQueen);
+						Queens.Add(newPiece);
 						break;
 					case PieceType.King:
-						King newKing = new King(board, this, Color, pieceToCreate.Position);
-						King = newKing;
-						AllPieces.Add(newKing);
+						King = newPiece;
 						break;
 				}
+				AllPieces.Add(newPiece);
 			}
 		}
+	}
+
+	public bool IsKingChecked()
+	{
+		return King.Square.IsAttackedBy(Color == ColorType.White ? ColorType.Black : ColorType.White);
 	}
 }
