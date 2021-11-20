@@ -35,6 +35,8 @@ public class AlphaBeta : SearchAlgorithm
 			return 0;
 		}
 
+		MoveOrderer.EvaluateAndSort(legalMoves);
+
 		PieceSet nextDepthPlayerPieces = currentPlayerPieces == _whitePieces ? _blackPieces : _whitePieces;
 
 		if (maximizingPlayer)
