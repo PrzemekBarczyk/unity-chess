@@ -28,7 +28,7 @@ public class ChessEngine
 
 		_board = new Board(extractedFENData);
 		_pieceManager = new PieceManager(_board, extractedFENData);
-		_moveExecutor = new MoveExecutor(_board);
+		_moveExecutor = new MoveExecutor(_board, _pieceManager, extractedFENData.PlayerToMoveColor);
 		_moveGenerator = new MoveGenerator(_board, _moveExecutor);
 		_minMax = new MinMax(_moveGenerator, _moveExecutor, _pieceManager);
 		_alphaBeta = new AlphaBeta(_moveGenerator, _moveExecutor, _pieceManager);
