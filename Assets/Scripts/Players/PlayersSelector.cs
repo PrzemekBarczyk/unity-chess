@@ -4,6 +4,7 @@ public class PlayersSelector : MonoBehaviour
 {
     [SerializeField] GameObject _selectOpponentMenu;
     [SerializeField] GameObject _selectColorMenu;
+	[SerializeField] GameObject _clocks;
 
 	PlayerType _mainPlayerType;
 	PlayerType _secondPlayerType;
@@ -49,6 +50,7 @@ public class PlayersSelector : MonoBehaviour
 		_mainPlayerColor = ColorType.Black;
 		_secondPlayerColor = ColorType.White;
 		_selectColorMenu.SetActive(false);
+		_clocks.SetActive(true);
 		_playerManager.CreatePlayers(new PlayerData(_mainPlayerColor, _mainPlayerType), new PlayerData(_secondPlayerColor, _secondPlayerType));
 		Camera.main.GetComponent<CameraController>().BlackPlayerPOV();
 		_gameManager.StartGame();
@@ -59,6 +61,7 @@ public class PlayersSelector : MonoBehaviour
 		_mainPlayerColor = ColorType.White;
 		_secondPlayerColor = ColorType.Black;
 		_selectColorMenu.SetActive(false);
+		_clocks.SetActive(true);
 		_playerManager.CreatePlayers(new PlayerData(_mainPlayerColor, _mainPlayerType), new PlayerData(_secondPlayerColor, _secondPlayerType));
 		_gameManager.StartGame();
 	}

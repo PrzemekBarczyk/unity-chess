@@ -93,6 +93,7 @@ GameObject:
   - component: {fileID: 2438135225077234590}
   - component: {fileID: 953504577885413138}
   - component: {fileID: 1707011316034796196}
+  - component: {fileID: 5584759691879175118}
   m_Layer: 0
   m_Name: Human Player
   m_TagString: Untagged
@@ -141,3 +142,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _draggedPieceSpriteRenderer: {fileID: 1303695768424376418}
   _piecesSprites: {fileID: 11400000, guid: 24e481f4ba189bf40b26ca974fbf5adb, type: 2}
+--- !u!114 &5584759691879175118
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5408963266649611983}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f620fef1690b0124da469b2957e48245, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

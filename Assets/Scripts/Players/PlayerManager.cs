@@ -6,6 +6,8 @@ public class PlayerManager : MonoSingleton<PlayerManager>
     [SerializeField] Player _botPlayerPrefab;
 
 	ColorType _startingPlayerColor;
+	float _timeForPlayer;
+	float _timeAddedAfterMove;
 
 	public Player WhitePlayer { get; private set; }
 	public Player BlackPlayer { get; private set; }
@@ -18,12 +20,18 @@ public class PlayerManager : MonoSingleton<PlayerManager>
 		base.Awake();
 	}
 
-	public void SetStartingPlayerColor(ColorType startingPlayerColor)
+	public void SaveStartingPlayerColor(ColorType startingPlayerColor)
 	{
 		_startingPlayerColor = startingPlayerColor;
 	}
-    
-    public void CreatePlayers(PlayerData mainPlayer, PlayerData secondPlayer)
+
+	public void SaveClockData(float timeForPlayer, float timeAddedAfterMove)
+	{
+		_timeForPlayer = timeForPlayer;
+		_timeAddedAfterMove = timeAddedAfterMove;
+	}
+
+	public void CreatePlayers(PlayerData mainPlayer, PlayerData secondPlayer)
 	{
 		if (mainPlayer.Color == ColorType.White)
 		{
@@ -39,8 +47,8 @@ public class PlayerManager : MonoSingleton<PlayerManager>
 		WhitePlayer.name = WhitePlayer.name.Replace("(Clone)", "");
 		BlackPlayer.name = BlackPlayer.name.Replace("(Clone)", "");
 
-		WhitePlayer.Initialize(ColorType.White);
-		BlackPlayer.Initialize(ColorType.Black);
+		WhitePlayer.Initialize(ColorType.White, _timeForPlayer, _timeAddedAfterMove);
+		BlackPlayer.Initialize(ColorType.Black, _timeForPlayer, _timeAddedAfterMove);
 
 		CurrentPlayer = _startingPlayerColor == WhitePlayer.Color ? WhitePlayer : BlackPlayer;
 		NextPlayer = _startingPlayerColor == WhitePlayer.Color ? BlackPlayer : WhitePlayer;

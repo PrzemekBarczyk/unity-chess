@@ -6,6 +6,10 @@ public class GameManager : MonoSingleton<GameManager>
 {
 	[SerializeField] string _startChessPositionInFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
+    [Header("Timers")]
+    [SerializeField] float _timeForPlayer = 180f;
+    [SerializeField] float _timeAddedAfterMove = 0f;
+
     public State State { get; private set; } = State.Playing;
 
     ChessEngine _chessEngine;
@@ -23,7 +27,8 @@ public class GameManager : MonoSingleton<GameManager>
         _graphicalBoard = GraphicalBoard.Instance;
 
         ExtractedFENData extractedFENData = FENExtractor.FENToBoardPositionData(_startChessPositionInFEN);
-        _playerManager.SetStartingPlayerColor(extractedFENData.PlayerToMoveColor);
+        _playerManager.SaveStartingPlayerColor(extractedFENData.PlayerToMoveColor);
+        _playerManager.SaveClockData(_timeForPlayer, _timeAddedAfterMove);
         _graphicalBoard.CreateBoard(extractedFENData.PiecesToCreate);
     }
 
@@ -37,7 +42,7 @@ public class GameManager : MonoSingleton<GameManager>
         while (true)
         {
             Move? moveToMake = null;
-            new Thread(() => moveToMake = _playerManager.CurrentPlayer.SelectMove(_chessEngine)).Start();
+            new Thread(() => moveToMake = _playerManager.CurrentPlayer.SelectMoveAndCountTime(_chessEngine)).Start();
 
             yield return new WaitUntil(() => moveToMake.HasValue); // waits until player selects his move
 
@@ -63,4 +68,9 @@ public class GameManager : MonoSingleton<GameManager>
         Time.timeScale = 0f;
         Debug.Log("Game over: " + result);
     }
+
+    public void TimeElapsed()
+	{
+        EndGame(State.TimeElapsed);
+	}
 }

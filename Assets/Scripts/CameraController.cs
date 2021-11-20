@@ -17,6 +17,11 @@ public class CameraController : MonoBehaviour
 			sprite.flipX = false;
 			sprite.flipY = false;
 		}
+
+		Transform whiteClock = GameObject.Find("White Clock").transform;
+		Transform blackClock = GameObject.Find("Black Clock").transform;
+		whiteClock.localPosition = new Vector2(whiteClock.position.x, -Mathf.Abs(whiteClock.position.y));
+		blackClock.localPosition = new Vector2(blackClock.position.x, Mathf.Abs(blackClock.position.y));
 	}
 
 	public void BlackPlayerPOV()
@@ -28,5 +33,10 @@ public class CameraController : MonoBehaviour
 			sprite.flipX = true;
 			sprite.flipY = true;
 		}
+
+		Transform whiteClock = GameObject.Find("White Clock").transform;
+		Transform blackClock = GameObject.Find("Black Clock").transform;
+		whiteClock.localPosition = new Vector2(whiteClock.localPosition.x, Mathf.Abs(whiteClock.localPosition.y));
+		blackClock.localPosition = new Vector2(blackClock.localPosition.x, -Mathf.Abs(blackClock.localPosition.y));
 	}
 }
