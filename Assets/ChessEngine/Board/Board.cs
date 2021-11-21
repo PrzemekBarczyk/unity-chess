@@ -13,6 +13,8 @@ public class Board
     public const int TOP_RANK_INDEX = 7;
     public const int BOTTOM_RANK_INDEX = 0;
 
+    public ulong ZobristHash { get; set; }
+
     public Square[][] Squares { get; private set; }
 
     public Square EnPassantTarget { get; set; }

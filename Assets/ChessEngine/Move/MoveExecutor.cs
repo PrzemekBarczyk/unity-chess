@@ -4,8 +4,6 @@ public class MoveExecutor
 {
 	Stack<RightsData> _rightsHistory = new Stack<RightsData>();
 
-	public ulong _zobristKey;
-
 	Board _board;
 	PieceManager _pieceManager;
 
@@ -14,7 +12,7 @@ public class MoveExecutor
 		_board = board;
 		_pieceManager = pieceManager;
 
-		_zobristKey = ZobristKey.CalculateZobristKey(_board, _pieceManager, currentPlayerColor);
+		_board.ZobristHash = ZobristKey.CalculateZobristKey(_board, _pieceManager, currentPlayerColor);
 	}
 
 	public void MakeMove(Move moveToMake)
@@ -25,15 +23,15 @@ public class MoveExecutor
 		if (moveToMake.EncounteredPiece != null)
 		{
 			Piece encounteredPiece = moveToMake.EncounteredPiece;
-			_zobristKey ^= ZobristKey.colorPiecePositionCombinations[(uint)encounteredPiece.Color - 1, (uint)encounteredPiece.Type - 1, encounteredPiece.Square.Position.x, encounteredPiece.Square.Position.y];
+			_board.ZobristHash ^= ZobristKey.colorPiecePositionCombinations[(uint)encounteredPiece.Color - 1, (uint)encounteredPiece.Type - 1, encounteredPiece.Square.Position.x, encounteredPiece.Square.Position.y];
 
 			encounteredPiece.IsAlive = false;
 			encounteredPiece.Square.Piece = null;
 		}
 
-		_zobristKey ^= ZobristKey.sideToMove;
-		_zobristKey ^= ZobristKey.colorPiecePositionCombinations[(uint)moveToMake.Piece.Color - 1, (uint)moveToMake.Piece.Type - 1, moveToMake.OldSquare.Position.x, moveToMake.OldSquare.Position.y];
-		_zobristKey ^= ZobristKey.colorPiecePositionCombinations[(uint)moveToMake.Piece.Color - 1, (uint)moveToMake.Piece.Type - 1, moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y];
+		_board.ZobristHash ^= ZobristKey.sideToMove;
+		_board.ZobristHash ^= ZobristKey.colorPiecePositionCombinations[(uint)moveToMake.Piece.Color - 1, (uint)moveToMake.Piece.Type - 1, moveToMake.OldSquare.Position.x, moveToMake.OldSquare.Position.y];
+		_board.ZobristHash ^= ZobristKey.colorPiecePositionCombinations[(uint)moveToMake.Piece.Color - 1, (uint)moveToMake.Piece.Type - 1, moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y];
 
 		moveToMake.OldSquare.Piece = null;
 		moveToMake.NewSquare.Piece = moveToMake.Piece;
@@ -44,15 +42,15 @@ public class MoveExecutor
 			bool madeDoubleMove = moveToMake.NewSquare.Position.y == (moveToMake.Piece.Color == ColorType.White ? 3 : 4) && moveToMake.OldSquare.Position.y == (moveToMake.Piece.Color == ColorType.White ? 1 : 6);
 			if (madeDoubleMove)
 			{
-				if (_board.EnPassantTarget != null) _zobristKey ^= ZobristKey.enPassantFiles[_board.EnPassantTarget.Position.x];
+				if (_board.EnPassantTarget != null) _board.ZobristHash ^= ZobristKey.enPassantFiles[_board.EnPassantTarget.Position.x];
 				_board.EnPassantTarget = _board.Squares[moveToMake.OldSquare.Position.x][moveToMake.OldSquare.Position.y + (moveToMake.Piece.Color == ColorType.White ? 1 : -1)];
-				_zobristKey ^= ZobristKey.enPassantFiles[_board.EnPassantTarget.Position.x];
+				_board.ZobristHash ^= ZobristKey.enPassantFiles[_board.EnPassantTarget.Position.x];
 			}
 			else
 			{
 				if (_board.EnPassantTarget != null) // removes unactive old en passants
 				{
-					_zobristKey ^= ZobristKey.enPassantFiles[_board.EnPassantTarget.Position.x];
+					_board.ZobristHash ^= ZobristKey.enPassantFiles[_board.EnPassantTarget.Position.x];
 					_board.EnPassantTarget = null;
 				}
 
@@ -87,8 +85,8 @@ public class MoveExecutor
 
 					promotion.Pieces.AllPieces.Add(promotion);
 
-					_zobristKey ^= ZobristKey.colorPiecePositionCombinations[(uint)moveToMake.Piece.Color - 1, (uint)moveToMake.Piece.Type - 1, moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y];
-					_zobristKey ^= ZobristKey.colorPiecePositionCombinations[(uint)promotion.Color - 1, (uint)promotion.Type - 1, moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y];
+					_board.ZobristHash ^= ZobristKey.colorPiecePositionCombinations[(uint)moveToMake.Piece.Color - 1, (uint)moveToMake.Piece.Type - 1, moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y];
+					_board.ZobristHash ^= ZobristKey.colorPiecePositionCombinations[(uint)promotion.Color - 1, (uint)promotion.Type - 1, moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y];
 				}
 			}
 		}
@@ -96,7 +94,7 @@ public class MoveExecutor
 		{
 			if (_board.EnPassantTarget != null) // removes unactive old en passants
 			{
-				_zobristKey ^= ZobristKey.enPassantFiles[_board.EnPassantTarget.Position.x];
+				_board.ZobristHash ^= ZobristKey.enPassantFiles[_board.EnPassantTarget.Position.x];
 				_board.EnPassantTarget = null;
 			}
 
@@ -106,7 +104,7 @@ public class MoveExecutor
 				{
 					if (moveToMake.Piece.Pieces.CanKingCastleQueenside)
 					{
-						_zobristKey ^= ZobristKey.castlingRights[moveToMake.Piece.Color == ColorType.White ? 1 : 3];
+						_board.ZobristHash ^= ZobristKey.castlingRights[moveToMake.Piece.Color == ColorType.White ? 1 : 3];
 						moveToMake.Piece.Pieces.CanKingCastleQueenside = false;
 					}
 				}
@@ -114,7 +112,7 @@ public class MoveExecutor
 				{
 					if (moveToMake.Piece.Pieces.CanKingCastleKingside)
 					{
-						_zobristKey ^= ZobristKey.castlingRights[moveToMake.Piece.Color == ColorType.White ? 0 : 2];
+						_board.ZobristHash ^= ZobristKey.castlingRights[moveToMake.Piece.Color == ColorType.White ? 0 : 2];
 						moveToMake.Piece.Pieces.CanKingCastleKingside = false;
 					}
 				}
@@ -123,12 +121,12 @@ public class MoveExecutor
 			{
 				if (moveToMake.Piece.Pieces.CanKingCastleKingside)
 				{
-					_zobristKey ^= ZobristKey.castlingRights[moveToMake.Piece.Color == ColorType.White ? 0 : 2];
+					_board.ZobristHash ^= ZobristKey.castlingRights[moveToMake.Piece.Color == ColorType.White ? 0 : 2];
 					moveToMake.Piece.Pieces.CanKingCastleKingside = false;
 				}
 				if (moveToMake.Piece.Pieces.CanKingCastleQueenside)
 				{
-					_zobristKey ^= ZobristKey.castlingRights[moveToMake.Piece.Color == ColorType.White ? 1 : 3];
+					_board.ZobristHash ^= ZobristKey.castlingRights[moveToMake.Piece.Color == ColorType.White ? 1 : 3];
 					moveToMake.Piece.Pieces.CanKingCastleQueenside = false;
 				}
 
@@ -169,8 +167,8 @@ public class MoveExecutor
 
 			promotion.Pieces.AllPieces.Remove(promotion);
 
-			_zobristKey ^= ZobristKey.colorPiecePositionCombinations[(uint)promotion.Color - 1, (uint)promotion.Type - 1, moveToUndo.NewSquare.Position.x, moveToUndo.NewSquare.Position.y];
-			_zobristKey ^= ZobristKey.colorPiecePositionCombinations[(uint)moveToUndo.Piece.Color - 1, (uint)moveToUndo.Piece.Type - 1, moveToUndo.NewSquare.Position.x, moveToUndo.NewSquare.Position.y];
+			_board.ZobristHash ^= ZobristKey.colorPiecePositionCombinations[(uint)promotion.Color - 1, (uint)promotion.Type - 1, moveToUndo.NewSquare.Position.x, moveToUndo.NewSquare.Position.y];
+			_board.ZobristHash ^= ZobristKey.colorPiecePositionCombinations[(uint)moveToUndo.Piece.Color - 1, (uint)moveToUndo.Piece.Type - 1, moveToUndo.NewSquare.Position.x, moveToUndo.NewSquare.Position.y];
 		}
 		else if (moveToUndo.Type == MoveType.Castle)
 		{
@@ -179,9 +177,9 @@ public class MoveExecutor
 			UndoMove(rookMove);
 		}
 
-		_zobristKey ^= ZobristKey.sideToMove;
-		_zobristKey ^= ZobristKey.colorPiecePositionCombinations[(uint)moveToUndo.Piece.Color - 1, (uint)moveToUndo.Piece.Type - 1, moveToUndo.OldSquare.Position.x, moveToUndo.OldSquare.Position.y];
-		_zobristKey ^= ZobristKey.colorPiecePositionCombinations[(uint)moveToUndo.Piece.Color - 1, (uint)moveToUndo.Piece.Type - 1, moveToUndo.NewSquare.Position.x, moveToUndo.NewSquare.Position.y];
+		_board.ZobristHash ^= ZobristKey.sideToMove;
+		_board.ZobristHash ^= ZobristKey.colorPiecePositionCombinations[(uint)moveToUndo.Piece.Color - 1, (uint)moveToUndo.Piece.Type - 1, moveToUndo.OldSquare.Position.x, moveToUndo.OldSquare.Position.y];
+		_board.ZobristHash ^= ZobristKey.colorPiecePositionCombinations[(uint)moveToUndo.Piece.Color - 1, (uint)moveToUndo.Piece.Type - 1, moveToUndo.NewSquare.Position.x, moveToUndo.NewSquare.Position.y];
 
 		moveToUndo.OldSquare.Piece = moveToUndo.Piece;
 		moveToUndo.NewSquare.Piece = null;
@@ -190,7 +188,7 @@ public class MoveExecutor
 		if (moveToUndo.EncounteredPiece != null)
 		{
 			Piece encounteredPiece = moveToUndo.EncounteredPiece;
-			_zobristKey ^= ZobristKey.colorPiecePositionCombinations[(uint)encounteredPiece.Color - 1, (uint)encounteredPiece.Type - 1, encounteredPiece.Square.Position.x, encounteredPiece.Square.Position.y];
+			_board.ZobristHash ^= ZobristKey.colorPiecePositionCombinations[(uint)encounteredPiece.Color - 1, (uint)encounteredPiece.Type - 1, encounteredPiece.Square.Position.x, encounteredPiece.Square.Position.y];
 
 			encounteredPiece.IsAlive = true;
 			encounteredPiece.Square.Piece = encounteredPiece;
@@ -200,18 +198,18 @@ public class MoveExecutor
 
 		if (previousRights.EnPassantTarget != _board.EnPassantTarget)
 		{
-			if (_board.EnPassantTarget != null) _zobristKey ^= ZobristKey.enPassantFiles[_board.EnPassantTarget.Position.x];
+			if (_board.EnPassantTarget != null) _board.ZobristHash ^= ZobristKey.enPassantFiles[_board.EnPassantTarget.Position.x];
 			_board.EnPassantTarget = previousRights.EnPassantTarget;
-			if (_board.EnPassantTarget != null) _zobristKey ^= ZobristKey.enPassantFiles[_board.EnPassantTarget.Position.x];
+			if (_board.EnPassantTarget != null) _board.ZobristHash ^= ZobristKey.enPassantFiles[_board.EnPassantTarget.Position.x];
 		}
 		if (previousRights.CanCastleKingside != moveToUndo.Piece.Pieces.CanKingCastleKingside)
 		{
-			_zobristKey ^= ZobristKey.castlingRights[moveToUndo.Piece.Color == ColorType.White ? 0 : 2];
+			_board.ZobristHash ^= ZobristKey.castlingRights[moveToUndo.Piece.Color == ColorType.White ? 0 : 2];
 			moveToUndo.Piece.Pieces.CanKingCastleKingside = previousRights.CanCastleKingside;
 		}
 		if (previousRights.CanCastleQueenside != moveToUndo.Piece.Pieces.CanKingCastleQueenside)
 		{
-			_zobristKey ^= ZobristKey.castlingRights[moveToUndo.Piece.Color == ColorType.White ? 1 : 3];
+			_board.ZobristHash ^= ZobristKey.castlingRights[moveToUndo.Piece.Color == ColorType.White ? 1 : 3];
 			moveToUndo.Piece.Pieces.CanKingCastleQueenside = previousRights.CanCastleQueenside;
 		}
 	}

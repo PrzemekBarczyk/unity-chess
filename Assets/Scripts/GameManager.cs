@@ -1,4 +1,6 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
@@ -11,6 +13,8 @@ public class GameManager : MonoSingleton<GameManager>
     [SerializeField] float _timeAddedAfterMove = 0f;
 
     public State State { get; private set; } = State.Playing;
+
+    Dictionary<ulong, int> _repetitionHistory = new Dictionary<ulong, int>(16);
 
     ChessEngine _chessEngine;
 
@@ -39,6 +43,7 @@ public class GameManager : MonoSingleton<GameManager>
 
     public IEnumerator GameLoop()
     {
+        _repetitionHistory.Add(_chessEngine.Board.ZobristHash, 1);
         while (true)
         {
             Move? moveToMake = null;
@@ -49,6 +54,17 @@ public class GameManager : MonoSingleton<GameManager>
             _graphicalBoard.UpdateBoard(moveToMake.Value, _playerManager.NextPlayer.LastMove);
 
             State = _chessEngine.MakeMove(moveToMake.Value);
+
+            try
+            {
+                _repetitionHistory.Add(_chessEngine.Board.ZobristHash, 1);
+            }
+            catch (ArgumentException)
+			{
+                _repetitionHistory[_chessEngine.Board.ZobristHash] = _repetitionHistory[_chessEngine.Board.ZobristHash] + 1;
+                if (_repetitionHistory[_chessEngine.Board.ZobristHash] >= 3)
+                    State = State.DrawByRepetitions;
+			}
 
             if (State == State.Playing)
             {

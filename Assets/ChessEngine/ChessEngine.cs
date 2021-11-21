@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-public enum State { Undefinied, Playing, Checkmate, DrawByStalemate, DrawByFiftyMoveRule, TimeElapsed }
+public enum State { Undefinied, Playing, Checkmate, DrawByStalemate, DrawByFiftyMoveRule, DrawByRepetitions, TimeElapsed }
 public enum ColorType {	Undefinied, White, Black }
 
 public class ChessEngine
@@ -8,7 +8,7 @@ public class ChessEngine
 	int _halfmoveClock;
 	int _fullmoveNumber;
 
-	Board _board;
+	public Board Board { get; }
 	PieceManager _pieceManager;
 	MoveGenerator _moveGenerator;
 	MoveExecutor _moveExecutor;
@@ -26,10 +26,10 @@ public class ChessEngine
 		_halfmoveClock = extractedFENData.HalfMovesClock;
 		_fullmoveNumber = extractedFENData.FullMovesNumber;
 
-		_board = new Board(extractedFENData);
-		_pieceManager = new PieceManager(_board, extractedFENData);
-		_moveExecutor = new MoveExecutor(_board, _pieceManager, extractedFENData.PlayerToMoveColor);
-		_moveGenerator = new MoveGenerator(_board, _moveExecutor);
+		Board = new Board(extractedFENData);
+		_pieceManager = new PieceManager(Board, extractedFENData);
+		_moveExecutor = new MoveExecutor(Board, _pieceManager, extractedFENData.PlayerToMoveColor);
+		_moveGenerator = new MoveGenerator(Board, _moveExecutor);
 		_minMax = new MinMax(_moveGenerator, _moveExecutor, _pieceManager);
 		_alphaBeta = new AlphaBeta(_moveGenerator, _moveExecutor, _pieceManager);
 		Perft = new Perft(_moveGenerator, _moveExecutor, _pieceManager);
