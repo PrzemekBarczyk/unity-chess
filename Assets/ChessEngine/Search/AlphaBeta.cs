@@ -82,6 +82,8 @@ public class AlphaBeta : SearchAlgorithm
 
 				int evaluation = Search(nextDepthPlayerPieces, depth - 1, alpha, beta, true);
 
+				_moveExecutor.UndoMove(legalMove);
+
 				if (evaluation < minEvaluation)
 				{
 					minEvaluation = evaluation;
@@ -90,13 +92,10 @@ public class AlphaBeta : SearchAlgorithm
 
 				if (minEvaluation <= alpha)
 				{
-					_moveExecutor.UndoMove(legalMove);
 					break;
 				}
 
 				beta = Math.Min(beta, minEvaluation);
-
-				_moveExecutor.UndoMove(legalMove);
 			}
 
 			return minEvaluation;
