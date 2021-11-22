@@ -13,6 +13,7 @@ public class ChessEngine
 	MoveGenerator _moveGenerator;
 	MoveExecutor _moveExecutor;
 	SearchAlgorithm _minMax;
+	SearchAlgorithm _negaMax;
 	SearchAlgorithm _alphaBeta;
 
 	public Perft Perft { get; private set; }
@@ -31,6 +32,7 @@ public class ChessEngine
 		_moveExecutor = new MoveExecutor(Board, _pieceManager, extractedFENData.PlayerToMoveColor);
 		_moveGenerator = new MoveGenerator(Board, _moveExecutor);
 		_minMax = new MinMax(_moveGenerator, _moveExecutor, _pieceManager);
+		_negaMax = new NegaMax(_moveGenerator, _moveExecutor, _pieceManager);
 		_alphaBeta = new AlphaBeta(_moveGenerator, _moveExecutor, _pieceManager);
 		Perft = new Perft(_moveGenerator, _moveExecutor, _pieceManager);
 	}

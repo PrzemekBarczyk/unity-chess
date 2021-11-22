@@ -25,14 +25,14 @@ public abstract class SearchAlgorithm
 
 	public abstract Move FindBestMove();
 
-	protected int Evaluate()
+	protected int Evaluate(ColorType maximizingPlayer = MAXIMIZING_COLOR)
 	{
 		int whiteEvaluation = EvaluateSide(_whitePieces.AllPieces);
 		int blackEvaluation = EvaluateSide(_blackPieces.AllPieces);
 
 		int evaluation = blackEvaluation - whiteEvaluation;
 
-		int evaluationModifier = MAXIMIZING_COLOR == ColorType.Black ? 1 : -1;
+		int evaluationModifier = maximizingPlayer == ColorType.Black ? 1 : -1;
 
 		return evaluation * evaluationModifier;
 	}
