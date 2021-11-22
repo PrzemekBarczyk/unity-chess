@@ -48,13 +48,13 @@ public class MinMax : SearchAlgorithm
 
 				int evaluation = Search(nextDepthPlayerPieces, depth - 1, false);
 
+				_moveExecutor.UndoMove(legalMove);
+
 				if (evaluation > maxEvaluation)
 				{
 					maxEvaluation = evaluation;
 					if (depth == MAX_DEPTH) _bestMove = legalMove;
 				}
-
-				_moveExecutor.UndoMove(legalMove);
 			}
 
 			return maxEvaluation;
@@ -71,13 +71,13 @@ public class MinMax : SearchAlgorithm
 
 				int evaluation = Search(nextDepthPlayerPieces, depth - 1, true);
 
+				_moveExecutor.UndoMove(legalMove);
+
 				if (evaluation < minEvaluation)
 				{
 					minEvaluation = evaluation;
 					if (depth == MAX_DEPTH) _bestMove = legalMove;
 				}
-
-				_moveExecutor.UndoMove(legalMove);
 			}
 
 			return minEvaluation;
