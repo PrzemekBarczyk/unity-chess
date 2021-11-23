@@ -51,21 +51,20 @@ public class AlphaBeta : SearchAlgorithm
 
 				int evaluation = Search(nextDepthPlayerPieces, depth - 1, alpha, beta, false);
 
+				_moveExecutor.UndoMove(legalMove);
+
 				if (evaluation > maxEvaluation)
 				{
 					maxEvaluation = evaluation;
 					if (depth == MAX_DEPTH) _bestMove = legalMove;
 				}
 
-				if (maxEvaluation >= beta)
-				{
-					_moveExecutor.UndoMove(legalMove);
-					break;
-				}
-
 				alpha = Math.Max(alpha, maxEvaluation);
 
-				_moveExecutor.UndoMove(legalMove);
+				if (alpha >= beta)
+				{
+					break;
+				}
 			}
 
 			return maxEvaluation;
@@ -90,12 +89,12 @@ public class AlphaBeta : SearchAlgorithm
 					if (depth == MAX_DEPTH) _bestMove = legalMove;
 				}
 
-				if (minEvaluation <= alpha)
+				beta = Math.Min(beta, minEvaluation);
+
+				if (alpha >= beta)
 				{
 					break;
 				}
-
-				beta = Math.Min(beta, minEvaluation);
 			}
 
 			return minEvaluation;
