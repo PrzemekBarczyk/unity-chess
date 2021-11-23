@@ -30,7 +30,7 @@ public class MinMax : SearchAlgorithm
 		if (legalMoves.Count == 0) // no legal moves
 		{
 			if (currentPlayerPieces.IsKingChecked())
-				return maximizingPlayer ? -10000000 : 10000000;
+				return maximizingPlayer ? -1000000 : 1000000;
 			return 0;
 		}
 

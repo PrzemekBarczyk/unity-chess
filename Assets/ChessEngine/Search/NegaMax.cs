@@ -23,7 +23,7 @@ public class NegaMax : SearchAlgorithm
 		if (legalMoves.Count == 0) // no legal moves
 		{
 			if (currentPlayerPieces.IsKingChecked())
-				return -10000000;
+				return -1000000;
 			return 0;
 		}
 
