@@ -26,4 +26,9 @@ public struct Move
 		RookOldSquare = rookOldSquare;
 		RookNewSquare = rookNewSquare;
 	}
+
+	public override string ToString()
+	{
+		return Piece.Color + " " + Piece.Type + " " + AlgebraicNotation.MoveToAlgebraicNotation(this);
+	}
 }
