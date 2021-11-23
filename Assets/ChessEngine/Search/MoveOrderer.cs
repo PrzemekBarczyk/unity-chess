@@ -20,9 +20,9 @@ public static class MoveOrderer
 	{
 		int score = 0;
 
-		if (move.NewSquare.IsOccupied())
+		if (move.EncounteredPiece != null)
 		{
-			score = CAPTURED_PIECE_VALUE_MULTIPLIER * (PiecesValues.GetValue(move.NewSquare.Piece) - PiecesValues.GetValue(move.OldSquare.Piece));
+			score = CAPTURED_PIECE_VALUE_MULTIPLIER * (PiecesValues.GetValue(move.EncounteredPiece) - PiecesValues.GetValue(move.Piece));
 		}
 
 		if (move.IsPromotion)
@@ -44,9 +44,9 @@ public static class MoveOrderer
 	{
 		for (int i = 0; i < movesToSort.Count - 1; i++)
 		{
-			for (int j = i + 1; j > 0; j--)
+			for (int j = 0; j < movesToSort.Count - 1; j++)
 			{
-				int swapIndex = j - 1;
+				int swapIndex = j + 1;
 				if (scores[swapIndex] < scores[j])
 				{
 					(movesToSort[j], movesToSort[swapIndex]) = (movesToSort[swapIndex], movesToSort[j]);
