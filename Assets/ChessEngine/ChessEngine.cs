@@ -16,6 +16,7 @@ public class ChessEngine
 	SearchAlgorithm _negaMax;
 	SearchAlgorithm _alphaBeta;
 	SearchAlgorithm _negaBeta;
+	SearchAlgorithm _negaBetaTT;
 
 	public Perft Perft { get; private set; }
 
@@ -36,6 +37,7 @@ public class ChessEngine
 		_negaMax = new NegaMax(_moveGenerator, _moveExecutor, _pieceManager);
 		_alphaBeta = new AlphaBeta(_moveGenerator, _moveExecutor, _pieceManager);
 		_negaBeta = new NegaBeta(_moveGenerator, _moveExecutor, _pieceManager);
+		_negaBetaTT = new NegaBetaTT(_moveGenerator, _moveExecutor, _pieceManager, Board);
 		Perft = new Perft(_moveGenerator, _moveExecutor, _pieceManager);
 	}
 
