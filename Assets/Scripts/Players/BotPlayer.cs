@@ -5,6 +5,6 @@ public class BotPlayer : Player
 	public override Move SelectMove(ChessEngine chessEngine) // runs in separate thread 
 	{
 		LastMove = chessEngine.FindBestMove();
-		return chessEngine.FindBestMove();
+		return LastMove.Value;
 	}
 }
