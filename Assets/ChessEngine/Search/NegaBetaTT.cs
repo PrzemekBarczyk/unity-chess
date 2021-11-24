@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 public class NegaBetaTT : SearchAlgorithm
 {
+	bool useQuiescenceSearch = false;
+
 	const int TRANSPOSITION_TABLE_SIZE = 64000;
 
 	TranspositionTable _transpositionTable;
@@ -48,6 +50,7 @@ public class NegaBetaTT : SearchAlgorithm
 
 		if (depth == 0)
 		{
+			if (useQuiescenceSearch) return QuiescenceSearch(currentPlayerPieces, alpha, beta);
 			return Evaluate(currentPlayerPieces.Color);
 		}
 
@@ -102,5 +105,48 @@ public class NegaBetaTT : SearchAlgorithm
 		_transpositionTable.StoreEntry(depth, bestEvaluation, nodeType, bestMoveInNode);
 
 		return bestEvaluation;
+	}
+
+	int QuiescenceSearch(PieceSet currentPlayerPieces, int alpha, int beta)
+	{
+		int standPat = Evaluate(currentPlayerPieces.Color);
+
+		if (standPat >= beta)
+		{
+			return beta;
+		}
+		if (alpha < standPat)
+		{
+			alpha = standPat;
+		}
+
+		List<Move> legalMoves = new List<Move>(_moveGenerator.GenerateLegalMoves(currentPlayerPieces));
+
+		PieceSet nextDepthPlayerPieces = currentPlayerPieces == _whitePieces ? _blackPieces : _whitePieces;
+
+		for (int i = 0; i < legalMoves.Count; i++)
+		{
+			Move legalMove = legalMoves[i];
+
+			if (legalMove.EncounteredPiece != null)
+			{
+				_moveExecutor.MakeMove(legalMove);
+
+				int evaluation = -QuiescenceSearch(nextDepthPlayerPieces, -beta, -alpha);
+
+				_moveExecutor.UndoMove(legalMove);
+
+				if (evaluation >= beta)
+				{
+					return beta;
+				}
+				if (evaluation > alpha)
+				{
+					alpha = evaluation;
+				}
+			}
+		}
+
+		return alpha;
 	}
 }
