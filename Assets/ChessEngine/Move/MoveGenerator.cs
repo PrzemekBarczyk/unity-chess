@@ -161,29 +161,29 @@ public sealed class MoveGenerator
 			{
 				if (canPromote && checkedSquare.IsPromotionSquare(piece.Color))
 				{
-					SaveMoveIfLegal(new Move(piece, _board.Squares[piece.Square.Position.x][piece.Square.Position.y], checkedSquare, checkedSquare.Piece, MoveType.PromotionToKnight));
-					SaveMoveIfLegal(new Move(piece, _board.Squares[piece.Square.Position.x][piece.Square.Position.y], checkedSquare, checkedSquare.Piece, MoveType.PromotionToBishop));
-					SaveMoveIfLegal(new Move(piece, _board.Squares[piece.Square.Position.x][piece.Square.Position.y], checkedSquare, checkedSquare.Piece, MoveType.PromotionToRook));
-					SaveMoveIfLegal(new Move(piece, _board.Squares[piece.Square.Position.x][piece.Square.Position.y], checkedSquare, checkedSquare.Piece, MoveType.PromotionToQueen));
+					SaveMoveIfLegal(new Move(piece, piece.Square, checkedSquare, checkedSquare.Piece, MoveType.PromotionToKnight));
+					SaveMoveIfLegal(new Move(piece, piece.Square, checkedSquare, checkedSquare.Piece, MoveType.PromotionToBishop));
+					SaveMoveIfLegal(new Move(piece, piece.Square, checkedSquare, checkedSquare.Piece, MoveType.PromotionToRook));
+					SaveMoveIfLegal(new Move(piece, piece.Square, checkedSquare, checkedSquare.Piece, MoveType.PromotionToQueen));
 					return;
 				}
 				else // normal move on empty square
 				{
-					SaveMoveIfLegal(new Move(piece, _board.Squares[piece.Square.Position.x][piece.Square.Position.y], checkedSquare, checkedSquare.Piece));
+					SaveMoveIfLegal(new Move(piece, piece.Square, checkedSquare, checkedSquare.Piece));
 				}
 			}
 			else if (canAttack && checkedSquare.IsOccupied() && checkedSquare.Piece.Color != piece.Color) // opponent piece
 			{
 				if (canPromote && checkedSquare.IsPromotionSquare(piece.Color))
 				{
-					SaveMoveIfLegal(new Move(piece, _board.Squares[piece.Square.Position.x][piece.Square.Position.y], checkedSquare, checkedSquare.Piece, MoveType.PromotionToKnight));
-					SaveMoveIfLegal(new Move(piece, _board.Squares[piece.Square.Position.x][piece.Square.Position.y], checkedSquare, checkedSquare.Piece, MoveType.PromotionToBishop));
-					SaveMoveIfLegal(new Move(piece, _board.Squares[piece.Square.Position.x][piece.Square.Position.y], checkedSquare, checkedSquare.Piece, MoveType.PromotionToRook));
-					SaveMoveIfLegal(new Move(piece, _board.Squares[piece.Square.Position.x][piece.Square.Position.y], checkedSquare, checkedSquare.Piece, MoveType.PromotionToQueen));
+					SaveMoveIfLegal(new Move(piece, piece.Square, checkedSquare, checkedSquare.Piece, MoveType.PromotionToKnight));
+					SaveMoveIfLegal(new Move(piece, piece.Square, checkedSquare, checkedSquare.Piece, MoveType.PromotionToBishop));
+					SaveMoveIfLegal(new Move(piece, piece.Square, checkedSquare, checkedSquare.Piece, MoveType.PromotionToRook));
+					SaveMoveIfLegal(new Move(piece, piece.Square, checkedSquare, checkedSquare.Piece, MoveType.PromotionToQueen));
 				}
 				else // attack on square different that promoting
 				{
-					SaveMoveIfLegal(new Move(piece, _board.Squares[piece.Square.Position.x][piece.Square.Position.y], checkedSquare, checkedSquare.Piece));
+					SaveMoveIfLegal(new Move(piece, piece.Square, checkedSquare, checkedSquare.Piece));
 				}
 				return;
 			}
@@ -207,7 +207,7 @@ public sealed class MoveGenerator
 		if (!checkedSquare.IsOccupied() || // empty square
 			(checkedSquare.IsOccupied() && checkedSquare.Piece.Color != piece.Color)) // opponent piece
 		{
-			SaveMoveIfLegal(new Move(piece, _board.Squares[piece.Square.Position.x][piece.Square.Position.y], checkedSquare, checkedSquare.Piece));
+			SaveMoveIfLegal(new Move(piece, piece.Square, checkedSquare, checkedSquare.Piece));
 		}
 	}
 
