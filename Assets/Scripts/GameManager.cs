@@ -15,10 +15,14 @@ public class GameManager : MonoSingleton<GameManager>
     PlayerManager _playerManager;
     GraphicalBoard _graphicalBoard;
 
+    HUD _hud;
+
     void Start()
     {
         _playerManager = PlayerManager.Instance;
         _graphicalBoard = GraphicalBoard.Instance;
+
+        _hud = FindObjectOfType<HUD>(true);
 
         _graphicalBoard.CreateBoard();
     }
@@ -40,6 +44,9 @@ public class GameManager : MonoSingleton<GameManager>
     public IEnumerator GameLoop()
     {
         _repetitionHistory.Add(_chessEngine.Board.ZobristHash, 1);
+        _hud.ChangeZobristKey(_chessEngine.Board.ZobristHash);
+        _hud.ChangeEvaluation(_chessEngine.Evaluate());
+
         while (true)
         {
             Move? moveToMake = null;
@@ -49,7 +56,12 @@ public class GameManager : MonoSingleton<GameManager>
 
             _graphicalBoard.UpdateBoard(moveToMake.Value, _playerManager.NextPlayer.LastMove);
 
+            _hud.AddMoveToHistory(moveToMake.Value);
+
             State = _chessEngine.MakeMove(moveToMake.Value);
+
+            _hud.ChangeZobristKey(_chessEngine.Board.ZobristHash);
+            _hud.ChangeEvaluation(_chessEngine.Evaluate());
 
             try
             {

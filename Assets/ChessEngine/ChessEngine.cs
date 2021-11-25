@@ -87,4 +87,9 @@ public class ChessEngine
 
 		return State.Playing;
 	}
+
+	public int Evaluate()
+	{
+		return _minMax.Evaluate();
+	}
 }
