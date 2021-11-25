@@ -6,38 +6,34 @@ using UnityEngine;
 
 public class GameManager : MonoSingleton<GameManager>
 {
-	[SerializeField] string _startChessPositionInFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-
-    [Header("Timers")]
-    [SerializeField] float _timeForPlayer = 180f;
-    [SerializeField] float _timeAddedAfterMove = 0f;
-
     public State State { get; private set; } = State.Playing;
 
     Dictionary<ulong, int> _repetitionHistory = new Dictionary<ulong, int>(16);
 
     ChessEngine _chessEngine;
 
-	PlayerManager _playerManager;
+    PlayerManager _playerManager;
     GraphicalBoard _graphicalBoard;
 
-	new void Awake()
-	{
-		base.Awake();
-
-        _chessEngine = new ChessEngine(_startChessPositionInFEN);
-
-		_playerManager = PlayerManager.Instance;
+    void Start()
+    {
+        _playerManager = PlayerManager.Instance;
         _graphicalBoard = GraphicalBoard.Instance;
 
-        ExtractedFENData extractedFENData = FENExtractor.FENToBoardPositionData(_startChessPositionInFEN);
-        _playerManager.SaveStartingPlayerColor(extractedFENData.PlayerToMoveColor);
-        _playerManager.SaveClockData(_timeForPlayer, _timeAddedAfterMove);
-        _graphicalBoard.CreateBoard(extractedFENData.PiecesToCreate);
+        _graphicalBoard.CreateBoard();
     }
 
-    public void StartGame() // called after color selection
+    public void StartGame(GameSettings gameSettings) // called after pressing PLAY button
     {
+        ExtractedFENData extractedFENData = FENExtractor.FENToBoardPositionData(gameSettings.StartPositionInFEN);
+
+        _graphicalBoard.CreatePieces(extractedFENData.PiecesToCreate);
+
+        _playerManager.CreatePlayers(gameSettings.GameType, gameSettings.UseClocks, gameSettings.BaseTime, gameSettings.AddedTime);
+        _playerManager.SetStartingPlayer(extractedFENData.PlayerToMoveColor);
+
+        _chessEngine = new ChessEngine(gameSettings.StartPositionInFEN);
+
         StartCoroutine(GameLoop());
     }
 
@@ -60,11 +56,11 @@ public class GameManager : MonoSingleton<GameManager>
                 _repetitionHistory.Add(_chessEngine.Board.ZobristHash, 1);
             }
             catch (ArgumentException)
-			{
+            {
                 _repetitionHistory[_chessEngine.Board.ZobristHash] = _repetitionHistory[_chessEngine.Board.ZobristHash] + 1;
                 if (_repetitionHistory[_chessEngine.Board.ZobristHash] >= 3)
                     State = State.DrawByRepetitions;
-			}
+            }
 
             if (State == State.Playing)
             {
@@ -86,7 +82,7 @@ public class GameManager : MonoSingleton<GameManager>
     }
 
     public void TimeElapsed()
-	{
+    {
         EndGame(State.TimeElapsed);
-	}
+    }
 }

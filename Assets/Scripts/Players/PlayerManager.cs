@@ -5,53 +5,49 @@ public class PlayerManager : MonoSingleton<PlayerManager>
     [SerializeField] Player _humanPlayerPrefab;
     [SerializeField] Player _botPlayerPrefab;
 
-	ColorType _startingPlayerColor;
-	float _timeForPlayer;
-	float _timeAddedAfterMove;
-
 	public Player WhitePlayer { get; private set; }
 	public Player BlackPlayer { get; private set; }
 
 	public Player CurrentPlayer { get; private set; }
 	public Player NextPlayer { get; private set; }
 
-	new void Awake()
+	public void CreatePlayers(GameType gameType, bool useClocks, uint baseTime, uint addedTime)
 	{
-		base.Awake();
-	}
-
-	public void SaveStartingPlayerColor(ColorType startingPlayerColor)
-	{
-		_startingPlayerColor = startingPlayerColor;
-	}
-
-	public void SaveClockData(float timeForPlayer, float timeAddedAfterMove)
-	{
-		_timeForPlayer = timeForPlayer;
-		_timeAddedAfterMove = timeAddedAfterMove;
-	}
-
-	public void CreatePlayers(PlayerData mainPlayer, PlayerData secondPlayer)
-	{
-		if (mainPlayer.Color == ColorType.White)
+		if (gameType == GameType.BotVsBot)
 		{
-			WhitePlayer = Instantiate(mainPlayer.Type == PlayerType.Human ? _humanPlayerPrefab : _botPlayerPrefab, transform.position, transform.rotation, transform);
-			BlackPlayer = Instantiate(secondPlayer.Type == PlayerType.Human ? _humanPlayerPrefab : _botPlayerPrefab, transform.position, transform.rotation, transform);
+			WhitePlayer = Instantiate(_botPlayerPrefab, transform.position, transform.rotation, transform);
+			BlackPlayer = Instantiate(_botPlayerPrefab, transform.position, transform.rotation, transform);
 		}
-		else if (mainPlayer.Color == ColorType.Black)
+		else if (gameType == GameType.HumanVsHuman)
 		{
-			WhitePlayer = Instantiate(secondPlayer.Type == PlayerType.Human ? _humanPlayerPrefab : _botPlayerPrefab, transform.position, transform.rotation, transform);
-			BlackPlayer = Instantiate(mainPlayer.Type == PlayerType.Human ? _humanPlayerPrefab : _botPlayerPrefab, transform.position, transform.rotation, transform);
+			WhitePlayer = Instantiate(_humanPlayerPrefab, transform.position, transform.rotation, transform);
+			BlackPlayer = Instantiate(_humanPlayerPrefab, transform.position, transform.rotation, transform);
 		}
+		else if (gameType == GameType.HumanVsBot)
+		{
+			WhitePlayer = Instantiate(_humanPlayerPrefab, transform.position, transform.rotation, transform);
+			BlackPlayer = Instantiate(_botPlayerPrefab, transform.position, transform.rotation, transform);
+		}
+		else
+		{
+			WhitePlayer = Instantiate(_botPlayerPrefab, transform.position, transform.rotation, transform);
+			BlackPlayer = Instantiate(_humanPlayerPrefab, transform.position, transform.rotation, transform);
+		}
+
+		WhitePlayer.SetColor(ColorType.White);
+		BlackPlayer.SetColor(ColorType.Black);
+
+		WhitePlayer.SetClock(useClocks, baseTime, addedTime);
+		BlackPlayer.SetClock(useClocks, baseTime, addedTime);
 
 		WhitePlayer.name = WhitePlayer.name.Replace("(Clone)", "");
 		BlackPlayer.name = BlackPlayer.name.Replace("(Clone)", "");
+	}
 
-		WhitePlayer.Initialize(ColorType.White, _timeForPlayer, _timeAddedAfterMove);
-		BlackPlayer.Initialize(ColorType.Black, _timeForPlayer, _timeAddedAfterMove);
-
-		CurrentPlayer = _startingPlayerColor == WhitePlayer.Color ? WhitePlayer : BlackPlayer;
-		NextPlayer = _startingPlayerColor == WhitePlayer.Color ? BlackPlayer : WhitePlayer;
+	public void SetStartingPlayer(ColorType startingPlayerColor)
+	{
+		CurrentPlayer = startingPlayerColor == WhitePlayer.Color ? WhitePlayer : BlackPlayer;
+		NextPlayer = startingPlayerColor == WhitePlayer.Color ? BlackPlayer : WhitePlayer;
 	}
 
 	public void SwitchTurn()

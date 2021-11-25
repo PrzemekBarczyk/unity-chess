@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,7 +12,7 @@ public class GraphicalBoard : MonoSingleton<GraphicalBoard>
 
     public GraphicalSquare[,] Squares { get; } = new GraphicalSquare[Board.FILES, Board.RANKS];
 
-    public void CreateBoard(List<PieceData> pieces)
+    public void CreateBoard()
     {
         for (int y = 0; y < Board.RANKS; y++)
         {
@@ -24,14 +23,16 @@ public class GraphicalBoard : MonoSingleton<GraphicalBoard>
 
                 newSquare.name = newSquarePrefab.name;
 
-                foreach (PieceData piece in pieces)
-                {
-                    if (piece.Position == new Vector2Int(x, y))
-                        newSquare.PieceSprite = _piecesSprites.GetSprite(piece.Color, piece.Type);
-                }
-
                 Squares[x, y] = newSquare;
             }
+        }
+    }
+
+    public void CreatePieces(List<PieceData> pieces)
+    {
+        foreach (PieceData piece in pieces)
+        {
+            Squares[piece.Position.x, piece.Position.y].PieceSprite = _piecesSprites.GetSprite(piece.Color, piece.Type);
         }
     }
 

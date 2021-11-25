@@ -12,18 +12,26 @@ public abstract class Player : MonoBehaviour
 
 	public Clock Clock { get; private set; }
 
-	public void Initialize(ColorType color, float timeForMove, float timeAddedAfterMove)
+	bool _useClock;
+
+	public void SetColor(ColorType color)
 	{
 		Color = color;
+	}
+
+	public void SetClock(bool useClock, uint baseTime, uint addedTime)
+	{
+		_useClock = useClock;
+
 		Clock = GetComponent<Clock>();
-		Clock.SetUp(Color, timeForMove, timeAddedAfterMove);
+		Clock.SetUp(Color, useClock, baseTime, addedTime);
 	}
 
 	public Move SelectMoveAndCountTime(ChessEngine chessEngine)
 	{
-		Clock.Run();
+		if (_useClock) Clock.Run();
 		Move move = SelectMove(chessEngine);
-		Clock.Stop();
+		if (_useClock) Clock.Stop();
 		return move;
 	}
 

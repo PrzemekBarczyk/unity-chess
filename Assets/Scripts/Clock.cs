@@ -12,6 +12,8 @@ public class Clock : MonoBehaviour
 	float _timeLeftInSeconds;
 	float _timeAddedAfterMove;
 
+	bool _useClock;
+
 	bool _isCounting;
 
 	int _counter;
@@ -23,9 +25,10 @@ public class Clock : MonoBehaviour
 		_gameManager = GameManager.Instance;
 	}
 
-	public void SetUp(ColorType playerColor, float timeForPlayer, float timeAddedAfterMove)
+	public void SetUp(ColorType playerColor, bool useClock, float timeForPlayer, float timeAddedAfterMove)
 	{
 		_playerColor = playerColor;
+		_useClock = useClock;
 		_timeAddedAfterMove = timeAddedAfterMove;
 		_timeLeftInSeconds = timeForPlayer;
 
@@ -38,7 +41,10 @@ public class Clock : MonoBehaviour
 			_graphicalClock = GameObject.Find("Black Clock").GetComponent<Text>();
 		}
 
-		UpdateGraphicalClock();
+		if (useClock)
+		{
+			UpdateGraphicalClock();
+		}
 	}
 
 	void UpdateGraphicalClock()
@@ -60,21 +66,24 @@ public class Clock : MonoBehaviour
 
 	void Update()
 	{
-		if (_isCounting)
+		if (_useClock)
 		{
-			_counter = 0;
+			if (_isCounting)
+			{
+				_counter = 0;
 
-			_timeLeftInSeconds -= Time.deltaTime;
+				_timeLeftInSeconds -= Time.deltaTime;
 
-			UpdateGraphicalClock();
+				UpdateGraphicalClock();
 
-			if (_timeLeftInSeconds <= 0)
-				_gameManager.TimeElapsed();
-		}
-		else if (_counter == 0)
-		{
-			_counter++;
-			UpdateGraphicalClock();
+				if (_timeLeftInSeconds <= 0)
+					_gameManager.TimeElapsed();
+			}
+			else if (_counter == 0)
+			{
+				_counter++;
+				UpdateGraphicalClock();
+			}
 		}
 	}
 }
