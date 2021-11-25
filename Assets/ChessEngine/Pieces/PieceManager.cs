@@ -1,4 +1,4 @@
-public class PieceManager
+public sealed class PieceManager
 {
     public PieceSet WhitePieces { get; private set; }
     public PieceSet BlackPieces { get; private set; }

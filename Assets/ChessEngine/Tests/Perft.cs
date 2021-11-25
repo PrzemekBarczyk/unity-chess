@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-public class Perft
+public sealed class Perft
 {
     MoveGenerator _moveGenerator;
     MoveExecutor _moveExecutor;

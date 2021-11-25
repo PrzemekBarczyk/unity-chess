@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-public class NegaMax : SearchAlgorithm
+public sealed class NegaMax : SearchAlgorithm
 {
 	public NegaMax(MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager) : base(moveGenerator, moveExecutor, pieceManager) { }
 

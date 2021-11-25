@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Vector2Int = UnityEngine.Vector2Int;
 
-public class MoveGenerator
+public sealed class MoveGenerator
 {
 	List<Move> _legalMoves = new List<Move>(128);
 

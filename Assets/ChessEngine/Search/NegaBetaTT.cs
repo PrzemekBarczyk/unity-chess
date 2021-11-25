@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-public class NegaBetaTT : SearchAlgorithm
+public sealed class NegaBetaTT : SearchAlgorithm
 {
 	bool useQuiescenceSearch = false;
 

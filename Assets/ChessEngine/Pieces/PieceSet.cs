@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-public class PieceSet
+public sealed class PieceSet
 {
 	public ColorType Color { get; }
 

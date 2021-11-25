@@ -1,4 +1,4 @@
-﻿public class TranspositionTable
+﻿public sealed class TranspositionTable
 {
 	public const int EVAL_MISSING = -1000001;
 

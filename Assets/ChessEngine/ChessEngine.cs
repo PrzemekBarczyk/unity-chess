@@ -3,7 +3,7 @@ using System.Collections.Generic;
 public enum State { Undefinied, Playing, Checkmate, DrawByStalemate, DrawByFiftyMoveRule, DrawByRepetitions, TimeElapsed }
 public enum ColorType {	Undefinied, White, Black }
 
-public class ChessEngine
+public sealed class ChessEngine
 {
 	int _halfmoveClock;
 	int _fullmoveNumber;

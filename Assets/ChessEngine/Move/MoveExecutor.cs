@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-public class MoveExecutor
+public sealed class MoveExecutor
 {
 	Stack<RightsData> _rightsHistory = new Stack<RightsData>();
 

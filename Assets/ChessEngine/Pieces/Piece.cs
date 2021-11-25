@@ -2,7 +2,7 @@ using Vector2Int = UnityEngine.Vector2Int;
 
 public enum PieceType { Undefinied, Pawn, Knight, Bishop, Rook, Queen, King }
 
-public class Piece
+public sealed class Piece
 {
 	public bool IsAlive { get; set; } = true;
 

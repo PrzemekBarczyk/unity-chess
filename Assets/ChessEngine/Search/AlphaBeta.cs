@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-public class AlphaBeta : SearchAlgorithm
+public sealed class AlphaBeta : SearchAlgorithm
 {
 	bool useQuiescenceSearch = false;
 

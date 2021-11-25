@@ -1,6 +1,6 @@
 using Vector2Int = UnityEngine.Vector2Int;
 
-public class Board
+public sealed class Board
 {
     public const int SIZE = 64;
 

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-public class MinMax : SearchAlgorithm
+public sealed class MinMax : SearchAlgorithm
 {
     public MinMax(MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager) : base(moveGenerator, moveExecutor, pieceManager) { }
 

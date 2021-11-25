@@ -1,7 +1,7 @@
 using Mathf = UnityEngine.Mathf;
 using Vector2Int = UnityEngine.Vector2Int;
 
-public class Square
+public sealed class Square
 {
     public Vector2Int Position { get; }
     public Piece Piece { get; set; }
