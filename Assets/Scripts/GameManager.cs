@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoSingleton<GameManager>
 {
@@ -29,7 +30,17 @@ public class GameManager : MonoSingleton<GameManager>
 
     public void StartGame(GameSettings gameSettings) // called after pressing PLAY button
     {
-        FENDataAdapter extractedFENData = FENConverter.FENToBoardPositionData(gameSettings.StartPositionInFEN);
+        FENDataAdapter extractedFENData;
+        try
+        {
+            extractedFENData = FENConverter.FENToBoardPositionData(gameSettings.StartPositionInFEN);
+        }
+        catch (FormatException e)
+		{
+            Debug.Log(e.Message);
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            return;
+		}
 
         _graphicalBoard.CreatePieces(extractedFENData.Pieces);
 

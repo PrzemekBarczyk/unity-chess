@@ -8,11 +8,14 @@ public static class FENConverter
 	{
 		string[] splitedFENString = fen.Split(' ');
 
+		if (splitedFENString.Length != 6)
+			throw new FormatException("FEN has to many fields");
+
 		bool[] castlingRights = ExtractCastlingRights(splitedFENString[2]);
 
 		return new FENDataAdapter(ExtractPiecePlacement(splitedFENString[0]), ExtractPlayerToMoveColor(splitedFENString[1]),
 			castlingRights[0], castlingRights[1], castlingRights[2], castlingRights[3], ExtractEnPassantTargetPiecePosition(splitedFENString[3]),
-			ExtractHalfMoveClock(splitedFENString[4]), ExtractFullMovesClock(splitedFENString[5]));
+			ExtractHalfMoveClock(splitedFENString[4]), ExtractFullMovesNumber(splitedFENString[5]));
 	}
 
 	static List<PieceData> ExtractPiecePlacement(string piecesPositions)
@@ -45,7 +48,7 @@ public static class FENConverter
 			}
 			else
 			{
-				throw new FormatException("Forbidden char type");
+				throw new FormatException("Forbidden char in piece placement field");
 			}
 		}
 
@@ -69,7 +72,7 @@ public static class FENConverter
 			case 'k':
 				return PieceType.King;
 			default:
-				throw new FormatException("Unknown piece type");
+				throw new FormatException("Unknown piece type in piece placement");
 		}
 	}
 
@@ -108,17 +111,52 @@ public static class FENConverter
 			return null;
 		}
 
-		return AlgebraicNotation.AlgebraicNotationToPosition(enPassantSquare);
+		Vector2Int enPassantPosition;
+		try
+		{
+			enPassantPosition = AlgebraicNotation.AlgebraicNotationToPosition(enPassantSquare);
+		}
+		catch (FormatException)
+		{
+			throw new FormatException("Uncorrect en passant position");
+		}
+
+		if (enPassantPosition.y != 2 && enPassantPosition.y != 5)
+		{
+			throw new FormatException("Uncorrect en passant position");
+		}
+
+		return enPassantPosition;
 	}
 
 	static uint ExtractHalfMoveClock(string halfMovesClock)
 	{
-		return (uint)char.GetNumericValue(halfMovesClock[0]);
+		uint halfMovesClockValue;
+		try
+		{
+			halfMovesClockValue = (uint)char.GetNumericValue(halfMovesClock[0]);
+		}
+		catch (Exception)
+		{
+			throw new FormatException("Uncorrect half moves clock");
+		}
+
+		return halfMovesClockValue;
 	}
 
-	static uint ExtractFullMovesClock(string fullMovesNumber)
+	static uint ExtractFullMovesNumber(string fullMovesNumber)
 	{
-		return (uint)char.GetNumericValue(fullMovesNumber[0]);
+		uint halfMovesNumberValue;
+		try
+		{
+			halfMovesNumberValue = (uint)char.GetNumericValue(fullMovesNumber[0]);
+		}
+		catch (Exception)
+		{
+			throw new FormatException("Uncorrect full moves number");
+		}
+
+		return halfMovesNumberValue;
 	}
 
 	public static string BoardPositionToFEN(FENDataAdapter fenDataAdapter)
