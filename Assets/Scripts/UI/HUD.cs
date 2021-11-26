@@ -109,6 +109,6 @@ public class HUD : MonoBehaviour
 
     public void HandleSaveButton()
 	{
-
+        GameManager.Instance.ConvertPositionToFEN();
 	}
 }

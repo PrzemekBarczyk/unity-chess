@@ -6,10 +6,10 @@ public sealed class PieceManager
     public PieceSet CurrentPieces { get; private set; }
     public PieceSet NextPieces { get; private set; }
 
-    public PieceManager(Board board, ExtractedFENData extractedFENData)
+    public PieceManager(Board board, FENDataAdapter extractedFENData)
     {
-        WhitePieces = new PieceSet(board, ColorType.White, extractedFENData.PiecesToCreate);
-        BlackPieces = new PieceSet(board, ColorType.Black, extractedFENData.PiecesToCreate);
+        WhitePieces = new PieceSet(board, ColorType.White, extractedFENData.Pieces);
+        BlackPieces = new PieceSet(board, ColorType.Black, extractedFENData.Pieces);
 
         WhitePieces.CanKingCastleKingside = extractedFENData.HasWhiteCastleKingsideRights;
         WhitePieces.CanKingCastleQueenside = extractedFENData.HasWhiteCastleQueensideRights;

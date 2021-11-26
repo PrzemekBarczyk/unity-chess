@@ -29,9 +29,9 @@ public class GameManager : MonoSingleton<GameManager>
 
     public void StartGame(GameSettings gameSettings) // called after pressing PLAY button
     {
-        ExtractedFENData extractedFENData = FENExtractor.FENToBoardPositionData(gameSettings.StartPositionInFEN);
+        FENDataAdapter extractedFENData = FENConverter.FENToBoardPositionData(gameSettings.StartPositionInFEN);
 
-        _graphicalBoard.CreatePieces(extractedFENData.PiecesToCreate);
+        _graphicalBoard.CreatePieces(extractedFENData.Pieces);
 
         _playerManager.CreatePlayers(gameSettings.GameType, gameSettings.UseClocks, gameSettings.BaseTime, gameSettings.AddedTime);
         _playerManager.SetStartingPlayer(extractedFENData.PlayerToMoveColor);
@@ -85,6 +85,11 @@ public class GameManager : MonoSingleton<GameManager>
             }
         }
     }
+
+    public void ConvertPositionToFEN()
+	{
+        Debug.Log(_chessEngine.FEN());
+	}
 
     public void EndGame(State result)
     {

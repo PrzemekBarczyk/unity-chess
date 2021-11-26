@@ -19,12 +19,12 @@ public sealed class Board
 
     public Square EnPassantTarget { get; set; }
 
-    public Board(ExtractedFENData extractedFENData)
+    public Board(FENDataAdapter extractedFENData)
     {
         CreateBoard(extractedFENData);
     }
 
-    void CreateBoard(ExtractedFENData extractedFENData)
+    void CreateBoard(FENDataAdapter extractedFENData)
     {
         Squares = new Square[FILES][];
         for (int x = 0; x < FILES; x++)

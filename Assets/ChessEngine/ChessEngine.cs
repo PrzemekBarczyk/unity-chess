@@ -5,8 +5,10 @@ public enum ColorType {	Undefinied, White, Black }
 
 public sealed class ChessEngine
 {
-	int _halfmoveClock;
-	int _fullmoveNumber;
+	uint _halfMoveClock;
+	uint _fullMoveNumber;
+
+	ColorType _sideToMove = ColorType.White;
 
 	public Board Board { get; }
 	PieceManager _pieceManager;
@@ -24,10 +26,10 @@ public sealed class ChessEngine
 
 	public ChessEngine(string fen)
 	{
-		ExtractedFENData extractedFENData = FENExtractor.FENToBoardPositionData(fen);
+		FENDataAdapter extractedFENData = FENConverter.FENToBoardPositionData(fen);
 
-		_halfmoveClock = extractedFENData.HalfMovesClock;
-		_fullmoveNumber = extractedFENData.FullMovesNumber;
+		_halfMoveClock = extractedFENData.HalfMovesClock;
+		_fullMoveNumber = extractedFENData.FullMovesNumber;
 
 		Board = new Board(extractedFENData);
 		_pieceManager = new PieceManager(Board, extractedFENData);
@@ -59,14 +61,14 @@ public sealed class ChessEngine
 		List<Move> legalMoves = _moveGenerator.GenerateLegalMoves(_pieceManager.NextPieces);
 
 		if (move.Piece.Type == PieceType.Pawn || move.EncounteredPiece != null)
-			_halfmoveClock = 0;
+			_halfMoveClock = 0;
 		else
-			_halfmoveClock++;
+			_halfMoveClock++;
 
 		if (_pieceManager.CurrentPieces.Color == ColorType.Black)
-			_fullmoveNumber++;
+			_fullMoveNumber++;
 
-		if (_halfmoveClock >= 50)
+		if (_halfMoveClock >= 50)
 		{
 			return State.DrawByFiftyMoveRule;
 		}
@@ -91,5 +93,20 @@ public sealed class ChessEngine
 	public int Evaluate()
 	{
 		return _minMax.Evaluate();
+	}
+
+	public string FEN()
+	{
+		List<PieceData> pieces = new List<PieceData>(16);
+		foreach (Piece piece in _pieceManager.BlackPieces.AllPieces)
+			pieces.Add(new PieceData(piece));
+		foreach (Piece piece in _pieceManager.WhitePieces.AllPieces)
+			pieces.Add(new PieceData(piece));
+		return FENConverter.BoardPositionToFEN(new FENDataAdapter(pieces, _sideToMove,
+																  _pieceManager.WhitePieces.CanKingCastleKingside,
+																  _pieceManager.WhitePieces.CanKingCastleQueenside,
+																  _pieceManager.BlackPieces.CanKingCastleKingside,
+																  _pieceManager.BlackPieces.CanKingCastleQueenside,
+																  Board.EnPassantTarget?.Position, _halfMoveClock, _fullMoveNumber));
 	}
 }

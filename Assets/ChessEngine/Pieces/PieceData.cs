@@ -12,4 +12,11 @@ public struct PieceData
 		Type = type;
 		Position = position;
 	}
+
+	public PieceData(Piece piece)
+	{
+		Color = piece.Color;
+		Type = piece.Type;
+		Position = piece.Square.Position;
+	}
 }

@@ -1,24 +1,24 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public struct ExtractedFENData
+public struct FENDataAdapter
 {
-	public List<PieceData> PiecesToCreate { get; private set; }
+	public List<PieceData> Pieces { get; private set; }
 	public ColorType PlayerToMoveColor { get; private set; }
 	public bool HasWhiteCastleKingsideRights { get; private set; }
 	public bool HasWhiteCastleQueensideRights { get; private set; }
 	public bool HasBlackCastleKingsideRights { get; private set; }
 	public bool HasBlackCastleQueensideRights { get; private set; }
 	public Vector2Int? EnPassantTargetPiecePosition { get; private set; }
-	public int HalfMovesClock { get; private set; }
-	public int FullMovesNumber { get; private set; }
+	public uint HalfMovesClock { get; private set; }
+	public uint FullMovesNumber { get; private set; }
 
-	public ExtractedFENData(List<PieceData> piecesToCreate, ColorType playerToMoveColor,
+	public FENDataAdapter(List<PieceData> piecesToCreate, ColorType playerToMoveColor,
 							bool hasWhiteCastleKingsideRights, bool hasWhiteCastleQueensideRights,
 							bool hasBlackCastleKingsideRights, bool hasBlackCastleQueensideRights,
-							Vector2Int? enPassantTargetPiecePosition, int halfMovesClock, int fullMovesNumber)
+							Vector2Int? enPassantTargetPiecePosition, uint halfMovesClock, uint fullMovesNumber)
 	{
-		PiecesToCreate = piecesToCreate;
+		Pieces = piecesToCreate;
 		PlayerToMoveColor = playerToMoveColor;
 		HasWhiteCastleKingsideRights = hasWhiteCastleKingsideRights;
 		HasWhiteCastleQueensideRights = hasWhiteCastleQueensideRights;
