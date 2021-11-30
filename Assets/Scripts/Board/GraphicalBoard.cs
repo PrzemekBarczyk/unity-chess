@@ -68,15 +68,15 @@ public class GraphicalBoard : MonoSingleton<GraphicalBoard>
 
         Squares[moveToMake.OldSquare.Position.x, moveToMake.OldSquare.Position.y].PieceSprite = null;
         if (!moveToMake.IsPromotion)
-            Squares[moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y].PieceSprite = _piecesSprites.GetSprite(moveToMake.OldSquare.Piece.Color, moveToMake.OldSquare.Piece.Type);
+            Squares[moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y].PieceSprite = _piecesSprites.GetSprite(moveToMake.Piece.Color, moveToMake.Piece.Type);
         else if (moveToMake.Type == MoveType.PromotionToKnight)
-            Squares[moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y].PieceSprite = _piecesSprites.GetSprite(moveToMake.OldSquare.Piece.Color, PieceType.Knight);
+            Squares[moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y].PieceSprite = _piecesSprites.GetSprite(moveToMake.Piece.Color, PieceType.Knight);
         else if (moveToMake.Type == MoveType.PromotionToBishop)
-            Squares[moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y].PieceSprite = _piecesSprites.GetSprite(moveToMake.OldSquare.Piece.Color, PieceType.Bishop);
+            Squares[moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y].PieceSprite = _piecesSprites.GetSprite(moveToMake.Piece.Color, PieceType.Bishop);
         else if (moveToMake.Type == MoveType.PromotionToRook)
-            Squares[moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y].PieceSprite = _piecesSprites.GetSprite(moveToMake.OldSquare.Piece.Color, PieceType.Rook);
+            Squares[moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y].PieceSprite = _piecesSprites.GetSprite(moveToMake.Piece.Color, PieceType.Rook);
         else if (moveToMake.Type == MoveType.PromotionToQueen)
-            Squares[moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y].PieceSprite = _piecesSprites.GetSprite(moveToMake.OldSquare.Piece.Color, PieceType.Queen);
+            Squares[moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y].PieceSprite = _piecesSprites.GetSprite(moveToMake.Piece.Color, PieceType.Queen);
 
         Squares[moveToMake.OldSquare.Position.x, moveToMake.OldSquare.Position.y].DisplayLastMoveIndicator();
         Squares[moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y].DisplayLastMoveIndicator();

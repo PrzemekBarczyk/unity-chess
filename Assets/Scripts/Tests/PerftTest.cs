@@ -17,7 +17,14 @@ public class PerftTest : MonoBehaviour
     {
         _resultTextField.text = "Tested position:\n" + _test.TestedFEN + "\n\n";
 
-        ChessEngine chessEngine = new ChessEngine(_test.TestedFEN);
+		GameSettings gameSettings = new GameSettings(
+			"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+			GameType.HumanVsHuman,
+			false,
+			0,
+			0
+		);
+        ChessEngine chessEngine = new ChessEngine(gameSettings);
 
 		switch (_testType)
 		{

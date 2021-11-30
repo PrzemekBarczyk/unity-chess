@@ -3,16 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(HumanPlayer))]
-public class MoveSelector : MonoBehaviour
+public class MoveSelector : MonoSingleton<MoveSelector>
 {
-	[SerializeField] SpriteRenderer _draggedPieceSpriteRenderer;
-
 	[SerializeField] PiecesSprites _piecesSprites;
+
+	[SerializeField] SpriteRenderer _draggedPieceSpriteRenderer;
 
 	List<Move> _legalMoves;
 
-	public bool IsMoveSelected { get; private set; }
+	bool _isMoveSelected;
 	Move _selectedMove;
 
 	GraphicalSquare _selectedPieceSquare; // every occupied square can be selected
@@ -23,28 +22,11 @@ public class MoveSelector : MonoBehaviour
 
 	bool _pickingPromotion;
 
-	HumanPlayer _humanPlayer;
-
 	GraphicalBoard _board;
 
 	void Start()
 	{
 		_board = GraphicalBoard.Instance;
-		_humanPlayer = GetComponent<HumanPlayer>();
-	}
-
-	void Update()
-	{
-		if (_draggedPieceSpriteRenderer.enabled)
-		{
-			DragSelectedPieceAfterCursor();
-		}
-	}
-
-	void DragSelectedPieceAfterCursor()
-	{
-		Vector2 newPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition) * Vector2.one;
-		_draggedPieceSpriteRenderer.transform.position = newPosition;
 	}
 
 	public void SetLegalMoves(List<Move> legalMoves)
@@ -52,10 +34,15 @@ public class MoveSelector : MonoBehaviour
 		_legalMoves = legalMoves;
 	}
 
+	public bool IsMoveSelected()
+	{
+		return _isMoveSelected;
+	}
+
 	public Move GetSelectedMove()
 	{
 		Move selectedMoveCopy = _selectedMove;
-		IsMoveSelected = false;
+		_isMoveSelected = false;
 		return selectedMoveCopy;
 	}
 
@@ -144,6 +131,20 @@ public class MoveSelector : MonoBehaviour
 				}
 			}
 		}
+	}
+
+	void Update()
+	{
+		if (_draggedPieceSpriteRenderer.enabled)
+		{
+			DragSelectedPieceAfterCursor();
+		}
+	}
+
+	void DragSelectedPieceAfterCursor()
+	{
+		Vector2 newPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition) * Vector2.one;
+		_draggedPieceSpriteRenderer.transform.position = newPosition;
 	}
 
 	public IEnumerator OnPieceDrop() // called when OnMouseUp triggered on Square
@@ -248,7 +249,7 @@ public class MoveSelector : MonoBehaviour
 		_draggedPieceSpriteRenderer.enabled = false;
 		_droppedPiecInSameSquareCounter = 0;
 		_pickingPromotion = false;
-		IsMoveSelected = true;
+		_isMoveSelected = true;
 	}
 
 	public void DisplayLegalMovesIndicators(List<Move> legalMoves)

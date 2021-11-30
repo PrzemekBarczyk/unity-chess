@@ -24,18 +24,20 @@ public class GraphicalSquare : MonoBehaviour
     public bool OnBottomRank { get => transform.position.y == Board.BOTTOM_RANK_INDEX; }
 
     GameManager _gameManager;
-    PlayerManager _playerManager;
+
+    MoveSelector _moveSelector;
 
 	void Awake()
 	{
         _gameManager = GameManager.Instance;
-        _playerManager = PlayerManager.Instance;
     }
 
     void Start()
     {
         if (OnTopRank || OnBottomRank)
             CreatePromotionPanel();
+
+        _moveSelector = FindObjectOfType<MoveSelector>();
     }
 
     void CreatePromotionPanel()
@@ -48,21 +50,17 @@ public class GraphicalSquare : MonoBehaviour
 
     void OnMouseDown()
     {
-        if (_gameManager.State != State.Playing) return;
-        if (_playerManager.CurrentPlayer is HumanPlayer)
+        if (_gameManager.State == State.Playing)
         {
-            HumanPlayer player = _playerManager.CurrentPlayer as HumanPlayer;
-            player.OnSquareSelected(this);
+            StartCoroutine(_moveSelector.OnSquareSelected(this));
         }
     }
 
     void OnMouseUp()
     {
-        if (_gameManager.State != State.Playing) return;
-        if (_playerManager.CurrentPlayer is HumanPlayer)
+        if (_gameManager.State == State.Playing) 
         {
-            HumanPlayer player = _playerManager.CurrentPlayer as HumanPlayer;
-            player.OnSuareDeselected();
+            StartCoroutine(_moveSelector.OnPieceDrop());
         }
     }
 

@@ -1,3 +1,5 @@
+using System;
+using System.Threading;
 using System.Collections.Generic;
 
 public enum State { Undefinied, Playing, Checkmate, DrawByStalemate, DrawByFiftyMoveRule, DrawByRepetitions, TimeElapsed }
@@ -5,10 +7,23 @@ public enum ColorType {	Undefinied, White, Black }
 
 public sealed class ChessEngine
 {
+	public event Action<BoardStatistics> OnGameStart;
+	public event HumanMoveHandler OnHumanMove;
+	public event Action<SearchStatistics> OnBotMove;
+	public event Action<ColorType> OnTurnStarted;
+	public event Action<Move, BoardStatistics> OnTurnEnded;
+	public event Action<State> OnGameEnded;
+
+	public delegate Move HumanMoveHandler(List<Move> legalMoves);
+
+	Dictionary<ulong, int> _repetitionHistory = new Dictionary<ulong, int>(16);
+
+	State _state;
+
 	uint _halfMoveClock;
 	uint _fullMoveNumber;
 
-	ColorType _sideToMove = ColorType.White;
+	PlayerManager _playerManager;
 
 	public Board Board { get; }
 	PieceManager _pieceManager;
@@ -22,14 +37,16 @@ public sealed class ChessEngine
 
 	public Perft Perft { get; private set; }
 
-	public ChessEngine() : this("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") { }
-
-	public ChessEngine(string fen)
+	public ChessEngine(GameSettings gameSettings)
 	{
-		FENDataAdapter extractedFENData = FENConverter.FENToBoardPositionData(fen);
+		FENDataAdapter extractedFENData = FENConverter.FENToBoardPositionData(gameSettings.StartPositionInFEN);
+
+		_state = State.Playing;
 
 		_halfMoveClock = extractedFENData.HalfMovesClock;
 		_fullMoveNumber = extractedFENData.FullMovesNumber;
+
+		_playerManager = new PlayerManager(gameSettings.GameType, extractedFENData.PlayerToMoveColor);
 
 		Board = new Board(extractedFENData);
 		_pieceManager = new PieceManager(Board, extractedFENData);
@@ -43,66 +60,112 @@ public sealed class ChessEngine
 		Perft = new Perft(_moveGenerator, _moveExecutor, _pieceManager);
 	}
 
-	public Move FindBestMove()
+	public Thread StartGame() // starts game in new thread
 	{
-		return _alphaBeta.FindBestMove();
+		Thread engineThread = new Thread(() => GameLoop());
+		engineThread.Start();
+		return engineThread;
 	}
 
-	public List<Move> GenerateLegalMoves(ColorType color)
+	void GameLoop()
 	{
-		PieceSet pieces = color == ColorType.White ? _pieceManager.WhitePieces : _pieceManager.BlackPieces;
-		return _moveGenerator.GenerateLegalMoves(pieces);
+		_repetitionHistory.Add(Board.ZobristHash, 1);
+		OnGameStart?.Invoke(new BoardStatistics(_minMax.Evaluate(), Board.ZobristHash));
+
+		while (_state == State.Playing)
+		{
+			OnTurnStarted?.Invoke(_playerManager.CurrentPlayer.Color);
+
+			Move moveToMake;
+			if (_playerManager.CurrentPlayer.Type == PlayerType.Human)
+			{
+				PieceSet humanPieces = _playerManager.CurrentPlayer.Color == ColorType.White ? _pieceManager.WhitePieces : _pieceManager.BlackPieces;
+				Move ? selectedMove = OnHumanMove?.Invoke(_moveGenerator.GenerateLegalMoves(humanPieces)); // send legal moves to GUI and wait for human to choose one
+				moveToMake = selectedMove.Value;
+			}
+			else // bot turn
+			{
+				moveToMake = _alphaBeta.FindBestMove();
+				OnBotMove?.Invoke(new SearchStatistics());
+			}
+
+			_moveExecutor.MakeMove(moveToMake);
+
+			int evaluation = _minMax.Evaluate();
+			ulong zobristKey = Board.ZobristHash;
+
+			OnTurnEnded?.Invoke(moveToMake, new BoardStatistics(evaluation, zobristKey));
+
+			if (moveToMake.Piece.Type == PieceType.Pawn || moveToMake.EncounteredPiece != null)
+			{
+				_halfMoveClock = 0;
+			}
+			else
+			{
+				_halfMoveClock++;
+			}
+
+			if (_pieceManager.CurrentPieces.Color == ColorType.Black)
+			{
+				_fullMoveNumber++;
+			}
+
+			CheckState();
+
+			_playerManager.SwitchTurn();
+			_pieceManager.SwitchPlayer();
+		}
+
+		OnGameEnded?.Invoke(_state);
 	}
 
-	public State MakeMove(Move move)
+	void CheckState()
 	{
-		_moveExecutor.MakeMove(move);
-
 		List<Move> legalMoves = _moveGenerator.GenerateLegalMoves(_pieceManager.NextPieces);
-
-		if (move.Piece.Type == PieceType.Pawn || move.EncounteredPiece != null)
-			_halfMoveClock = 0;
-		else
-			_halfMoveClock++;
-
-		if (_pieceManager.CurrentPieces.Color == ColorType.Black)
-			_fullMoveNumber++;
 
 		if (_halfMoveClock >= 50)
 		{
-			return State.DrawByFiftyMoveRule;
+			_state = State.DrawByFiftyMoveRule;
+			return;
+		}
+
+		try
+		{
+			_repetitionHistory.Add(Board.ZobristHash, 1);
+		}
+		catch (ArgumentException)
+		{
+			_repetitionHistory[Board.ZobristHash] = _repetitionHistory[Board.ZobristHash] + 1;
+			if (_repetitionHistory[Board.ZobristHash] >= 3)
+			{
+				_state = State.DrawByRepetitions;
+				return;
+			}
 		}
 
 		if (legalMoves.Count == 0)
 		{
 			if (_pieceManager.NextPieces.IsKingChecked())
 			{
-				return State.Checkmate;
+				_state = State.Checkmate;
+				return;
 			}
 			else
 			{
-				return State.DrawByStalemate;
+				_state = State.DrawByStalemate;
+				return;
 			}
 		}
-
-		_pieceManager.SwitchPlayer();
-
-		return State.Playing;
-	}
-
-	public int Evaluate()
-	{
-		return _minMax.Evaluate();
 	}
 
 	public string FEN()
 	{
 		List<PieceData> pieces = new List<PieceData>(16);
 		foreach (Piece piece in _pieceManager.BlackPieces.AllPieces)
-			pieces.Add(new PieceData(piece));
+			if (piece.IsAlive) pieces.Add(new PieceData(piece));
 		foreach (Piece piece in _pieceManager.WhitePieces.AllPieces)
-			pieces.Add(new PieceData(piece));
-		return FENConverter.BoardPositionToFEN(new FENDataAdapter(pieces, _sideToMove,
+			if (piece.IsAlive) pieces.Add(new PieceData(piece));
+		return FENConverter.BoardPositionToFEN(new FENDataAdapter(pieces, _playerManager.CurrentPlayer.Color,
 																  _pieceManager.WhitePieces.CanKingCastleKingside,
 																  _pieceManager.WhitePieces.CanKingCastleQueenside,
 																  _pieceManager.BlackPieces.CanKingCastleKingside,

@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
@@ -7,20 +6,24 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoSingleton<GameManager>
 {
-    public State State { get; private set; } = State.Playing;
+    public State State { get; private set; }
 
-    Dictionary<ulong, int> _repetitionHistory = new Dictionary<ulong, int>(16);
+    Move? _lastMove;
 
     ChessEngine _chessEngine;
+    Thread _chessEngineThread;
 
-    PlayerManager _playerManager;
+    [SerializeField] MoveSelector _moveSelector;
+
     GraphicalBoard _graphicalBoard;
+
+    [SerializeField] Clock _whitePlayerClock;
+    [SerializeField] Clock _blackPlayerClock;
 
     HUD _hud;
 
     void Start()
     {
-        _playerManager = PlayerManager.Instance;
         _graphicalBoard = GraphicalBoard.Instance;
 
         _hud = FindObjectOfType<HUD>(true);
@@ -44,73 +47,114 @@ public class GameManager : MonoSingleton<GameManager>
 
         _graphicalBoard.CreatePieces(extractedFENData.Pieces);
 
-        _playerManager.CreatePlayers(gameSettings.GameType, gameSettings.UseClocks, gameSettings.BaseTime, gameSettings.AddedTime);
-        _playerManager.SetStartingPlayer(extractedFENData.PlayerToMoveColor);
+        _whitePlayerClock.SetUp(gameSettings.UseClocks, gameSettings.BaseTime, gameSettings.AddedTime);
+        _blackPlayerClock.SetUp(gameSettings.UseClocks, gameSettings.BaseTime, gameSettings.AddedTime);
 
-        _chessEngine = new ChessEngine(gameSettings.StartPositionInFEN);
+        _whitePlayerClock.OnTimeElapsed += OnTimeElaped;
+        _blackPlayerClock.OnTimeElapsed += OnTimeElaped;
 
-        StartCoroutine(GameLoop());
+        _chessEngine = new ChessEngine(gameSettings);
+        _chessEngine.OnGameStart += OnGameStart;
+        _chessEngine.OnTurnStarted += OnTurnStarted;
+        _chessEngine.OnTurnEnded += OnTurnEnded;
+        _chessEngine.OnGameEnded += OnGameEnded;
+        _chessEngine.OnHumanMove += OnHumanMove;
+        _chessEngine.OnBotMove += OnBotMove;
+        _chessEngine.StartGame();
+
+        State = State.Playing;
     }
 
-    public IEnumerator GameLoop()
-    {
-        _repetitionHistory.Add(_chessEngine.Board.ZobristHash, 1);
-        _hud.ChangeZobristKey(_chessEngine.Board.ZobristHash);
-        _hud.ChangeEvaluation(_chessEngine.Evaluate());
+    public void OnTimeElaped()
+	{
+        GameOver(State.TimeElapsed);
+	}
 
-        while (true)
+    public void OnGameStart(BoardStatistics boardStatistics)
+	{
+        ThreadDispatcher.RunOnMainThread(() =>
         {
-            Move? moveToMake = null;
-            new Thread(() => moveToMake = _playerManager.CurrentPlayer.SelectMoveAndCountTime(_chessEngine)).Start();
+            _hud.ChangeZobristKey(boardStatistics.ZobristKey);
+            _hud.ChangeEvaluation(boardStatistics.Evaluation);
+        });
+    }
 
-            yield return new WaitUntil(() => moveToMake.HasValue); // waits until player selects his move
+    public void OnTurnStarted(ColorType color)
+	{
+        ThreadDispatcher.RunOnMainThread(() =>
+        {
+            if (color == ColorType.White)
+		    {
+                _whitePlayerClock.Run();
+		    }
+            else
+		    {
+                _blackPlayerClock.Run();
+		    }
+        });
+    }
 
-            _graphicalBoard.UpdateBoard(moveToMake.Value, _playerManager.NextPlayer.LastMove);
-
-            _hud.AddMoveToHistory(moveToMake.Value);
-
-            State = _chessEngine.MakeMove(moveToMake.Value);
-
-            _hud.ChangeZobristKey(_chessEngine.Board.ZobristHash);
-            _hud.ChangeEvaluation(_chessEngine.Evaluate());
-
-            try
+    public void OnTurnEnded(Move move, BoardStatistics boardStatistics)
+	{
+        ThreadDispatcher.RunOnMainThread(() =>
+        {
+            if (move.Piece.Color == ColorType.White)
             {
-                _repetitionHistory.Add(_chessEngine.Board.ZobristHash, 1);
-            }
-            catch (ArgumentException)
-            {
-                _repetitionHistory[_chessEngine.Board.ZobristHash] = _repetitionHistory[_chessEngine.Board.ZobristHash] + 1;
-                if (_repetitionHistory[_chessEngine.Board.ZobristHash] >= 3)
-                    State = State.DrawByRepetitions;
-            }
-
-            if (State == State.Playing)
-            {
-                _playerManager.SwitchTurn();
+                _whitePlayerClock.Stop();
             }
             else
             {
-                EndGame(State);
-                yield break;
+                _blackPlayerClock.Stop();
             }
-        }
+
+            _graphicalBoard.UpdateBoard(move, _lastMove);
+            _lastMove = move;
+
+            _hud.ChangeZobristKey(boardStatistics.ZobristKey);
+            _hud.ChangeEvaluation(boardStatistics.Evaluation);
+        });
+    }
+
+    public void OnGameEnded(State result)
+	{
+        ThreadDispatcher.RunOnMainThread(() =>
+        {
+            GameOver(result);
+        });
+    }
+
+    void GameOver(State result)
+	{
+        State = result;
+        Time.timeScale = 0f;
+        if (_chessEngineThread != null) _chessEngineThread.Abort();
+        Debug.Log("Game over: " + result);
+    }
+
+    public Move OnHumanMove(List<Move> legalMoves)
+	{
+        _moveSelector.SetLegalMoves(legalMoves);
+
+        while (!_moveSelector.IsMoveSelected())
+            continue;
+
+        return _moveSelector.GetSelectedMove();
+    }
+
+    public void OnBotMove(SearchStatistics searchStatistics)
+	{
+        ThreadDispatcher.RunOnMainThread(() =>
+        {
+            _hud.ChangeDepth(searchStatistics.Depth);
+            _hud.ChangeBestEvaluation(searchStatistics.BestEvaluation);
+            _hud.ChangePositionsEvaluated(searchStatistics.PositionsEvaluated);
+            _hud.ChangeCutoffs(searchStatistics.Cutoffs);
+            _hud.ChangeTranspositions(searchStatistics.Transpositions);
+        });
     }
 
     public void ConvertPositionToFEN()
 	{
         Debug.Log(_chessEngine.FEN());
 	}
-
-    public void EndGame(State result)
-    {
-        State = result;
-        Time.timeScale = 0f;
-        Debug.Log("Game over: " + result);
-    }
-
-    public void TimeElapsed()
-    {
-        EndGame(State.TimeElapsed);
-    }
 }

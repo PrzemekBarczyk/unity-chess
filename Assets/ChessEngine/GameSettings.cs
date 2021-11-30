@@ -7,4 +7,13 @@ public struct GameSettings
     public bool UseClocks { get; set; }
     public uint BaseTime { get; set; }
     public uint AddedTime { get; set; }
+
+    public GameSettings(string startPositionInFEN, GameType gameType, bool useClocks, uint baseTime, uint addedTime)
+	{
+        StartPositionInFEN = startPositionInFEN;
+        GameType = gameType;
+        UseClocks = useClocks;
+        BaseTime = baseTime;
+        AddedTime = addedTime;
+	}
 }
