@@ -132,31 +132,23 @@ public static class FENConverter
 	static uint ExtractHalfMoveClock(string halfMovesClock)
 	{
 		uint halfMovesClockValue;
-		try
-		{
-			halfMovesClockValue = (uint)char.GetNumericValue(halfMovesClock[0]);
-		}
-		catch (Exception)
+		bool isConvertionSuccess = uint.TryParse(halfMovesClock, out halfMovesClockValue);
+		if (!isConvertionSuccess)
 		{
 			throw new FormatException("Uncorrect half moves clock");
 		}
-
 		return halfMovesClockValue;
 	}
 
 	static uint ExtractFullMovesNumber(string fullMovesNumber)
 	{
-		uint halfMovesNumberValue;
-		try
-		{
-			halfMovesNumberValue = (uint)char.GetNumericValue(fullMovesNumber[0]);
-		}
-		catch (Exception)
+		uint fullMovesNumberValue;
+		bool isCOnvertionSuccess = uint.TryParse(fullMovesNumber, out fullMovesNumberValue);
+		if (!isCOnvertionSuccess)
 		{
 			throw new FormatException("Uncorrect full moves number");
 		}
-
-		return halfMovesNumberValue;
+		return fullMovesNumberValue;
 	}
 
 	public static string BoardPositionToFEN(FENDataAdapter fenDataAdapter)
