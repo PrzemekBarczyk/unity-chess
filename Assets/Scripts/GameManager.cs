@@ -10,7 +10,7 @@ public class GameManager : MonoSingleton<GameManager>
 
     Move? _lastMove;
 
-    ChessEngine _chessEngine;
+    ChessProgram _chessProgram;
     Thread _chessEngineThread;
 
     [SerializeField] MoveSelector _moveSelector;
@@ -53,14 +53,14 @@ public class GameManager : MonoSingleton<GameManager>
         _whitePlayerClock.OnTimeElapsed += OnTimeElaped;
         _blackPlayerClock.OnTimeElapsed += OnTimeElaped;
 
-        _chessEngine = new ChessEngine(gameSettings);
-        _chessEngine.OnGameStart += OnGameStart;
-        _chessEngine.OnTurnStarted += OnTurnStarted;
-        _chessEngine.OnTurnEnded += OnTurnEnded;
-        _chessEngine.OnGameEnded += OnGameEnded;
-        _chessEngine.OnHumanMove += OnHumanMove;
-        _chessEngine.OnBotMove += OnBotMove;
-        _chessEngine.StartGame();
+        _chessProgram = new ChessProgram(gameSettings);
+        _chessProgram.OnGameStart += OnGameStart;
+        _chessProgram.OnTurnStarted += OnTurnStarted;
+        _chessProgram.OnTurnEnded += OnTurnEnded;
+        _chessProgram.OnGameEnded += OnGameEnded;
+        _chessProgram.OnHumanMove += OnHumanMove;
+        _chessProgram.OnBotMove += OnBotMove;
+        _chessProgram.StartGame();
 
         State = State.Playing;
     }
@@ -155,6 +155,6 @@ public class GameManager : MonoSingleton<GameManager>
 
     public void ConvertPositionToFEN()
 	{
-        Debug.Log(_chessEngine.FEN());
+        Debug.Log(_chessProgram.FEN());
 	}
 }
