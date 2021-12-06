@@ -266,6 +266,8 @@ public static class FENConverter
 		if (blackKingsideCastle) castlingRights += "k";
 		if (blackQueensideCastle) castlingRights += "q";
 
+		if (castlingRights == "") castlingRights += "-";
+
 		return castlingRights;
 	}
 
