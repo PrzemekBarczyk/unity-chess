@@ -19,6 +19,7 @@ public class HUD : MonoBehaviour
     [Header("Board statistics")]
     [SerializeField] Text _zobristKey;
     [SerializeField] Text _evaluation;
+    [SerializeField] Text _fen;
 
     [Header("Clocks")]
     [SerializeField] Text _whitePlayerClock;
@@ -36,6 +37,7 @@ public class HUD : MonoBehaviour
 
         _zobristKey.text = "Zobrist Key: ";
         _evaluation.text = "Evaluation: ";
+        _fen.text = "FEN: ";
 
         _depth.text = "Depth: ";
         _bestEvalutation.text = "Best Evaluation: ";
@@ -109,13 +111,13 @@ public class HUD : MonoBehaviour
         _evaluation.text = "Evaluation: " + boardEvaluation;
 	}
 
+    public void ChangeFEN(string newFEN)
+	{
+        _fen.text = "FEN: " + newFEN;
+	}
+
     public void HandleQuitButton()
 	{
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-	}
-
-    public void HandleSaveButton()
-	{
-        GameManager.Instance.ConvertPositionToFEN();
 	}
 }

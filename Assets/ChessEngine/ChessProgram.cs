@@ -54,7 +54,7 @@ public sealed class ChessProgram
 
 		_repetitionHistory.Add(startingFEN.Remove(startingFEN.Length - 4, 4), 1);
 
-		OnGameStart?.Invoke(new BoardStatistics(startingEvaluation, startingZobristHash));
+		OnGameStart?.Invoke(new BoardStatistics(startingEvaluation, startingFEN, startingZobristHash));
 
 		while (_state == State.Playing)
 		{
@@ -96,7 +96,7 @@ public sealed class ChessProgram
 			string fen = _chessEngine.FEN();
 			ulong zobristKey = _chessEngine.ZobristHash();
 
-			OnTurnEnded?.Invoke(moveToMake, new BoardStatistics(evaluation, zobristKey));
+			OnTurnEnded?.Invoke(moveToMake, new BoardStatistics(evaluation, fen, zobristKey));
 
 			if (moveToMake.Piece.Type == PieceType.Pawn || moveToMake.EncounteredPiece != null)
 			{
@@ -160,6 +160,4 @@ public sealed class ChessProgram
 			}
 		}
 	}
-
-	public string FEN() => _chessEngine.FEN();
 }

@@ -78,6 +78,7 @@ public class GameManager : MonoSingleton<GameManager>
         {
             _hud.ChangeZobristKey(boardStatistics.ZobristKey);
             _hud.ChangeEvaluation(boardStatistics.Evaluation);
+            _hud.ChangeFEN(boardStatistics.FEN);
         });
     }
 
@@ -114,6 +115,7 @@ public class GameManager : MonoSingleton<GameManager>
 
             _hud.ChangeZobristKey(boardStatistics.ZobristKey);
             _hud.ChangeEvaluation(boardStatistics.Evaluation);
+            _hud.ChangeFEN(boardStatistics.FEN);
         });
     }
 
@@ -154,9 +156,4 @@ public class GameManager : MonoSingleton<GameManager>
             _hud.ChangeTranspositions(searchStatistics.Transpositions);
         });
     }
-
-    public void ConvertPositionToFEN()
-	{
-        Debug.Log(_chessProgram.FEN());
-	}
 }
