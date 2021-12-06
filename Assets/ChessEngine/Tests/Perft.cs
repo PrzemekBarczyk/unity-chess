@@ -111,7 +111,7 @@ public sealed class Perft
 
             if (depth == maxDepth)
             {
-                _divideResults.Add(AlgebraicNotation.MoveToAlgebraicNotation(legalMove) + ": " + localNodes);
+                _divideResults.Add(SimplifiedAlgebraicNotation.MoveToLongSAN(legalMove) + ": " + localNodes);
             }
         }
 

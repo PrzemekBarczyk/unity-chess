@@ -29,6 +29,6 @@ public struct Move
 
 	public override string ToString()
 	{
-		return Piece.Color + " " + Piece.Type + " " + AlgebraicNotation.MoveToAlgebraicNotation(this);
+		return Piece.Color + " " + Piece.Type + " " + SimplifiedAlgebraicNotation.MoveToLongSAN(this);
 	}
 }

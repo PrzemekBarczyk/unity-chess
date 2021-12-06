@@ -114,7 +114,7 @@ public static class FENConverter
 		Vector2Int enPassantPosition;
 		try
 		{
-			enPassantPosition = AlgebraicNotation.AlgebraicNotationToPosition(enPassantSquare);
+			enPassantPosition = SimplifiedAlgebraicNotation.ShortSANToPosition(enPassantSquare);
 		}
 		catch (FormatException)
 		{
@@ -273,7 +273,7 @@ public static class FENConverter
 	{
 		if (enPassantPosition.HasValue)
 		{
-			return AlgebraicNotation.PositionToAlgebraicNotation(enPassantPosition.Value);
+			return SimplifiedAlgebraicNotation.PositionToShortSAN(enPassantPosition.Value);
 		}
 		else
 		{

@@ -59,11 +59,11 @@ public class HUD : MonoBehaviour
 	{
         if (move.Piece.Color == ColorType.White)
 		{
-            _whitePlayerMoveList.text += AlgebraicNotation.MoveToAlgebraicNotation(move) + "\n";
+            _whitePlayerMoveList.text += SimplifiedAlgebraicNotation.MoveToLongSAN(move) + "\n";
 		}
         else
 		{
-            _blackPlayerMoveList.text += AlgebraicNotation.MoveToAlgebraicNotation(move) + "\n";
+            _blackPlayerMoveList.text += SimplifiedAlgebraicNotation.MoveToLongSAN(move) + "\n";
         }
 	}
 
