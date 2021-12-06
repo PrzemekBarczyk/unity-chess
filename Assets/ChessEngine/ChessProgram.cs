@@ -15,7 +15,7 @@ public sealed class ChessProgram
 
 	public delegate Move HumanMoveHandler(List<Move> legalMoves);
 
-	Dictionary<ulong, int> _repetitionHistory = new Dictionary<ulong, int>(16);
+	Dictionary<string, int> _repetitionHistory = new Dictionary<string, int>(32);
 
 	State _state;
 
@@ -49,9 +49,10 @@ public sealed class ChessProgram
 	void GameLoop()
 	{
 		ulong startingZobristHash = _chessEngine.ZobristHash();
+		string startingFEN = _chessEngine.FEN();
 		int startingEvaluation = _chessEngine.Evaluation();
 
-		_repetitionHistory.Add(startingZobristHash, 1);
+		_repetitionHistory.Add(startingFEN.Remove(startingFEN.Length - 4, 4), 1);
 
 		OnGameStart?.Invoke(new BoardStatistics(startingEvaluation, startingZobristHash));
 
@@ -69,8 +70,8 @@ public sealed class ChessProgram
 			{
 				if (_useBook)
 				{
-					string fen = _chessEngine.FEN();
-					var movesFromBook = _book.FindEntry(fen.Substring(0, fen.Length - 4));
+					string fenPos = _chessEngine.FEN();
+					var movesFromBook = _book.FindEntry(fenPos.Substring(0, fenPos.Length - 4));
 					if (movesFromBook == null)
 					{
 						_useBook = false;
@@ -92,6 +93,7 @@ public sealed class ChessProgram
 			_chessEngine.MakeMove(moveToMake);
 
 			int evaluation = _chessEngine.Evaluation();
+			string fen = _chessEngine.FEN();
 			ulong zobristKey = _chessEngine.ZobristHash();
 
 			OnTurnEnded?.Invoke(moveToMake, new BoardStatistics(evaluation, zobristKey));
@@ -110,7 +112,7 @@ public sealed class ChessProgram
 				_chessEngine.FullMoveNumber++;
 			}
 
-			CheckState(zobristKey);
+			CheckState(fen);
 
 			_playerManager.SwitchTurn();
 		}
@@ -118,8 +120,10 @@ public sealed class ChessProgram
 		OnGameEnded?.Invoke(_state);
 	}
 
-	void CheckState(ulong zobristHash)
+	void CheckState(string fen)
 	{
+		string formattedFEN = fen.Remove(fen.Length - 4, 4);
+
 		List<Move> legalMoves = _chessEngine.GenerateLegalMoves(_playerManager.NextPlayer.Color);
 
 		if (_chessEngine.HalfMoveClock >= 50)
@@ -130,12 +134,12 @@ public sealed class ChessProgram
 
 		try
 		{
-			_repetitionHistory.Add(zobristHash, 1);
+			_repetitionHistory.Add(formattedFEN, 1);
 		}
 		catch (ArgumentException)
 		{
-			_repetitionHistory[zobristHash] = _repetitionHistory[zobristHash] + 1;
-			if (_repetitionHistory[zobristHash] >= 3)
+			_repetitionHistory[formattedFEN] = _repetitionHistory[formattedFEN] + 1;
+			if (_repetitionHistory[formattedFEN] >= 3)
 			{
 				_state = State.DrawByRepetitions;
 				return;
