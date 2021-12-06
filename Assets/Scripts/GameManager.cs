@@ -6,6 +6,8 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoSingleton<GameManager>
 {
+    [SerializeField] TextAsset _openingBook;
+
     public State State { get; private set; }
 
     Move? _lastMove;
@@ -53,7 +55,7 @@ public class GameManager : MonoSingleton<GameManager>
         _whitePlayerClock.OnTimeElapsed += OnTimeElaped;
         _blackPlayerClock.OnTimeElapsed += OnTimeElaped;
 
-        _chessProgram = new ChessProgram(gameSettings);
+        _chessProgram = new ChessProgram(gameSettings, _openingBook.text);
         _chessProgram.OnGameStart += OnGameStart;
         _chessProgram.OnTurnStarted += OnTurnStarted;
         _chessProgram.OnTurnEnded += OnTurnEnded;

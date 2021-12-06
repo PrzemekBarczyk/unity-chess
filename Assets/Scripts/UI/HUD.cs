@@ -69,7 +69,14 @@ public class HUD : MonoBehaviour
 
     public void ChangeDepth(uint depth)
 	{
-        _depth.text = "Depth: " + depth;
+        if (depth == 0)
+        {
+            _depth.text = "Depth: book";
+        }
+        else
+        {
+            _depth.text = "Depth: " + depth;
+        }
 	}
 
     public void ChangeBestEvaluation(int bestEvaluation)

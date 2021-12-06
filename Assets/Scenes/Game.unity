@@ -874,6 +874,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3b44e17d03786c478ff3ea646e162c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _openingBook: {fileID: 4900000, guid: 137b6679c805113479f9df6d7f1c4a07, type: 3}
   _moveSelector: {fileID: 1511886806}
   _whitePlayerClock: {fileID: 518305950}
   _blackPlayerClock: {fileID: 1242511194}

@@ -23,7 +23,10 @@ public sealed class ChessProgram
 
 	ChessEngine _chessEngine;
 
-	public ChessProgram(GameSettings gameSettings)
+	bool _useBook = true;
+	OpeningBook _book;
+
+	public ChessProgram(GameSettings gameSettings, string openingBook)
 	{
 		FENDataAdapter extractedFENData = FENConverter.FENToBoardPositionData(gameSettings.StartPositionInFEN);
 
@@ -32,6 +35,8 @@ public sealed class ChessProgram
 		_playerManager = new PlayerManager(gameSettings.GameType, extractedFENData.PlayerToMoveColor);
 
 		_chessEngine = new ChessEngine(gameSettings.StartPositionInFEN);
+
+		_book = new OpeningBook(_chessEngine, openingBook);
 	}
 
 	public Thread StartGame() // starts game in new thread
@@ -54,7 +59,7 @@ public sealed class ChessProgram
 		{
 			OnTurnStarted?.Invoke(_playerManager.CurrentPlayer.Color);
 
-			Move moveToMake;
+			Move moveToMake = new Move();
 			if (_playerManager.CurrentPlayer.Type == PlayerType.Human)
 			{
 				Move? selectedMove = OnHumanMove?.Invoke(_chessEngine.GenerateLegalMoves(_playerManager.CurrentPlayer.Color)); // send legal moves to GUI and wait for human to choose one
@@ -62,8 +67,26 @@ public sealed class ChessProgram
 			}
 			else // bot turn
 			{
-				moveToMake = _chessEngine.FindBestMove();
-				OnBotMove?.Invoke(new SearchStatistics());
+				if (_useBook)
+				{
+					string fen = _chessEngine.FEN();
+					var movesFromBook = _book.FindEntry(fen.Substring(0, fen.Length - 4));
+					if (movesFromBook == null)
+					{
+						_useBook = false;
+					}
+					else
+					{
+						moveToMake = SimplifiedAlgebraicNotation.LongSANToMove(_chessEngine, movesFromBook[new Random().Next(0, movesFromBook.Count)]);
+						OnBotMove?.Invoke(new SearchStatistics(0, 0, 0, 0, 0));
+					}
+				}
+
+				if (!_useBook)
+				{
+					moveToMake = _chessEngine.FindBestMove();
+					OnBotMove?.Invoke(new SearchStatistics(4, 1, 1, 1, 1));
+				}
 			}
 
 			_chessEngine.MakeMove(moveToMake);
