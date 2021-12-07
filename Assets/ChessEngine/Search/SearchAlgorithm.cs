@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 public abstract class SearchAlgorithm
@@ -13,6 +14,10 @@ public abstract class SearchAlgorithm
 	protected PieceSet _blackPieces;
 
 	protected Move _bestMove;
+	protected int _bestEvaluation;
+	protected uint _positionsEvaluated;
+	protected uint _cutoffs;
+	protected uint _transpositions;
 
 	public SearchAlgorithm(MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager)
 	{
@@ -23,7 +28,7 @@ public abstract class SearchAlgorithm
 		_blackPieces = _pieceManager.BlackPieces;
 	}
 
-	public abstract Move FindBestMove();
+	public abstract Tuple<Move, SearchStatistics> FindBestMove();
 
 	public int Evaluate(ColorType maximizingPlayer = MAXIMIZING_COLOR)
 	{

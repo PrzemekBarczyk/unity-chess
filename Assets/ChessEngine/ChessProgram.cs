@@ -85,8 +85,11 @@ public sealed class ChessProgram
 
 				if (!_useBook)
 				{
-					moveToMake = _chessEngine.FindBestMove();
-					OnBotMove?.Invoke(new SearchStatistics(4, 1, 1, 1, 1));
+					Tuple<Move, SearchStatistics> moveToMakeWithStats = _chessEngine.FindBestMove();
+
+					moveToMake = moveToMakeWithStats.Item1;
+
+					OnBotMove?.Invoke(moveToMakeWithStats.Item2);
 				}
 			}
 

@@ -1,11 +1,17 @@
+using System;
 using System.Collections.Generic;
 
 public sealed class MinMax : SearchAlgorithm
 {
     public MinMax(MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager) : base(moveGenerator, moveExecutor, pieceManager) { }
 
-    public override Move FindBestMove()
+    public override Tuple<Move, SearchStatistics> FindBestMove()
     {
+		_bestEvaluation = 0;
+		_positionsEvaluated = 0;
+		_cutoffs = 0;
+		_transpositions = 0;
+
 		if (_pieceManager.CurrentPieces.Color == MAXIMIZING_COLOR)
 		{
 			Search(_pieceManager.CurrentPieces, MAX_DEPTH, true);
@@ -15,8 +21,8 @@ public sealed class MinMax : SearchAlgorithm
 			Search(_pieceManager.CurrentPieces, MAX_DEPTH, false);
 		}
 
-        return _bestMove;
-    }
+        return new Tuple<Move, SearchStatistics>(_bestMove, new SearchStatistics(MAX_DEPTH, _bestEvaluation, _positionsEvaluated, _cutoffs, _transpositions));
+	}
 
     public int Search(PieceSet currentPlayerPieces, int depth, bool maximizingPlayer)
     {
@@ -50,10 +56,16 @@ public sealed class MinMax : SearchAlgorithm
 
 				_moveExecutor.UndoMove(legalMove);
 
+				_positionsEvaluated++;
+
 				if (evaluation > maxEvaluation)
 				{
 					maxEvaluation = evaluation;
-					if (depth == MAX_DEPTH) _bestMove = legalMove;
+					if (depth == MAX_DEPTH)
+					{
+						_bestMove = legalMove;
+						_bestEvaluation = maxEvaluation;
+					}
 				}
 			}
 
@@ -73,10 +85,16 @@ public sealed class MinMax : SearchAlgorithm
 
 				_moveExecutor.UndoMove(legalMove);
 
+				_positionsEvaluated++;
+
 				if (evaluation < minEvaluation)
 				{
 					minEvaluation = evaluation;
-					if (depth == MAX_DEPTH) _bestMove = legalMove;
+					if (depth == MAX_DEPTH)
+					{
+						_bestMove = legalMove;
+						_bestEvaluation = minEvaluation;
+					}
 				}
 			}
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 public enum ColorType { Undefinied, White, Black }
@@ -45,7 +46,7 @@ public sealed class ChessEngine
 		Perft = new Perft(_moveGenerator, _moveExecutor, _pieceManager);
 	}
 
-	public Move FindBestMove()
+	public Tuple<Move, SearchStatistics> FindBestMove()
 	{
 		return _alphaBeta.FindBestMove();
 	}

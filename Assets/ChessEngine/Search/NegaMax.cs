@@ -1,14 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 public sealed class NegaMax : SearchAlgorithm
 {
 	public NegaMax(MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager) : base(moveGenerator, moveExecutor, pieceManager) { }
 
-	public override Move FindBestMove()
+	public override Tuple<Move, SearchStatistics> FindBestMove()
 	{
+		_bestEvaluation = 0;
+		_positionsEvaluated = 0;
+		_cutoffs = 0;
+		_transpositions = 0;
+
 		Search(_pieceManager.CurrentPieces, MAX_DEPTH);
 
-		return _bestMove;
+		return new Tuple<Move, SearchStatistics>(_bestMove, new SearchStatistics(MAX_DEPTH, _bestEvaluation, _positionsEvaluated, _cutoffs, _transpositions));
 	}
 
 	public int Search(PieceSet currentPlayerPieces, int depth)
@@ -41,10 +47,16 @@ public sealed class NegaMax : SearchAlgorithm
 
 			_moveExecutor.UndoMove(legalMove);
 
+			_positionsEvaluated++;
+
 			if (evaluation > maxEvaluation)
 			{
 				maxEvaluation = evaluation;
-				if (depth == MAX_DEPTH) _bestMove = legalMove;
+				if (depth == MAX_DEPTH)
+				{
+					_bestMove = legalMove;
+					_bestEvaluation = maxEvaluation;
+				}
 			}
 		}
 

@@ -7,8 +7,13 @@ public sealed class AlphaBeta : SearchAlgorithm
 
 	public AlphaBeta(MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager) : base(moveGenerator, moveExecutor, pieceManager) { }
 
-	public override Move FindBestMove()
+	public override Tuple<Move, SearchStatistics> FindBestMove()
 	{
+		_bestEvaluation = 0;
+		_positionsEvaluated = 0;
+		_cutoffs = 0;
+		_transpositions = 0;
+
 		if (_pieceManager.CurrentPieces.Color == MAXIMIZING_COLOR)
 		{
 			Search(_pieceManager.CurrentPieces, MAX_DEPTH, -10000000, 10000000, true);
@@ -18,7 +23,7 @@ public sealed class AlphaBeta : SearchAlgorithm
 			Search(_pieceManager.CurrentPieces, MAX_DEPTH, -10000000, 10000000, false);
 		}
 
-		return _bestMove;
+		return new Tuple<Move, SearchStatistics>(_bestMove, new SearchStatistics(MAX_DEPTH, _bestEvaluation, _positionsEvaluated, _cutoffs, _transpositions));
 	}
 
 	public int Search(PieceSet currentPlayerPieces, int depth, int alpha, int beta, bool maximizingPlayer)
@@ -56,16 +61,23 @@ public sealed class AlphaBeta : SearchAlgorithm
 
 				_moveExecutor.UndoMove(legalMove);
 
+				_positionsEvaluated++;
+
 				if (evaluation > maxEvaluation)
 				{
 					maxEvaluation = evaluation;
-					if (depth == MAX_DEPTH) _bestMove = legalMove;
+					if (depth == MAX_DEPTH)
+					{
+						_bestMove = legalMove;
+						_bestEvaluation = maxEvaluation;
+					}
 				}
 
 				alpha = Math.Max(alpha, maxEvaluation);
 
 				if (alpha >= beta)
 				{
+					_cutoffs++;
 					break;
 				}
 			}
@@ -86,16 +98,23 @@ public sealed class AlphaBeta : SearchAlgorithm
 
 				_moveExecutor.UndoMove(legalMove);
 
+				_positionsEvaluated++;
+
 				if (evaluation < minEvaluation)
 				{
 					minEvaluation = evaluation;
-					if (depth == MAX_DEPTH) _bestMove = legalMove;
+					if (depth == MAX_DEPTH)
+					{
+						_bestMove = legalMove;
+						_bestEvaluation = minEvaluation;
+					}
 				}
 
 				beta = Math.Min(beta, minEvaluation);
 
 				if (alpha >= beta)
 				{
+					_cutoffs++;
 					break;
 				}
 			}
@@ -149,6 +168,8 @@ public sealed class AlphaBeta : SearchAlgorithm
 
 					_moveExecutor.UndoMove(legalMove);
 
+					_positionsEvaluated++;
+
 					if (evaluation >= beta)
 					{
 						return beta;
@@ -175,6 +196,8 @@ public sealed class AlphaBeta : SearchAlgorithm
 					int evaluation = QuiescenceSearch(nextDepthPlayerPieces, alpha, beta, true);
 
 					_moveExecutor.UndoMove(legalMove);
+
+					_positionsEvaluated++;
 
 					if (evaluation <= alpha)
 					{

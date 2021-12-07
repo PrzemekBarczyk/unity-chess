@@ -14,11 +14,16 @@ public sealed class NegaBetaTT : SearchAlgorithm
 		_transpositionTable = new TranspositionTable(board, TRANSPOSITION_TABLE_SIZE);
 	}
 
-	public override Move FindBestMove()
+	public override Tuple<Move, SearchStatistics> FindBestMove()
 	{
+		_bestEvaluation = 0;
+		_positionsEvaluated = 0;
+		_cutoffs = 0;
+		_transpositions = 0;
+
 		Search(_pieceManager.CurrentPieces, MAX_DEPTH, -10000000, 10000000);
 
-		return _bestMove;
+		return new Tuple<Move, SearchStatistics>(_bestMove, new SearchStatistics(MAX_DEPTH, _bestEvaluation, _positionsEvaluated, _cutoffs, _transpositions));
 	}
 
 	public int Search(PieceSet currentPlayerPieces, int depth, int alpha, int beta)
@@ -30,20 +35,29 @@ public sealed class NegaBetaTT : SearchAlgorithm
 		{
 			if (ttEntry.nodeType == TranspositionTable.EXACT)
 			{
-				if (depth == MAX_DEPTH) _bestMove = ttEntry.move;
+				_transpositions++;
+				if (depth == MAX_DEPTH)
+				{
+					_bestMove = ttEntry.move;
+					_bestEvaluation = ttEntry.evaluation;
+				}
 				return ttEntry.evaluation;
 			}
+
 			if (ttEntry.nodeType == TranspositionTable.LOWER_BOUND && ttEntry.evaluation > alpha)
 			{
+				_transpositions++;
 				alpha = ttEntry.evaluation;
 			}
 			else if (ttEntry.nodeType == TranspositionTable.UPPER_BOUND && ttEntry.evaluation < beta)
 			{
+				_transpositions++;
 				beta = ttEntry.evaluation;
 			}
 
 			if (alpha >= beta)
 			{
+				_transpositions++;
 				return ttEntry.evaluation;
 			}
 		}
@@ -79,17 +93,24 @@ public sealed class NegaBetaTT : SearchAlgorithm
 
 			_moveExecutor.UndoMove(legalMove);
 
+			_positionsEvaluated++;
+
 			if (evaluation > bestEvaluation)
 			{
 				bestEvaluation = evaluation;
 				bestMoveInNode = legalMove;
-				if (depth == MAX_DEPTH) _bestMove = legalMove;
+				if (depth == MAX_DEPTH)
+				{
+					_bestMove = bestMoveInNode;
+					_bestEvaluation = bestEvaluation;
+				}
 			}
 
 			alpha = Math.Max(alpha, bestEvaluation);
 
 			if (alpha >= beta)
 			{
+				_cutoffs++;
 				break;
 			}
 		}
@@ -135,6 +156,8 @@ public sealed class NegaBetaTT : SearchAlgorithm
 				int evaluation = -QuiescenceSearch(nextDepthPlayerPieces, -beta, -alpha);
 
 				_moveExecutor.UndoMove(legalMove);
+
+				_positionsEvaluated++;
 
 				if (evaluation >= beta)
 				{
