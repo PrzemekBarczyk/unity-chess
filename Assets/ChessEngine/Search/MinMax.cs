@@ -5,7 +5,7 @@ public sealed class MinMax : SearchAlgorithm
 {
     public MinMax(MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager) : base(moveGenerator, moveExecutor, pieceManager) { }
 
-    public override Tuple<Move, SearchStatistics> FindBestMove()
+    public override Tuple<Move, SearchStatistics> FindBestMove(uint fixedSearchDepth)
     {
 		_bestEvaluation = 0;
 		_positionsEvaluated = 0;
@@ -14,17 +14,17 @@ public sealed class MinMax : SearchAlgorithm
 
 		if (_pieceManager.CurrentPieces.Color == MAXIMIZING_COLOR)
 		{
-			Search(_pieceManager.CurrentPieces, MAX_DEPTH, true);
+			Search(_pieceManager.CurrentPieces, fixedSearchDepth, true, fixedSearchDepth);
 		}
 		else
 		{
-			Search(_pieceManager.CurrentPieces, MAX_DEPTH, false);
+			Search(_pieceManager.CurrentPieces, fixedSearchDepth, false, fixedSearchDepth);
 		}
 
-        return new Tuple<Move, SearchStatistics>(_bestMove, new SearchStatistics(MAX_DEPTH, _bestEvaluation, _positionsEvaluated, _cutoffs, _transpositions));
+        return new Tuple<Move, SearchStatistics>(_bestMove, new SearchStatistics(fixedSearchDepth, _bestEvaluation, _positionsEvaluated, _cutoffs, _transpositions));
 	}
 
-    public int Search(PieceSet currentPlayerPieces, int depth, bool maximizingPlayer)
+    public int Search(PieceSet currentPlayerPieces, uint depth, bool maximizingPlayer, uint maxDepth)
     {
 		if (depth == 0)
 		{
@@ -52,7 +52,7 @@ public sealed class MinMax : SearchAlgorithm
 
 				_moveExecutor.MakeMove(legalMove);
 
-				int evaluation = Search(nextDepthPlayerPieces, depth - 1, false);
+				int evaluation = Search(nextDepthPlayerPieces, depth - 1, false, maxDepth);
 
 				_moveExecutor.UndoMove(legalMove);
 
@@ -61,7 +61,7 @@ public sealed class MinMax : SearchAlgorithm
 				if (evaluation > maxEvaluation)
 				{
 					maxEvaluation = evaluation;
-					if (depth == MAX_DEPTH)
+					if (depth == maxDepth)
 					{
 						_bestMove = legalMove;
 						_bestEvaluation = maxEvaluation;
@@ -81,7 +81,7 @@ public sealed class MinMax : SearchAlgorithm
 
 				_moveExecutor.MakeMove(legalMove);
 
-				int evaluation = Search(nextDepthPlayerPieces, depth - 1, true);
+				int evaluation = Search(nextDepthPlayerPieces, depth - 1, true, maxDepth);
 
 				_moveExecutor.UndoMove(legalMove);
 
@@ -90,7 +90,7 @@ public sealed class MinMax : SearchAlgorithm
 				if (evaluation < minEvaluation)
 				{
 					minEvaluation = evaluation;
-					if (depth == MAX_DEPTH)
+					if (depth == maxDepth)
 					{
 						_bestMove = legalMove;
 						_bestEvaluation = minEvaluation;

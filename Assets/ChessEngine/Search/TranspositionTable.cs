@@ -40,7 +40,7 @@
 		return Entry.InvalidEntry();
 	}
 
-	public void StoreEntry(int depth, int evaluation, int nodeType, Move move)
+	public void StoreEntry(uint depth, int evaluation, int nodeType, Move move)
 	{
 		_entries[Index()] = new Entry(_board.ZobristHash, depth, evaluation, nodeType, move);
 	}
@@ -49,12 +49,12 @@
 public struct Entry
 {
 	public readonly ulong key;
-	public readonly int depth;
+	public readonly uint depth;
 	public readonly int evaluation;
 	public readonly int nodeType;
 	public readonly Move move;
 
-	public Entry(ulong key, int depth, int evaluation, int nodeType, Move move)
+	public Entry(ulong key, uint depth, int evaluation, int nodeType, Move move)
 	{
 		this.key = key;
 		this.evaluation = evaluation;

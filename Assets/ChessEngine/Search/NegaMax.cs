@@ -5,19 +5,19 @@ public sealed class NegaMax : SearchAlgorithm
 {
 	public NegaMax(MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager) : base(moveGenerator, moveExecutor, pieceManager) { }
 
-	public override Tuple<Move, SearchStatistics> FindBestMove()
+	public override Tuple<Move, SearchStatistics> FindBestMove(uint fixedDepthSearch)
 	{
 		_bestEvaluation = 0;
 		_positionsEvaluated = 0;
 		_cutoffs = 0;
 		_transpositions = 0;
 
-		Search(_pieceManager.CurrentPieces, MAX_DEPTH);
+		Search(_pieceManager.CurrentPieces, fixedDepthSearch, fixedDepthSearch);
 
-		return new Tuple<Move, SearchStatistics>(_bestMove, new SearchStatistics(MAX_DEPTH, _bestEvaluation, _positionsEvaluated, _cutoffs, _transpositions));
+		return new Tuple<Move, SearchStatistics>(_bestMove, new SearchStatistics(fixedDepthSearch, _bestEvaluation, _positionsEvaluated, _cutoffs, _transpositions));
 	}
 
-	public int Search(PieceSet currentPlayerPieces, int depth)
+	public int Search(PieceSet currentPlayerPieces, uint depth, uint maxDepth)
 	{
 		if (depth == 0)
 		{
@@ -43,7 +43,7 @@ public sealed class NegaMax : SearchAlgorithm
 
 			_moveExecutor.MakeMove(legalMove);
 
-			int evaluation = -Search(nextDepthPlayerPieces, depth - 1);
+			int evaluation = -Search(nextDepthPlayerPieces, depth - 1, maxDepth);
 
 			_moveExecutor.UndoMove(legalMove);
 
@@ -52,7 +52,7 @@ public sealed class NegaMax : SearchAlgorithm
 			if (evaluation > maxEvaluation)
 			{
 				maxEvaluation = evaluation;
-				if (depth == MAX_DEPTH)
+				if (depth == maxDepth)
 				{
 					_bestMove = legalMove;
 					_bestEvaluation = maxEvaluation;

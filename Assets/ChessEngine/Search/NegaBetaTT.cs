@@ -14,20 +14,27 @@ public sealed class NegaBetaTT : SearchAlgorithm
 		_transpositionTable = new TranspositionTable(board, TRANSPOSITION_TABLE_SIZE);
 	}
 
-	public override Tuple<Move, SearchStatistics> FindBestMove()
+	public override Tuple<Move, SearchStatistics> FindBestMove(uint fixedSearchDepth)
 	{
+		_aboordSearch = false;
+
 		_bestEvaluation = 0;
 		_positionsEvaluated = 0;
 		_cutoffs = 0;
 		_transpositions = 0;
 
-		Search(_pieceManager.CurrentPieces, MAX_DEPTH, -10000000, 10000000);
+		Search(_pieceManager.CurrentPieces, fixedSearchDepth, -10000000, 10000000, fixedSearchDepth);
 
-		return new Tuple<Move, SearchStatistics>(_bestMove, new SearchStatistics(MAX_DEPTH, _bestEvaluation, _positionsEvaluated, _cutoffs, _transpositions));
+		return new Tuple<Move, SearchStatistics>(_bestMove, new SearchStatistics(fixedSearchDepth, _bestEvaluation, _positionsEvaluated, _cutoffs, _transpositions));
 	}
 
-	public int Search(PieceSet currentPlayerPieces, int depth, int alpha, int beta)
+	public int Search(PieceSet currentPlayerPieces, uint depth, int alpha, int beta, uint maxDepth)
 	{
+		if (_aboordSearch)
+		{
+			return 0;
+		}
+
 		int alphaOrig = alpha;
 
 		Entry ttEntry = _transpositionTable.GetEntry();
@@ -36,7 +43,7 @@ public sealed class NegaBetaTT : SearchAlgorithm
 			if (ttEntry.nodeType == TranspositionTable.EXACT)
 			{
 				_transpositions++;
-				if (depth == MAX_DEPTH)
+				if (depth == maxDepth)
 				{
 					_bestMove = ttEntry.move;
 					_bestEvaluation = ttEntry.evaluation;
@@ -89,7 +96,7 @@ public sealed class NegaBetaTT : SearchAlgorithm
 
 			_moveExecutor.MakeMove(legalMove);
 
-			int evaluation = -Search(nextDepthPlayerPieces, depth - 1, -beta, -alpha);
+			int evaluation = -Search(nextDepthPlayerPieces, depth - 1, -beta, -alpha, maxDepth);
 
 			_moveExecutor.UndoMove(legalMove);
 
@@ -99,7 +106,7 @@ public sealed class NegaBetaTT : SearchAlgorithm
 			{
 				bestEvaluation = evaluation;
 				bestMoveInNode = legalMove;
-				if (depth == MAX_DEPTH)
+				if (depth == maxDepth)
 				{
 					_bestMove = bestMoveInNode;
 					_bestEvaluation = bestEvaluation;

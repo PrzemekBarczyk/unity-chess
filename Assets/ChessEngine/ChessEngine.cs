@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading;
 
 public enum ColorType { Undefinied, White, Black }
 
@@ -46,10 +48,39 @@ public sealed class ChessEngine
 		Perft = new Perft(_moveGenerator, _moveExecutor, _pieceManager);
 	}
 
-	public Tuple<Move, SearchStatistics> FindBestMove()
+	public Tuple<Move, SearchStatistics> FindBestMove(uint fixedSearchDepth)
 	{
-		return _alphaBeta.FindBestMove();
+		return _alphaBeta.FindBestMove(fixedSearchDepth);
 	}
+
+	public Tuple<Move, SearchStatistics> FindBestMove(float timeForSearchInMilliseconds)
+	{
+		Stopwatch timer = Stopwatch.StartNew();
+
+		Tuple<Move, SearchStatistics> bestMoveDataThisIteration = new Tuple<Move, SearchStatistics>(new Move(), new SearchStatistics());
+		Tuple<Move, SearchStatistics> bestMoveData = new Tuple<Move, SearchStatistics>(new Move(), new SearchStatistics());
+
+		uint currentSearchDepth = 1;
+
+		while (true)
+		{
+			Thread t = new Thread(() => bestMoveDataThisIteration = _negaBetaTT.FindBestMove(currentSearchDepth++));
+			t.Start();
+
+			while (t.IsAlive)
+			{
+				if (timer.ElapsedMilliseconds >= timeForSearchInMilliseconds)
+				{
+					_negaBetaTT.AbordSearch();
+					t.Join();
+					return bestMoveData;
+				}
+			}
+
+			bestMoveData = bestMoveDataThisIteration;
+		}
+	}
+
 
 	public List<Move> GenerateLegalMoves()
 	{

@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 public abstract class SearchAlgorithm
 {
-	protected const int MAX_DEPTH = 4;
-
 	protected const ColorType MAXIMIZING_COLOR = ColorType.Black;
 
 	protected MoveGenerator _moveGenerator;
@@ -12,6 +10,8 @@ public abstract class SearchAlgorithm
 	protected PieceManager _pieceManager;
 	protected PieceSet _whitePieces;
 	protected PieceSet _blackPieces;
+
+	protected bool _aboordSearch;
 
 	protected Move _bestMove;
 	protected int _bestEvaluation;
@@ -28,7 +28,12 @@ public abstract class SearchAlgorithm
 		_blackPieces = _pieceManager.BlackPieces;
 	}
 
-	public abstract Tuple<Move, SearchStatistics> FindBestMove();
+	public abstract Tuple<Move, SearchStatistics> FindBestMove(uint fixedSearchDepth);
+
+	public void AbordSearch()
+	{
+		_aboordSearch = true;
+	}
 
 	public int Evaluate(ColorType maximizingPlayer = MAXIMIZING_COLOR)
 	{

@@ -7,7 +7,7 @@ public sealed class AlphaBeta : SearchAlgorithm
 
 	public AlphaBeta(MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager) : base(moveGenerator, moveExecutor, pieceManager) { }
 
-	public override Tuple<Move, SearchStatistics> FindBestMove()
+	public override Tuple<Move, SearchStatistics> FindBestMove(uint fixedSearchDepth)
 	{
 		_bestEvaluation = 0;
 		_positionsEvaluated = 0;
@@ -16,17 +16,17 @@ public sealed class AlphaBeta : SearchAlgorithm
 
 		if (_pieceManager.CurrentPieces.Color == MAXIMIZING_COLOR)
 		{
-			Search(_pieceManager.CurrentPieces, MAX_DEPTH, -10000000, 10000000, true);
+			Search(_pieceManager.CurrentPieces, fixedSearchDepth, -10000000, 10000000, true, fixedSearchDepth);
 		}
 		else
 		{
-			Search(_pieceManager.CurrentPieces, MAX_DEPTH, -10000000, 10000000, false);
+			Search(_pieceManager.CurrentPieces, fixedSearchDepth, -10000000, 10000000, false, fixedSearchDepth);
 		}
 
-		return new Tuple<Move, SearchStatistics>(_bestMove, new SearchStatistics(MAX_DEPTH, _bestEvaluation, _positionsEvaluated, _cutoffs, _transpositions));
+		return new Tuple<Move, SearchStatistics>(_bestMove, new SearchStatistics(fixedSearchDepth, _bestEvaluation, _positionsEvaluated, _cutoffs, _transpositions));
 	}
 
-	public int Search(PieceSet currentPlayerPieces, int depth, int alpha, int beta, bool maximizingPlayer)
+	public int Search(PieceSet currentPlayerPieces, uint depth, int alpha, int beta, bool maximizingPlayer, uint maxDepth)
 	{
 		if (depth == 0)
 		{
@@ -57,7 +57,7 @@ public sealed class AlphaBeta : SearchAlgorithm
 
 				_moveExecutor.MakeMove(legalMove);
 
-				int evaluation = Search(nextDepthPlayerPieces, depth - 1, alpha, beta, false);
+				int evaluation = Search(nextDepthPlayerPieces, depth - 1, alpha, beta, false, maxDepth);
 
 				_moveExecutor.UndoMove(legalMove);
 
@@ -66,7 +66,7 @@ public sealed class AlphaBeta : SearchAlgorithm
 				if (evaluation > maxEvaluation)
 				{
 					maxEvaluation = evaluation;
-					if (depth == MAX_DEPTH)
+					if (depth == maxDepth)
 					{
 						_bestMove = legalMove;
 						_bestEvaluation = maxEvaluation;
@@ -94,7 +94,7 @@ public sealed class AlphaBeta : SearchAlgorithm
 
 				_moveExecutor.MakeMove(legalMove);
 
-				int evaluation = Search(nextDepthPlayerPieces, depth - 1, alpha, beta, true);
+				int evaluation = Search(nextDepthPlayerPieces, depth - 1, alpha, beta, true, maxDepth);
 
 				_moveExecutor.UndoMove(legalMove);
 
@@ -103,7 +103,7 @@ public sealed class AlphaBeta : SearchAlgorithm
 				if (evaluation < minEvaluation)
 				{
 					minEvaluation = evaluation;
-					if (depth == MAX_DEPTH)
+					if (depth == maxDepth)
 					{
 						_bestMove = legalMove;
 						_bestEvaluation = minEvaluation;

@@ -26,6 +26,10 @@ public sealed class ChessProgram
 	bool _useBook = true;
 	OpeningBook _book;
 
+	uint _fixedSearchedDepth = 5;
+	bool _useIterativeDeepening = true;
+	float _timerForSearch = 1000f; // in milliseconds
+
 	public ChessProgram(GameSettings gameSettings, string openingBook)
 	{
 		FENDataAdapter extractedFENData = FENConverter.FENToBoardPositionData(gameSettings.StartPositionInFEN);
@@ -85,7 +89,16 @@ public sealed class ChessProgram
 
 				if (!_useBook)
 				{
-					Tuple<Move, SearchStatistics> moveToMakeWithStats = _chessEngine.FindBestMove();
+					Tuple<Move, SearchStatistics> moveToMakeWithStats;
+
+					if (!_useIterativeDeepening)
+					{
+						moveToMakeWithStats = _chessEngine.FindBestMove(_fixedSearchedDepth);
+					}
+					else
+					{
+						moveToMakeWithStats = _chessEngine.FindBestMove(_timerForSearch);
+					}
 
 					moveToMake = moveToMakeWithStats.Item1;
 
