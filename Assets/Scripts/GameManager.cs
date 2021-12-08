@@ -22,6 +22,9 @@ public class GameManager : MonoSingleton<GameManager>
     [SerializeField] Clock _whitePlayerClock;
     [SerializeField] Clock _blackPlayerClock;
 
+    [SerializeField] CapturedPieces _whitePlayerCapturedPieces;
+    [SerializeField] CapturedPieces _blackPlayerCapturedPieces;
+
     HUD _hud;
 
     void Start()
@@ -109,6 +112,18 @@ public class GameManager : MonoSingleton<GameManager>
             {
                 _blackPlayerClock.Stop();
             }
+
+            if (move.EncounteredPiece != null)
+			{
+                if (move.EncounteredPiece.Color == ColorType.White)
+				{
+                    _whitePlayerCapturedPieces.AddCaptureIcon(move.EncounteredPiece.Type);
+				}
+                else
+				{
+                    _blackPlayerCapturedPieces.AddCaptureIcon(move.EncounteredPiece.Type);
+                }
+			}
 
             _graphicalBoard.UpdateBoard(move, _lastMove);
             _lastMove = move;
