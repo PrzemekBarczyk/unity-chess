@@ -105,6 +105,30 @@ public sealed class ChessEngine
 		return pieces.IsKingChecked();
 	}
 
+	internal bool IsMaterialSufficient(ColorType playerColor)
+	{
+		PieceSet pieces = playerColor == ColorType.White ? _pieceManager.WhitePieces : _pieceManager.BlackPieces;
+		bool isMaterialSufficient = false;
+		int counter = 0;
+		foreach (var piece in pieces.AllPieces)
+		{
+			if (piece.IsAlive)
+			{
+				if (piece.Type == PieceType.Queen || piece.Type == PieceType.Rook || piece.Type == PieceType.Pawn)
+				{
+					isMaterialSufficient = true;
+					break;
+				}
+				counter++;
+			}
+			if (counter > 2)
+			{
+				isMaterialSufficient = true;
+				break;
+			}
+		}
+		return isMaterialSufficient;
+	}
 
 	internal ulong ZobristHash()
 	{

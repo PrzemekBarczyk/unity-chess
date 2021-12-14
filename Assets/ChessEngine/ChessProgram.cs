@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 
-public enum State { Undefinied, Playing, Checkmate, DrawByStalemate, DrawByFiftyMoveRule, DrawByRepetitions, TimeElapsed }
+public enum State { Undefinied, Playing, Checkmate, DrawByStalemate, DrawByFiftyMoveRule, DrawByRepetitions, DrawByInsufficientMaterial, TimeElapsed }
 
 public sealed class ChessProgram
 {
@@ -141,6 +141,12 @@ public sealed class ChessProgram
 		string formattedFEN = fen.Remove(fen.Length - 4, 4);
 
 		List<Move> legalMoves = _chessEngine.GenerateLegalMoves(_playerManager.NextPlayer.Color);
+
+		if (!_chessEngine.IsMaterialSufficient(_playerManager.NextPlayer.Color) && !_chessEngine.IsMaterialSufficient(_playerManager.CurrentPlayer.Color))
+		{
+			_state = State.DrawByInsufficientMaterial;
+			return;
+		}
 
 		if (_chessEngine.HalfMoveClock >= 50)
 		{
