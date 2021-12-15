@@ -4,7 +4,6 @@ using System.Threading;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-[RequireComponent(typeof(AudioSource))]
 public class GameManager : MonoSingleton<GameManager>
 {
     [SerializeField] TextAsset _openingBook;
@@ -16,10 +15,9 @@ public class GameManager : MonoSingleton<GameManager>
     ChessProgram _chessProgram;
     Thread _chessEngineThread;
 
-    [SerializeField] MoveSelector _moveSelector;
+    [SerializeField] SFXManager _sfxManager;
 
-    [SerializeField] AudioClip _captureSFX;
-    [SerializeField] AudioClip _moveSFX;
+    [SerializeField] MoveSelector _moveSelector;
 
     GraphicalBoard _graphicalBoard;
 
@@ -29,14 +27,10 @@ public class GameManager : MonoSingleton<GameManager>
     [SerializeField] CapturedPieces _whitePlayerCapturedPieces;
     [SerializeField] CapturedPieces _blackPlayerCapturedPieces;
 
-    AudioSource _audioSource;
-
     HUD _hud;
 
     void Start()
     {
-        _audioSource = GetComponent<AudioSource>();
-
         _graphicalBoard = GraphicalBoard.Instance;
 
         _hud = FindObjectOfType<HUD>(true);
@@ -123,7 +117,7 @@ public class GameManager : MonoSingleton<GameManager>
 
             if (move.EncounteredPiece != null)
 			{
-                _audioSource.PlayOneShot(_captureSFX);
+                _sfxManager.PlayCaptureSFX();
 
                 if (move.EncounteredPiece.Color == ColorType.White)
 				{
@@ -136,7 +130,7 @@ public class GameManager : MonoSingleton<GameManager>
 			}
             else
 			{
-                _audioSource.PlayOneShot(_moveSFX);
+                _sfxManager.PlayMoveSFX();
 			}
 
             _graphicalBoard.UpdateBoard(move, _lastMove);
