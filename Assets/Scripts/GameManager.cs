@@ -37,6 +37,8 @@ public class GameManager : MonoSingleton<GameManager>
 
     public void StartGame(GameSettings gameSettings) // called after pressing PLAY button
     {
+        Time.timeScale = 0f;
+
         FENDataAdapter extractedFENData;
         try
         {
@@ -103,6 +105,8 @@ public class GameManager : MonoSingleton<GameManager>
 	{
         ThreadDispatcher.RunOnMainThread(() =>
         {
+            Time.timeScale = 1f;
+
             if (move.Piece.Color == ColorType.White)
             {
                 _whitePlayerClock.Stop();
