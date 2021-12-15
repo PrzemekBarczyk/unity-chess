@@ -6,35 +6,32 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoSingleton<GameManager>
 {
-    [SerializeField] TextAsset _openingBook;
+    [Header("Oppening Book")]
+    [SerializeField] TextAsset _openingBookFile;
+
+    [Header("External Dependencies")]
+    [SerializeField] SFXManager _sfxManager;
+    [SerializeField] GraphicalBoard _graphicalBoard;
+    [SerializeField] HUD _hud;
+
+    [Header("Move Selector")]
+    [SerializeField] MoveSelector _moveSelector;
+
+    [Header("UI Clocks")]
+    [SerializeField] Clock _whitePlayerClock;
+    [SerializeField] Clock _blackPlayerClock;
+
+    [Header("UI Captured Pieces Lists")]
+    [SerializeField] CapturedPieces _whitePlayerCapturedPieces;
+    [SerializeField] CapturedPieces _blackPlayerCapturedPieces;
 
     public State State { get; private set; }
-
-    Move? _lastMove;
 
     ChessProgram _chessProgram;
     Thread _chessEngineThread;
 
-    [SerializeField] SFXManager _sfxManager;
-
-    [SerializeField] MoveSelector _moveSelector;
-
-    GraphicalBoard _graphicalBoard;
-
-    [SerializeField] Clock _whitePlayerClock;
-    [SerializeField] Clock _blackPlayerClock;
-
-    [SerializeField] CapturedPieces _whitePlayerCapturedPieces;
-    [SerializeField] CapturedPieces _blackPlayerCapturedPieces;
-
-    HUD _hud;
-
     void Start()
     {
-        _graphicalBoard = GraphicalBoard.Instance;
-
-        _hud = FindObjectOfType<HUD>(true);
-
         _graphicalBoard.CreateBoard();
     }
 
@@ -60,7 +57,7 @@ public class GameManager : MonoSingleton<GameManager>
         _whitePlayerClock.OnTimeElapsed += OnTimeElaped;
         _blackPlayerClock.OnTimeElapsed += OnTimeElaped;
 
-        _chessProgram = new ChessProgram(gameSettings, _openingBook.text);
+        _chessProgram = new ChessProgram(gameSettings, _openingBookFile.text);
         _chessProgram.OnGameStart += OnGameStart;
         _chessProgram.OnTurnStarted += OnTurnStarted;
         _chessProgram.OnTurnEnded += OnTurnEnded;
@@ -133,8 +130,7 @@ public class GameManager : MonoSingleton<GameManager>
                 _sfxManager.PlayMoveSFX();
 			}
 
-            _graphicalBoard.UpdateBoard(move, _lastMove);
-            _lastMove = move;
+            _graphicalBoard.UpdateBoard(move);
 
             _hud.ChangeZobristKey(boardStatistics.ZobristKey);
             _hud.ChangeEvaluation(boardStatistics.Evaluation);

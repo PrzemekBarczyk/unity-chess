@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GraphicalBoard : MonoSingleton<GraphicalBoard>
+public class GraphicalBoard : MonoBehaviour
 {
     [Header("Squares")]
     [SerializeField] GraphicalSquare _whiteSquarePrefab;
@@ -11,6 +11,8 @@ public class GraphicalBoard : MonoSingleton<GraphicalBoard>
     [SerializeField] PiecesSprites _piecesSprites;
 
     public GraphicalSquare[,] Squares { get; } = new GraphicalSquare[Board.FILES, Board.RANKS];
+
+    Move? _lastMove;
 
     public void CreateBoard()
     {
@@ -36,12 +38,12 @@ public class GraphicalBoard : MonoSingleton<GraphicalBoard>
         }
     }
 
-    public void UpdateBoard(Move moveToMake, Move? lastOpponentMove)
+    public void UpdateBoard(Move moveToMake)
     {
-        if (lastOpponentMove.HasValue)
+        if (_lastMove.HasValue)
         {
-            Squares[lastOpponentMove.Value.OldSquare.Position.x, lastOpponentMove.Value.OldSquare.Position.y].HideLastMoveIndicator();
-            Squares[lastOpponentMove.Value.NewSquare.Position.x, lastOpponentMove.Value.NewSquare.Position.y].HideLastMoveIndicator();
+            Squares[_lastMove.Value.OldSquare.Position.x, _lastMove.Value.OldSquare.Position.y].HideLastMoveIndicator();
+            Squares[_lastMove.Value.NewSquare.Position.x, _lastMove.Value.NewSquare.Position.y].HideLastMoveIndicator();
         }
 
         if (moveToMake.Type == MoveType.Castle)
@@ -80,5 +82,7 @@ public class GraphicalBoard : MonoSingleton<GraphicalBoard>
 
         Squares[moveToMake.OldSquare.Position.x, moveToMake.OldSquare.Position.y].DisplayLastMoveIndicator();
         Squares[moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y].DisplayLastMoveIndicator();
+
+        _lastMove = moveToMake;
     }
 }

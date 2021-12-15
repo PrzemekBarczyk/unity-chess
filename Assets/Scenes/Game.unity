@@ -874,8 +874,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3b44e17d03786c478ff3ea646e162c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _openingBook: {fileID: 4900000, guid: 137b6679c805113479f9df6d7f1c4a07, type: 3}
+  _openingBookFile: {fileID: 4900000, guid: 137b6679c805113479f9df6d7f1c4a07, type: 3}
   _sfxManager: {fileID: 493694382}
+  _graphicalBoard: {fileID: 1208830684}
+  _hud: {fileID: 594648756}
   _moveSelector: {fileID: 1511886806}
   _whitePlayerClock: {fileID: 518305950}
   _blackPlayerClock: {fileID: 1242511194}
@@ -6187,6 +6189,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50bd5d12b894814428dd14d5118d89e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _board: {fileID: 1208830684}
   _piecesSprites: {fileID: 11400000, guid: 24e481f4ba189bf40b26ca974fbf5adb, type: 2}
   _draggedPieceSpriteRenderer: {fileID: 1934495028}
 --- !u!4 &1511886807

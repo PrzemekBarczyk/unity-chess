@@ -5,8 +5,11 @@ using UnityEngine;
 
 public class MoveSelector : MonoSingleton<MoveSelector>
 {
+	[Header("External Dependencies")]
+	[SerializeField] GraphicalBoard _board;
 	[SerializeField] PiecesSprites _piecesSprites;
 
+	[Header("Dragged Piece")]
 	[SerializeField] SpriteRenderer _draggedPieceSpriteRenderer;
 
 	List<Move> _legalMoves;
@@ -21,13 +24,6 @@ public class MoveSelector : MonoSingleton<MoveSelector>
 	byte _droppedPiecInSameSquareCounter = 0;
 
 	bool _pickingPromotion;
-
-	GraphicalBoard _board;
-
-	void Start()
-	{
-		_board = GraphicalBoard.Instance;
-	}
 
 	public void SetLegalMoves(List<Move> legalMoves)
 	{

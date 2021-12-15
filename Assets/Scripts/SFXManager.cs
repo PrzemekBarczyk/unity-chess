@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(AudioSource))]
-public class SFXManager : MonoSingleton<SFXManager>
+public class SFXManager : MonoBehaviour
 {
     [SerializeField] AudioClip _captureSFX;
     [SerializeField] AudioClip _moveSFX;
