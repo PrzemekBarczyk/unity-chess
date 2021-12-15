@@ -25,6 +25,10 @@ public class HUD : MonoBehaviour
     [SerializeField] Text _whitePlayerClock;
     [SerializeField] Text _blackPlayerClock;
 
+    [Header("Result message")]
+    [SerializeField] Image _resultMessageBackground;
+    [SerializeField] Text _resultMessageText;
+
     void Awake()
     {
         RemovePlaceholders();
@@ -47,6 +51,9 @@ public class HUD : MonoBehaviour
 
         _whitePlayerClock.text = "";
         _blackPlayerClock.text = "";
+
+        _resultMessageBackground.gameObject.SetActive(false);
+        _resultMessageText.text = "";
     }
 
     public void SetUp(GameSettings gameSettings)
@@ -119,5 +126,34 @@ public class HUD : MonoBehaviour
     public void HandleQuitButton()
 	{
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+	}
+
+    public void DisplayResultMessage(State result)
+	{
+        _resultMessageBackground.gameObject.SetActive(true);
+
+        switch (result)
+		{
+            case State.Checkmate:
+                _resultMessageText.text = "Checkmate";
+                break;
+            case State.DrawByStalemate:
+                _resultMessageText.text = "Draw by stalemate";
+                break;
+            case State.DrawByFiftyMoveRule:
+                _resultMessageText.text = "Draw by fifty move rule";
+                break;
+            case State.DrawByRepetitions:
+                _resultMessageText.text = "Draw by repetitions";
+                break;
+            case State.DrawByInsufficientMaterial:
+                _resultMessageText.text = "Draw by insufficient material";
+                break;
+            case State.TimeElapsed:
+                _resultMessageText.text = "Time elapsed";
+                break;
+            default:
+                throw new System.Exception("Undefined result");
+        }
 	}
 }

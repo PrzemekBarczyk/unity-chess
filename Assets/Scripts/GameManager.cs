@@ -151,7 +151,7 @@ public class GameManager : MonoSingleton<GameManager>
         State = result;
         Time.timeScale = 0f;
         if (_chessEngineThread != null) _chessEngineThread.Abort();
-        Debug.Log("Game over: " + result);
+        _hud.DisplayResultMessage(result);
     }
 
     public Move OnHumanMove(List<Move> legalMoves)
