@@ -4,6 +4,7 @@ using System.Threading;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+[RequireComponent(typeof(AudioSource))]
 public class GameManager : MonoSingleton<GameManager>
 {
     [SerializeField] TextAsset _openingBook;
@@ -17,6 +18,9 @@ public class GameManager : MonoSingleton<GameManager>
 
     [SerializeField] MoveSelector _moveSelector;
 
+    [SerializeField] AudioClip _captureSFX;
+    [SerializeField] AudioClip _moveSFX;
+
     GraphicalBoard _graphicalBoard;
 
     [SerializeField] Clock _whitePlayerClock;
@@ -25,10 +29,14 @@ public class GameManager : MonoSingleton<GameManager>
     [SerializeField] CapturedPieces _whitePlayerCapturedPieces;
     [SerializeField] CapturedPieces _blackPlayerCapturedPieces;
 
+    AudioSource _audioSource;
+
     HUD _hud;
 
     void Start()
     {
+        _audioSource = GetComponent<AudioSource>();
+
         _graphicalBoard = GraphicalBoard.Instance;
 
         _hud = FindObjectOfType<HUD>(true);
@@ -115,6 +123,8 @@ public class GameManager : MonoSingleton<GameManager>
 
             if (move.EncounteredPiece != null)
 			{
+                _audioSource.PlayOneShot(_captureSFX);
+
                 if (move.EncounteredPiece.Color == ColorType.White)
 				{
                     _whitePlayerCapturedPieces.AddCaptureIcon(move.EncounteredPiece.Type);
@@ -123,6 +133,10 @@ public class GameManager : MonoSingleton<GameManager>
 				{
                     _blackPlayerCapturedPieces.AddCaptureIcon(move.EncounteredPiece.Type);
                 }
+			}
+            else
+			{
+                _audioSource.PlayOneShot(_moveSFX);
 			}
 
             _graphicalBoard.UpdateBoard(move, _lastMove);
