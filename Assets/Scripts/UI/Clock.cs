@@ -23,9 +23,14 @@ public class Clock : MonoBehaviour
 	{
 		if (useClock)
 		{
+			gameObject.SetActive(true);
 			_timeLeftInSeconds = timeForPlayer;
 			_timeAddedAfterMove = timeAddedAfterMove;
 			UpdateGraphicalClock();
+		}
+		else
+		{
+			gameObject.SetActive(false);
 		}
 	}
 
