@@ -770,7 +770,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: Welcome in ChessEngine
+  m_Text: Welcome in ChessProgram
 --- !u!222 &161842601
 CanvasRenderer:
   m_ObjectHideFlags: 0
