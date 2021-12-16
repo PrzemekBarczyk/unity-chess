@@ -125,6 +125,7 @@ public class HUD : MonoBehaviour
 
     public void HandleQuitButton()
 	{
+        GameManager.Instance.StopGame();
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
 	}
 

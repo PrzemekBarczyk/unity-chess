@@ -28,7 +28,7 @@ public class GameManager : MonoSingleton<GameManager>
     public State State { get; private set; }
 
     ChessProgram _chessProgram;
-    Thread _chessEngineThread;
+    Thread _chessProgramThread;
 
     void Start()
     {
@@ -66,7 +66,7 @@ public class GameManager : MonoSingleton<GameManager>
         _chessProgram.OnGameEnded += OnGameEnded;
         _chessProgram.OnHumanMove += OnHumanMove;
         _chessProgram.OnBotMove += OnBotMove;
-        _chessProgram.StartGame();
+        _chessProgramThread = _chessProgram.StartGame();
 
         State = State.Playing;
     }
@@ -153,8 +153,7 @@ public class GameManager : MonoSingleton<GameManager>
     void GameOver(State result)
 	{
         State = result;
-        Time.timeScale = 0f;
-        if (_chessEngineThread != null) _chessEngineThread.Abort();
+        StopGame();
         _hud.DisplayResultMessage(result);
     }
 
@@ -179,4 +178,10 @@ public class GameManager : MonoSingleton<GameManager>
             _hud.ChangeTranspositions(searchStatistics.Transpositions);
         });
     }
+
+    public void StopGame()
+	{
+        Time.timeScale = 0f;
+        _chessProgramThread.Abort();
+	}
 }
