@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Scriptable Objects/Perft")]
@@ -11,3 +13,5 @@ public class SinglePerftInfo : ScriptableObject
     public ulong[] CorrectResults => _correctResults;
     public ushort MaxDepth => _maxDepth;
 }
+
+#endif

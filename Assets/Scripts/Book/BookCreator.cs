@@ -1,8 +1,11 @@
+# if UNITY_EDITOR
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -86,7 +89,7 @@ public class BookCreator : MonoBehaviour
             }
         }
 
-		string outputPath = UnityEditor.AssetDatabase.GetAssetPath(_mergedAndFormattedInputFile);
+		string outputPath = AssetDatabase.GetAssetPath(_mergedAndFormattedInputFile);
 
 		StreamWriter writer = new StreamWriter(outputPath);
 
@@ -269,7 +272,7 @@ public class BookCreator : MonoBehaviour
         output.Remove(output.Length - 1, 1); // remove last empty line
 
         // save string with results into file
-        string outputPath = UnityEditor.AssetDatabase.GetAssetPath(_bookFile);
+        string outputPath = AssetDatabase.GetAssetPath(_bookFile);
         StreamWriter writer = new StreamWriter(outputPath);
         writer.Write(output);
         writer.Close();
@@ -330,3 +333,5 @@ public class BookCreator : MonoBehaviour
         return false;
     }
 }
+
+#endif
