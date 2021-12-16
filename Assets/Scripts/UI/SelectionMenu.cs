@@ -72,4 +72,14 @@ public class SelectionMenu : MonoBehaviour
 	{
 		_gameManager.StartGame(_gameSettings);
 	}
+
+	public void HandleExitButton()
+	{
+		ExitGame();
+	}
+
+	void ExitGame()
+	{
+		Application.Quit();
+	}
 }
