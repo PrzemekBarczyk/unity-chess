@@ -136,6 +136,7 @@ public class GameManager : MonoSingleton<GameManager>
 
             _graphicalBoard.UpdateBoard(move);
 
+            _hud.AddMoveToHistory(move);
             _hud.ChangeZobristKey(boardStatistics.ZobristKey);
             _hud.ChangeEvaluation(boardStatistics.Evaluation);
             _hud.ChangeFEN(boardStatistics.FEN);

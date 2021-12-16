@@ -1598,7 +1598,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1451858978}
   m_HandleRect: {fileID: 1451858977}
   m_Direction: 2
-  m_Value: 0.9999957
+  m_Value: 0
   m_Size: 0.9547339
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -2522,6 +2522,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fbfc468f3853f094eb73853810566347, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _scrollbar: {fileID: 418738085}
   _whitePlayerMoveList: {fileID: 955001399}
   _blackPlayerMoveList: {fileID: 1230208333}
   _botStatistics: {fileID: 2023576173}
@@ -4444,7 +4445,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -2.4598, y: 299.7866}
+  m_AnchoredPosition: {x: -2.4598, y: 328.2136}
   m_SizeDelta: {x: 324.77, y: 628}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1065585731
@@ -6233,8 +6234,8 @@ RectTransform:
   m_Father: {fileID: 85369492}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.045265898}
-  m_AnchorMax: {x: 1, y: 0.9999998}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 0.9547339}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}

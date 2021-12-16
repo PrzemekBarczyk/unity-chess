@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 public class HUD : MonoBehaviour
 {
     [Header("Move History")]
+    [SerializeField] Scrollbar _scrollbar;
     [SerializeField] Text _whitePlayerMoveList;
     [SerializeField] Text _blackPlayerMoveList;
 
@@ -74,6 +75,7 @@ public class HUD : MonoBehaviour
 		{
             _blackPlayerMoveList.text += SimplifiedAlgebraicNotation.MoveToLongSAN(move) + "\n";
         }
+        _scrollbar.value = 0f;
 	}
 
     public void ChangeDepth(uint depth)
