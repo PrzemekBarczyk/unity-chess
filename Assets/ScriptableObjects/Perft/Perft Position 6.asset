@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5efedd944df2105488d032163afcd109, type: 3}
   m_Name: Perft Position 6
   m_EditorClassIdentifier: 
-  _testedFEN: 'r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w -
-    - 0 10 '
+  _testedFEN: r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - -
+    0 10
   _correctResults: 01000000000000002e000000000000001f08000000000000225f010000000000426d3b00000000001f98c709000000008160a59c01000000ba4accdd42000000464a562dd80a0000eaa92e5d9b60cd06
   _maxDepth: 5

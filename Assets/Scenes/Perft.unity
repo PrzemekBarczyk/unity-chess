@@ -376,6 +376,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20400ebd58ab99449af47578e9f77055, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _testType: 0
   _test: {fileID: 11400000, guid: cc57579000af9974482cc8af801c70ad, type: 2}
   _resultTextField: {fileID: 2112459873}
 --- !u!4 &558826522
