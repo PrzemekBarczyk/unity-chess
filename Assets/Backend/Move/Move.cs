@@ -1,5 +1,10 @@
 namespace Backend
 {
+	public enum MoveType
+	{
+		Undefinied, Normal, Castle, PromotionToKnight, PromotionToBishop, PromotionToRook, PromotionToQueen
+	}
+
 	public struct Move
 	{
 		public MoveType Type { get; private set; }
