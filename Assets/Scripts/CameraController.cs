@@ -1,42 +1,65 @@
 using UnityEngine;
 
-public class CameraController : MonoBehaviour
+public class CameraController : MonoSingleton<CameraController>
 {
+	[Header("Camera positions and rotations")]
 	[SerializeField] Vector3 positionWhenWhite = new Vector3(0.25f, 3.5f, -10f);
 	[SerializeField] Vector3 rotationWhenWhite = new Vector3(0f, 0f, 0f);
 
 	[SerializeField] Vector3 positionWhenBlack = new Vector3(6.75f, 3.5f, -10f);
 	[SerializeField] Vector3 rotationWhenBlack = new Vector3(0f, 0f, 180f);
 
-	public void WhitePlayerPOV()
+	[Header("Objects to flip")]
+	[SerializeField] Transform _whitePlayerClock;
+	[SerializeField] Transform _blackPlayerClock;
+
+	[SerializeField] Transform _capturedPiecesByWhite;
+	[SerializeField] Transform _capturedPiecesByBlack;
+
+	public void FlipPOV()
 	{
-		transform.position = positionWhenWhite;
-		transform.rotation = Quaternion.Euler(rotationWhenWhite);
-		foreach (SpriteRenderer sprite in FindObjectsOfType<SpriteRenderer>(true))
+		bool isCurrentPovWhite = transform.position == positionWhenWhite;
+		if (transform.position == positionWhenWhite)
 		{
-			sprite.flipX = false;
-			sprite.flipY = false;
+			ChangeCameraPositionAndRotation(positionWhenBlack, rotationWhenBlack);
+		}
+		else
+		{
+			ChangeCameraPositionAndRotation(positionWhenWhite, rotationWhenWhite);
 		}
 
-		Transform whiteClock = GameObject.Find("White Clock").transform;
-		Transform blackClock = GameObject.Find("Black Clock").transform;
-		whiteClock.localPosition = new Vector2(whiteClock.position.x, -Mathf.Abs(whiteClock.position.y));
-		blackClock.localPosition = new Vector2(blackClock.position.x, Mathf.Abs(blackClock.position.y));
+		FlipSpriteRenderers(isCurrentPovWhite);
+		FlipClocks();
+		FlipCapturesPieces();
 	}
 
-	public void BlackPlayerPOV()
+	void ChangeCameraPositionAndRotation(Vector3 position, Vector3 rotation)
 	{
-		transform.position = positionWhenBlack;
-		transform.rotation = Quaternion.Euler(rotationWhenBlack);
+		transform.position = position;
+		transform.rotation = Quaternion.Euler(rotation);
+	}
+
+	void FlipSpriteRenderers(bool flip)
+	{
 		foreach (SpriteRenderer sprite in FindObjectsOfType<SpriteRenderer>(true))
 		{
-			sprite.flipX = true;
-			sprite.flipY = true;
+			sprite.flipX = flip;
+			sprite.flipY = flip;
 		}
+	}
 
-		Transform whiteClock = GameObject.Find("White Clock").transform;
-		Transform blackClock = GameObject.Find("Black Clock").transform;
-		whiteClock.localPosition = new Vector2(whiteClock.localPosition.x, Mathf.Abs(whiteClock.localPosition.y));
-		blackClock.localPosition = new Vector2(blackClock.localPosition.x, -Mathf.Abs(blackClock.localPosition.y));
+	void FlipClocks()
+	{
+		var whiteOldPosition = _whitePlayerClock.localPosition;
+		_whitePlayerClock.localPosition = new Vector2(_blackPlayerClock.localPosition.x, _blackPlayerClock.localPosition.y);
+		_blackPlayerClock.localPosition = new Vector2(whiteOldPosition.x, whiteOldPosition.y);
+	}
+
+	void FlipCapturesPieces()
+	{
+		var capturedPiecesByWhiteOldPosition = _capturedPiecesByWhite.localPosition;
+		_capturedPiecesByWhite.localPosition = new Vector2(_capturedPiecesByBlack.localPosition.x, _capturedPiecesByBlack.localPosition.y);
+		_capturedPiecesByBlack.localPosition = new Vector2(capturedPiecesByWhiteOldPosition.x, capturedPiecesByWhiteOldPosition.y);
+
 	}
 }

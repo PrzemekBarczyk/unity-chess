@@ -27,6 +27,8 @@ public class SelectionMenu : MonoBehaviour
 	public void HandlePlayButton()
 	{
 		SaveSettings();
+		if (_gameSettings.GameType == GameType.BotVsHuman)
+			CameraController.Instance.FlipPOV();
 		ChangeMenu();
 		StartGame();
 	}
