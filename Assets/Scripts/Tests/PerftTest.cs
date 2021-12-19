@@ -1,78 +1,82 @@
 #if UNITY_EDITOR
 
+using Backend;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PerftTest : MonoBehaviour
+namespace Frontend
 {
-	enum TestType { Perft, Divide }
-
-	[SerializeField] TestType _testType;
-
-    [SerializeField] SinglePerftInfo _test;
-
-    [SerializeField] Text _resultTextField;
-
-    void Start()
-    {
-        _resultTextField.text = "Tested position:\n" + _test.TestedFEN + "\n\n";
-
-        ChessEngine chessEngine = new ChessEngine(_test.TestedFEN);
-
-		switch (_testType)
-		{
-			case TestType.Perft:
-				RunPerftTest(chessEngine);
-				break;
-			case TestType.Divide:
-				RunDivideTest(chessEngine);
-				break;
-		}
-    }
-
-    public void RunPerftTest(ChessEngine chessEngine)
-    {
-        StartCoroutine(Perft(chessEngine));
-    }
-
-    public void RunDivideTest(ChessEngine chessEngine)
-    {
-        Divide(chessEngine);
-    }
-
-	IEnumerator Perft(ChessEngine chessEngine)
+	public class PerftTest : MonoBehaviour
 	{
-		int depth = Mathf.Min(_test.MaxDepth, _test.CorrectResults.Length);
+		enum TestType { Perft, Divide }
 
-		for (int i = 0; i <= depth; i++)
+		[SerializeField] TestType _testType;
+
+		[SerializeField] SinglePerftInfo _test;
+
+		[SerializeField] Text _resultTextField;
+
+		void Start()
 		{
-			var timer = new System.Diagnostics.Stopwatch();
-			timer.Start();
-			ulong nodesNumber = chessEngine.Perft.RunSinglePerft(i);
-			timer.Stop();
+			_resultTextField.text = "Tested position:\n" + _test.TestedFEN + "\n\n";
 
-			if (nodesNumber == _test.CorrectResults[i])
+			ChessEngine chessEngine = new ChessEngine(_test.TestedFEN);
+
+			switch (_testType)
 			{
-				_resultTextField.text += "Depth: " + i + "  Result: " + nodesNumber + " Time: " + timer.ElapsedMilliseconds + "ms  <color=green>PASSED</color>\n";
+				case TestType.Perft:
+					RunPerftTest(chessEngine);
+					break;
+				case TestType.Divide:
+					RunDivideTest(chessEngine);
+					break;
 			}
-			else
-			{
-				_resultTextField.text += "Depth: " + i + "  Result: " + nodesNumber + " Time: " + timer.ElapsedMilliseconds + "ms  <color=red>FAILED</color> (" + _test.CorrectResults[i] + ")\n";
-			}
-			yield return null;
 		}
-		_resultTextField.text += "PERFT FINISHED";
-	}
 
-	void Divide(ChessEngine chessEngine)
-	{
-		List<string> results = chessEngine.Perft.RunDivide(_test.MaxDepth);
-
-		foreach (string line in results)
+		public void RunPerftTest(ChessEngine chessEngine)
 		{
-			_resultTextField.text += line + "\n";
+			StartCoroutine(Perft(chessEngine));
+		}
+
+		public void RunDivideTest(ChessEngine chessEngine)
+		{
+			Divide(chessEngine);
+		}
+
+		IEnumerator Perft(ChessEngine chessEngine)
+		{
+			int depth = Mathf.Min(_test.MaxDepth, _test.CorrectResults.Length);
+
+			for (int i = 0; i <= depth; i++)
+			{
+				var timer = new System.Diagnostics.Stopwatch();
+				timer.Start();
+				ulong nodesNumber = chessEngine.Perft.RunSinglePerft(i);
+				timer.Stop();
+
+				if (nodesNumber == _test.CorrectResults[i])
+				{
+					_resultTextField.text += "Depth: " + i + "  Result: " + nodesNumber + " Time: " + timer.ElapsedMilliseconds + "ms  <color=green>PASSED</color>\n";
+				}
+				else
+				{
+					_resultTextField.text += "Depth: " + i + "  Result: " + nodesNumber + " Time: " + timer.ElapsedMilliseconds + "ms  <color=red>FAILED</color> (" + _test.CorrectResults[i] + ")\n";
+				}
+				yield return null;
+			}
+			_resultTextField.text += "PERFT FINISHED";
+		}
+
+		void Divide(ChessEngine chessEngine)
+		{
+			List<string> results = chessEngine.Perft.RunDivide(_test.MaxDepth);
+
+			foreach (string line in results)
+			{
+				_resultTextField.text += line + "\n";
+			}
 		}
 	}
 }

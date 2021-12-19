@@ -1,93 +1,96 @@
 using UnityEngine;
 
-[RequireComponent(typeof(BoxCollider))]
-public class GraphicalSquare : MonoBehaviour
+namespace Frontend
 {
-    [SerializeField] ColorType _colorType;
-
-    [Header("Piece")]
-    [SerializeField] SpriteRenderer _piece;
-    public Sprite PieceSprite { get => _piece.sprite; set => _piece.sprite = value; }
-
-    [Header("Promotion panels")]
-    [SerializeField] PromotionPanel _whitePromotionPanelPrefab;
-    [SerializeField] PromotionPanel _blackPromotionPanelPrefab;
-    public PromotionPanel PromotionPanel { get; private set; }
-
-    [Header("Indicators")]
-    [SerializeField] GameObject _attackIndicator;
-    [SerializeField] GameObject _emptyFieldIndicator;
-    [SerializeField] GameObject _lastMoveIndicator;
-    [SerializeField] GameObject _selectionIndicator;
-
-    public bool OnTopRank { get => transform.position.y == Board.TOP_RANK_INDEX; }
-    public bool OnBottomRank { get => transform.position.y == Board.BOTTOM_RANK_INDEX; }
-
-    GameManager _gameManager;
-
-    MoveSelector _moveSelector;
-
-	void Awake()
-	{
-        _gameManager = GameManager.Instance;
-    }
-
-    void Start()
+    [RequireComponent(typeof(BoxCollider))]
+    public class GraphicalSquare : MonoBehaviour
     {
-        if (OnTopRank || OnBottomRank)
-            CreatePromotionPanel();
+        [SerializeField] ColorType _colorType;
 
-        _moveSelector = FindObjectOfType<MoveSelector>();
-    }
+        [Header("Piece")]
+        [SerializeField] SpriteRenderer _piece;
+        public Sprite PieceSprite { get => _piece.sprite; set => _piece.sprite = value; }
 
-    void CreatePromotionPanel()
-	{
-        PromotionPanel = Instantiate(OnTopRank ? _whitePromotionPanelPrefab : _blackPromotionPanelPrefab, transform.position, transform.rotation, transform);
+        [Header("Promotion panels")]
+        [SerializeField] PromotionPanel _whitePromotionPanelPrefab;
+        [SerializeField] PromotionPanel _blackPromotionPanelPrefab;
+        public PromotionPanel PromotionPanel { get; private set; }
 
-        PromotionPanel.name = PromotionPanel.name.Replace("(Clone)", "");
-        PromotionPanel.gameObject.SetActive(false);
-    }
+        [Header("Indicators")]
+        [SerializeField] GameObject _attackIndicator;
+        [SerializeField] GameObject _emptyFieldIndicator;
+        [SerializeField] GameObject _lastMoveIndicator;
+        [SerializeField] GameObject _selectionIndicator;
 
-    void OnMouseDown()
-    {
-        if (_gameManager.State == State.Playing)
+        public bool OnTopRank { get => transform.position.y == GraphicalBoard.TOP_RANK_INDEX; }
+        public bool OnBottomRank { get => transform.position.y == GraphicalBoard.BOTTOM_RANK_INDEX; }
+
+        GameManager _gameManager;
+
+        MoveSelector _moveSelector;
+
+        void Awake()
         {
-            StartCoroutine(_moveSelector.OnSquareSelected(this));
+            _gameManager = GameManager.Instance;
         }
-    }
 
-    void OnMouseUp()
-    {
-        if (_gameManager.State == State.Playing) 
+        void Start()
         {
-            StartCoroutine(_moveSelector.OnPieceDrop());
+            if (OnTopRank || OnBottomRank)
+                CreatePromotionPanel();
+
+            _moveSelector = FindObjectOfType<MoveSelector>();
         }
-    }
 
-    public void DisplayValidForAttackIndicator() => _attackIndicator.SetActive(true);
+        void CreatePromotionPanel()
+        {
+            PromotionPanel = Instantiate(OnTopRank ? _whitePromotionPanelPrefab : _blackPromotionPanelPrefab, transform.position, transform.rotation, transform);
 
-    public void DisplayValidForMoveIndicator() => _emptyFieldIndicator.SetActive(true);
+            PromotionPanel.name = PromotionPanel.name.Replace("(Clone)", "");
+            PromotionPanel.gameObject.SetActive(false);
+        }
 
-    public void HideValidMovementIndicators()
-    {
-        _attackIndicator.SetActive(false);
-        _emptyFieldIndicator.SetActive(false);
-    }
+        void OnMouseDown()
+        {
+            if (_gameManager.State == State.Playing)
+            {
+                StartCoroutine(_moveSelector.OnSquareSelected(this));
+            }
+        }
 
-    public void DisplayLastMoveIndicator() => _lastMoveIndicator.SetActive(true);
+        void OnMouseUp()
+        {
+            if (_gameManager.State == State.Playing)
+            {
+                StartCoroutine(_moveSelector.OnPieceDrop());
+            }
+        }
 
-    public void HideLastMoveIndicator() => _lastMoveIndicator.SetActive(false);
+        public void DisplayValidForAttackIndicator() => _attackIndicator.SetActive(true);
 
-    public void DisplaySelectionIndicator() => _selectionIndicator.SetActive(true);
+        public void DisplayValidForMoveIndicator() => _emptyFieldIndicator.SetActive(true);
 
-    public void HideSelectionIndicator() => _selectionIndicator.SetActive(false);
+        public void HideValidMovementIndicators()
+        {
+            _attackIndicator.SetActive(false);
+            _emptyFieldIndicator.SetActive(false);
+        }
 
-    public void DisplayPromotionPanel()
-    {
-        if (PromotionPanel != null) PromotionPanel.gameObject.SetActive(true);
-    }
-    public void HidePromotionPanel()
-    {
-        if (PromotionPanel != null) PromotionPanel.gameObject.SetActive(false);
+        public void DisplayLastMoveIndicator() => _lastMoveIndicator.SetActive(true);
+
+        public void HideLastMoveIndicator() => _lastMoveIndicator.SetActive(false);
+
+        public void DisplaySelectionIndicator() => _selectionIndicator.SetActive(true);
+
+        public void HideSelectionIndicator() => _selectionIndicator.SetActive(false);
+
+        public void DisplayPromotionPanel()
+        {
+            if (PromotionPanel != null) PromotionPanel.gameObject.SetActive(true);
+        }
+        public void HidePromotionPanel()
+        {
+            if (PromotionPanel != null) PromotionPanel.gameObject.SetActive(false);
+        }
     }
 }

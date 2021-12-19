@@ -1,25 +1,28 @@
 using UnityEngine;
 
-[RequireComponent(typeof(AudioSource))]
-public class SFXManager : MonoBehaviour
+namespace Frontend
 {
-    [SerializeField] AudioClip _captureSFX;
-    [SerializeField] AudioClip _moveSFX;
-
-	AudioSource _audioSource;
-
-	void Start()
+	[RequireComponent(typeof(AudioSource))]
+	public class SFXManager : MonoBehaviour
 	{
-		_audioSource = GetComponent<AudioSource>();
-	}
+		[SerializeField] AudioClip _captureSFX;
+		[SerializeField] AudioClip _moveSFX;
 
-	public void PlayCaptureSFX()
-	{
-		_audioSource.PlayOneShot(_captureSFX);
-	}
+		AudioSource _audioSource;
 
-    public void PlayMoveSFX()
-	{
-		_audioSource.PlayOneShot(_moveSFX);
+		void Start()
+		{
+			_audioSource = GetComponent<AudioSource>();
+		}
+
+		public void PlayCaptureSFX()
+		{
+			_audioSource.PlayOneShot(_captureSFX);
+		}
+
+		public void PlayMoveSFX()
+		{
+			_audioSource.PlayOneShot(_moveSFX);
+		}
 	}
 }

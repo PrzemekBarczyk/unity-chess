@@ -1,188 +1,192 @@
+using Backend;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class GameManager : MonoSingleton<GameManager>
+namespace Frontend
 {
-    [Header("Oppening Book")]
-    [SerializeField] TextAsset _openingBookFile;
-
-    [Header("External Dependencies")]
-    [SerializeField] SFXManager _sfxManager;
-    [SerializeField] GraphicalBoard _graphicalBoard;
-    [SerializeField] HUD _hud;
-
-    [Header("Move Selector")]
-    [SerializeField] MoveSelector _moveSelector;
-
-    [Header("UI Clocks")]
-    [SerializeField] Clock _whitePlayerClock;
-    [SerializeField] Clock _blackPlayerClock;
-
-    [Header("UI Captured Pieces Lists")]
-    [SerializeField] CapturedPieces _whitePlayerCapturedPieces;
-    [SerializeField] CapturedPieces _blackPlayerCapturedPieces;
-
-    public State State { get; private set; }
-
-    ChessProgram _chessProgram;
-    Thread _chessProgramThread;
-
-    void Start()
+    public class GameManager : MonoSingleton<GameManager>
     {
-        _graphicalBoard.CreateBoard();
-    }
+        [Header("Oppening Book")]
+        [SerializeField] TextAsset _openingBookFile;
 
-    public void StartGame(GameSettings gameSettings) // called after pressing PLAY button
-    {
-        Time.timeScale = 0f;
+        [Header("External Dependencies")]
+        [SerializeField] SFXManager _sfxManager;
+        [SerializeField] GraphicalBoard _graphicalBoard;
+        [SerializeField] HUD _hud;
 
-        FENDataAdapter extractedFENData;
-        try
+        [Header("Move Selector")]
+        [SerializeField] MoveSelector _moveSelector;
+
+        [Header("UI Clocks")]
+        [SerializeField] Clock _whitePlayerClock;
+        [SerializeField] Clock _blackPlayerClock;
+
+        [Header("UI Captured Pieces Lists")]
+        [SerializeField] CapturedPieces _whitePlayerCapturedPieces;
+        [SerializeField] CapturedPieces _blackPlayerCapturedPieces;
+
+        public State State { get; private set; }
+
+        ChessProgram _chessProgram;
+        Thread _chessProgramThread;
+
+        void Start()
         {
-            extractedFENData = FENConverter.FENToBoardPositionData(gameSettings.StartPositionInFEN);
+            _graphicalBoard.CreateBoard();
         }
-        catch (FormatException e)
-		{
-            Debug.Log(e.Message);
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-            return;
-		}
 
-        _graphicalBoard.CreatePieces(extractedFENData.Pieces);
-
-        _whitePlayerClock.SetUp(gameSettings.UseClocks, gameSettings.BaseTime, gameSettings.AddedTime);
-        _blackPlayerClock.SetUp(gameSettings.UseClocks, gameSettings.BaseTime, gameSettings.AddedTime);
-
-        _whitePlayerClock.OnTimeElapsed += OnTimeElaped;
-        _blackPlayerClock.OnTimeElapsed += OnTimeElaped;
-
-        _chessProgram = new ChessProgram(gameSettings, _openingBookFile.text);
-        _chessProgram.OnGameStart += OnGameStart;
-        _chessProgram.OnTurnStarted += OnTurnStarted;
-        _chessProgram.OnTurnEnded += OnTurnEnded;
-        _chessProgram.OnGameEnded += OnGameEnded;
-        _chessProgram.OnHumanMove += OnHumanMove;
-        _chessProgram.OnBotMove += OnBotMove;
-        _chessProgramThread = _chessProgram.StartGame();
-
-        State = State.Playing;
-    }
-
-    public void OnTimeElaped()
-	{
-        GameOver(State.TimeElapsed);
-	}
-
-    public void OnGameStart(BoardStatistics boardStatistics)
-	{
-        ThreadDispatcher.RunOnMainThread(() =>
+        public void StartGame(GameSettings gameSettings) // called after pressing PLAY button
         {
-            _hud.ChangeZobristKey(boardStatistics.ZobristKey);
-            _hud.ChangeEvaluation(boardStatistics.Evaluation);
-            _hud.ChangeFEN(boardStatistics.FEN);
-        });
-    }
+            Time.timeScale = 0f;
 
-    public void OnTurnStarted(ColorType color)
-	{
-        ThreadDispatcher.RunOnMainThread(() =>
-        {
-            if (color == ColorType.White)
-		    {
-                _whitePlayerClock.Run();
-		    }
-            else
-		    {
-                _blackPlayerClock.Run();
-		    }
-        });
-    }
-
-    public void OnTurnEnded(Move move, BoardStatistics boardStatistics)
-	{
-        ThreadDispatcher.RunOnMainThread(() =>
-        {
-            Time.timeScale = 1f;
-
-            if (move.Piece.Color == ColorType.White)
+            FENDataAdapter extractedFENData;
+            try
             {
-                _whitePlayerClock.Stop();
+                extractedFENData = FENConverter.FENToBoardPositionData(gameSettings.StartPositionInFEN);
             }
-            else
+            catch (FormatException e)
             {
-                _blackPlayerClock.Stop();
+                Debug.Log(e.Message);
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                return;
             }
 
-            if (move.EncounteredPiece != null)
-			{
-                _sfxManager.PlayCaptureSFX();
+            _graphicalBoard.CreatePieces(extractedFENData.Pieces);
 
-                if (move.EncounteredPiece.Color == ColorType.White)
-				{
-                    _whitePlayerCapturedPieces.AddCaptureIcon(move.EncounteredPiece.Type);
-				}
-                else
-				{
-                    _blackPlayerCapturedPieces.AddCaptureIcon(move.EncounteredPiece.Type);
+            _whitePlayerClock.SetUp(gameSettings.UseClocks, gameSettings.BaseTime, gameSettings.AddedTime);
+            _blackPlayerClock.SetUp(gameSettings.UseClocks, gameSettings.BaseTime, gameSettings.AddedTime);
+
+            _whitePlayerClock.OnTimeElapsed += OnTimeElaped;
+            _blackPlayerClock.OnTimeElapsed += OnTimeElaped;
+
+            _chessProgram = new ChessProgram(gameSettings, _openingBookFile.text);
+            _chessProgram.OnGameStart += OnGameStart;
+            _chessProgram.OnTurnStarted += OnTurnStarted;
+            _chessProgram.OnTurnEnded += OnTurnEnded;
+            _chessProgram.OnGameEnded += OnGameEnded;
+            _chessProgram.OnHumanMove += OnHumanMove;
+            _chessProgram.OnBotMove += OnBotMove;
+            _chessProgramThread = _chessProgram.StartGame();
+
+            State = State.Playing;
+        }
+
+        public void OnTimeElaped()
+        {
+            GameOver(State.TimeElapsed);
+        }
+
+        public void OnGameStart(BoardStatistics boardStatistics)
+        {
+            ThreadDispatcher.RunOnMainThread(() =>
+            {
+                _hud.ChangeZobristKey(boardStatistics.ZobristKey);
+                _hud.ChangeEvaluation(boardStatistics.Evaluation);
+                _hud.ChangeFEN(boardStatistics.FEN);
+            });
+        }
+
+        public void OnTurnStarted(ColorType color)
+        {
+            ThreadDispatcher.RunOnMainThread(() =>
+            {
+                if (color == ColorType.White)
+                {
+                    _whitePlayerClock.Run();
                 }
-			}
-            else
-			{
-                _sfxManager.PlayMoveSFX();
-			}
+                else
+                {
+                    _blackPlayerClock.Run();
+                }
+            });
+        }
 
-            _graphicalBoard.UpdateBoard(move);
-
-            _hud.AddMoveToHistory(move);
-            _hud.ChangeZobristKey(boardStatistics.ZobristKey);
-            _hud.ChangeEvaluation(boardStatistics.Evaluation);
-            _hud.ChangeFEN(boardStatistics.FEN);
-        });
-    }
-
-    public void OnGameEnded(State result)
-	{
-        ThreadDispatcher.RunOnMainThread(() =>
+        public void OnTurnEnded(Move move, BoardStatistics boardStatistics)
         {
-            GameOver(result);
-        });
-    }
+            ThreadDispatcher.RunOnMainThread(() =>
+            {
+                Time.timeScale = 1f;
 
-    void GameOver(State result)
-	{
-        State = result;
-        StopGame();
-        _hud.DisplayResultMessage(result);
-    }
+                if (move.Piece.Color == ColorType.White)
+                {
+                    _whitePlayerClock.Stop();
+                }
+                else
+                {
+                    _blackPlayerClock.Stop();
+                }
 
-    public Move OnHumanMove(List<Move> legalMoves)
-	{
-        _moveSelector.SetLegalMoves(legalMoves);
+                if (move.EncounteredPiece != null)
+                {
+                    _sfxManager.PlayCaptureSFX();
 
-        while (!_moveSelector.IsMoveSelected())
-            continue;
+                    if (move.EncounteredPiece.Color == ColorType.White)
+                    {
+                        _whitePlayerCapturedPieces.AddCaptureIcon(move.EncounteredPiece.Type);
+                    }
+                    else
+                    {
+                        _blackPlayerCapturedPieces.AddCaptureIcon(move.EncounteredPiece.Type);
+                    }
+                }
+                else
+                {
+                    _sfxManager.PlayMoveSFX();
+                }
 
-        return _moveSelector.GetSelectedMove();
-    }
+                _graphicalBoard.UpdateBoard(move);
 
-    public void OnBotMove(SearchStatistics searchStatistics)
-	{
-        ThreadDispatcher.RunOnMainThread(() =>
+                _hud.AddMoveToHistory(move);
+                _hud.ChangeZobristKey(boardStatistics.ZobristKey);
+                _hud.ChangeEvaluation(boardStatistics.Evaluation);
+                _hud.ChangeFEN(boardStatistics.FEN);
+            });
+        }
+
+        public void OnGameEnded(State result)
         {
-            _hud.ChangeDepth(searchStatistics.Depth);
-            _hud.ChangeBestEvaluation(searchStatistics.BestEvaluation);
-            _hud.ChangePositionsEvaluated(searchStatistics.PositionsEvaluated);
-            _hud.ChangeCutoffs(searchStatistics.Cutoffs);
-            _hud.ChangeTranspositions(searchStatistics.Transpositions);
-        });
-    }
+            ThreadDispatcher.RunOnMainThread(() =>
+            {
+                GameOver(result);
+            });
+        }
 
-    public void StopGame()
-	{
-        Time.timeScale = 0f;
-        _chessProgramThread.Abort();
-	}
+        void GameOver(State result)
+        {
+            State = result;
+            StopGame();
+            _hud.DisplayResultMessage(result);
+        }
+
+        public Move OnHumanMove(List<Move> legalMoves)
+        {
+            _moveSelector.SetLegalMoves(legalMoves);
+
+            while (!_moveSelector.IsMoveSelected())
+                continue;
+
+            return _moveSelector.GetSelectedMove();
+        }
+
+        public void OnBotMove(SearchStatistics searchStatistics)
+        {
+            ThreadDispatcher.RunOnMainThread(() =>
+            {
+                _hud.ChangeDepth(searchStatistics.Depth);
+                _hud.ChangeBestEvaluation(searchStatistics.BestEvaluation);
+                _hud.ChangePositionsEvaluated(searchStatistics.PositionsEvaluated);
+                _hud.ChangeCutoffs(searchStatistics.Cutoffs);
+                _hud.ChangeTranspositions(searchStatistics.Transpositions);
+            });
+        }
+
+        public void StopGame()
+        {
+            Time.timeScale = 0f;
+            _chessProgramThread.Abort();
+        }
+    }
 }

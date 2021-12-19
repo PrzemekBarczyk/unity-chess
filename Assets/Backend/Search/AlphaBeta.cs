@@ -1,216 +1,219 @@
 using System;
 using System.Collections.Generic;
 
-public sealed class AlphaBeta : SearchAlgorithm
+namespace Backend
 {
-	bool useQuiescenceSearch = false;
-
-	public AlphaBeta(MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager) : base(moveGenerator, moveExecutor, pieceManager) { }
-
-	public override Tuple<Move, SearchStatistics> FindBestMove(uint fixedSearchDepth)
+	internal sealed class AlphaBeta : SearchAlgorithm
 	{
-		_bestEvaluation = 0;
-		_positionsEvaluated = 0;
-		_cutoffs = 0;
-		_transpositions = 0;
+		bool useQuiescenceSearch = false;
 
-		if (_pieceManager.CurrentPieces.Color == MAXIMIZING_COLOR)
+		internal AlphaBeta(MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager) : base(moveGenerator, moveExecutor, pieceManager) { }
+
+		internal override Tuple<Move, SearchStatistics> FindBestMove(uint fixedSearchDepth)
 		{
-			Search(_pieceManager.CurrentPieces, fixedSearchDepth, -10000000, 10000000, true, fixedSearchDepth);
-		}
-		else
-		{
-			Search(_pieceManager.CurrentPieces, fixedSearchDepth, -10000000, 10000000, false, fixedSearchDepth);
-		}
+			_bestEvaluation = 0;
+			_positionsEvaluated = 0;
+			_cutoffs = 0;
+			_transpositions = 0;
 
-		return new Tuple<Move, SearchStatistics>(_bestMove, new SearchStatistics(fixedSearchDepth, _bestEvaluation, _positionsEvaluated, _cutoffs, _transpositions));
-	}
-
-	public int Search(PieceSet currentPlayerPieces, uint depth, int alpha, int beta, bool maximizingPlayer, uint maxDepth)
-	{
-		if (depth == 0)
-		{
-			if (useQuiescenceSearch) return QuiescenceSearch(currentPlayerPieces, alpha, beta, maximizingPlayer);
-			return Evaluate();
-		}
-
-		List<Move> legalMoves = new List<Move>(_moveGenerator.GenerateLegalMoves(currentPlayerPieces));
-
-		if (legalMoves.Count == 0) // no legal moves
-		{
-			if (currentPlayerPieces.IsKingChecked())
-				return maximizingPlayer ? -1000000 : 1000000;
-			return 0;
-		}
-
-		MoveOrderer.EvaluateAndSort(legalMoves);
-
-		PieceSet nextDepthPlayerPieces = currentPlayerPieces == _whitePieces ? _blackPieces : _whitePieces;
-
-		if (maximizingPlayer)
-		{
-			int maxEvaluation = -10000000;
-
-			for (int i = 0; i < legalMoves.Count; i++)
+			if (_pieceManager.CurrentPieces.Color == MAXIMIZING_COLOR)
 			{
-				Move legalMove = legalMoves[i];
+				Search(_pieceManager.CurrentPieces, fixedSearchDepth, -10000000, 10000000, true, fixedSearchDepth);
+			}
+			else
+			{
+				Search(_pieceManager.CurrentPieces, fixedSearchDepth, -10000000, 10000000, false, fixedSearchDepth);
+			}
 
-				_moveExecutor.MakeMove(legalMove);
+			return new Tuple<Move, SearchStatistics>(_bestMove, new SearchStatistics(fixedSearchDepth, _bestEvaluation, _positionsEvaluated, _cutoffs, _transpositions));
+		}
 
-				int evaluation = Search(nextDepthPlayerPieces, depth - 1, alpha, beta, false, maxDepth);
+		internal int Search(PieceSet currentPlayerPieces, uint depth, int alpha, int beta, bool maximizingPlayer, uint maxDepth)
+		{
+			if (depth == 0)
+			{
+				if (useQuiescenceSearch) return QuiescenceSearch(currentPlayerPieces, alpha, beta, maximizingPlayer);
+				return Evaluate();
+			}
 
-				_moveExecutor.UndoMove(legalMove);
+			List<Move> legalMoves = new List<Move>(_moveGenerator.GenerateLegalMoves(currentPlayerPieces));
 
-				_positionsEvaluated++;
+			if (legalMoves.Count == 0) // no legal moves
+			{
+				if (currentPlayerPieces.IsKingChecked())
+					return maximizingPlayer ? -1000000 : 1000000;
+				return 0;
+			}
 
-				if (evaluation > maxEvaluation)
+			MoveOrderer.EvaluateAndSort(legalMoves);
+
+			PieceSet nextDepthPlayerPieces = currentPlayerPieces == _whitePieces ? _blackPieces : _whitePieces;
+
+			if (maximizingPlayer)
+			{
+				int maxEvaluation = -10000000;
+
+				for (int i = 0; i < legalMoves.Count; i++)
 				{
-					maxEvaluation = evaluation;
-					if (depth == maxDepth)
+					Move legalMove = legalMoves[i];
+
+					_moveExecutor.MakeMove(legalMove);
+
+					int evaluation = Search(nextDepthPlayerPieces, depth - 1, alpha, beta, false, maxDepth);
+
+					_moveExecutor.UndoMove(legalMove);
+
+					_positionsEvaluated++;
+
+					if (evaluation > maxEvaluation)
 					{
-						_bestMove = legalMove;
-						_bestEvaluation = maxEvaluation;
+						maxEvaluation = evaluation;
+						if (depth == maxDepth)
+						{
+							_bestMove = legalMove;
+							_bestEvaluation = maxEvaluation;
+						}
+					}
+
+					alpha = Math.Max(alpha, maxEvaluation);
+
+					if (alpha >= beta)
+					{
+						_cutoffs++;
+						break;
 					}
 				}
 
-				alpha = Math.Max(alpha, maxEvaluation);
-
-				if (alpha >= beta)
-				{
-					_cutoffs++;
-					break;
-				}
+				return maxEvaluation;
 			}
-
-			return maxEvaluation;
-		}
-		else // minimizing player
-		{
-			int minEvaluation = 10000000;
-
-			for (int i = 0; i < legalMoves.Count; i++)
+			else // minimizing player
 			{
-				Move legalMove = legalMoves[i];
+				int minEvaluation = 10000000;
 
-				_moveExecutor.MakeMove(legalMove);
-
-				int evaluation = Search(nextDepthPlayerPieces, depth - 1, alpha, beta, true, maxDepth);
-
-				_moveExecutor.UndoMove(legalMove);
-
-				_positionsEvaluated++;
-
-				if (evaluation < minEvaluation)
+				for (int i = 0; i < legalMoves.Count; i++)
 				{
-					minEvaluation = evaluation;
-					if (depth == maxDepth)
+					Move legalMove = legalMoves[i];
+
+					_moveExecutor.MakeMove(legalMove);
+
+					int evaluation = Search(nextDepthPlayerPieces, depth - 1, alpha, beta, true, maxDepth);
+
+					_moveExecutor.UndoMove(legalMove);
+
+					_positionsEvaluated++;
+
+					if (evaluation < minEvaluation)
 					{
-						_bestMove = legalMove;
-						_bestEvaluation = minEvaluation;
+						minEvaluation = evaluation;
+						if (depth == maxDepth)
+						{
+							_bestMove = legalMove;
+							_bestEvaluation = minEvaluation;
+						}
+					}
+
+					beta = Math.Min(beta, minEvaluation);
+
+					if (alpha >= beta)
+					{
+						_cutoffs++;
+						break;
 					}
 				}
 
-				beta = Math.Min(beta, minEvaluation);
+				return minEvaluation;
+			}
+		}
 
-				if (alpha >= beta)
+		int QuiescenceSearch(PieceSet currentPlayerPieces, int alpha, int beta, bool maximizingPlayer)
+		{
+			int standPat = Evaluate();
+
+			if (maximizingPlayer)
+			{
+				if (standPat >= beta)
 				{
-					_cutoffs++;
-					break;
+					return beta;
+				}
+				if (standPat > alpha)
+				{
+					alpha = standPat;
+				}
+			}
+			else // minimazing player
+			{
+				if (standPat <= alpha)
+				{
+					return alpha;
+				}
+				if (standPat < beta)
+				{
+					beta = standPat;
 				}
 			}
 
-			return minEvaluation;
-		}
-	}
+			List<Move> legalMoves = new List<Move>(_moveGenerator.GenerateLegalMoves(currentPlayerPieces));
 
-	int QuiescenceSearch(PieceSet currentPlayerPieces, int alpha, int beta, bool maximizingPlayer)
-	{
-		int standPat = Evaluate();
+			PieceSet nextDepthPlayerPieces = currentPlayerPieces == _whitePieces ? _blackPieces : _whitePieces;
 
-		if (maximizingPlayer)
-		{
-			if (standPat >= beta)
+			if (maximizingPlayer)
 			{
-				return beta;
-			}
-			if (standPat > alpha)
-			{
-				alpha = standPat;
-			}
-		}
-		else // minimazing player
-		{
-			if (standPat <= alpha)
-			{
+				for (int i = 0; i < legalMoves.Count; i++)
+				{
+					Move legalMove = legalMoves[i];
+
+					if (legalMove.EncounteredPiece != null)
+					{
+						_moveExecutor.MakeMove(legalMove);
+
+						int evaluation = QuiescenceSearch(nextDepthPlayerPieces, alpha, beta, false);
+
+						_moveExecutor.UndoMove(legalMove);
+
+						_positionsEvaluated++;
+
+						if (evaluation >= beta)
+						{
+							return beta;
+						}
+						if (evaluation > alpha)
+						{
+							alpha = evaluation;
+						}
+					}
+				}
+
 				return alpha;
 			}
-			if (standPat < beta)
+			else // minimizing player
 			{
-				beta = standPat;
-			}
-		}
-
-		List<Move> legalMoves = new List<Move>(_moveGenerator.GenerateLegalMoves(currentPlayerPieces));
-
-		PieceSet nextDepthPlayerPieces = currentPlayerPieces == _whitePieces ? _blackPieces : _whitePieces;
-
-		if (maximizingPlayer)
-		{
-			for (int i = 0; i < legalMoves.Count; i++)
-			{
-				Move legalMove = legalMoves[i];
-
-				if (legalMove.EncounteredPiece != null)
+				for (int i = 0; i < legalMoves.Count; i++)
 				{
-					_moveExecutor.MakeMove(legalMove);
+					Move legalMove = legalMoves[i];
 
-					int evaluation = QuiescenceSearch(nextDepthPlayerPieces, alpha, beta, false);
-
-					_moveExecutor.UndoMove(legalMove);
-
-					_positionsEvaluated++;
-
-					if (evaluation >= beta)
+					if (legalMove.EncounteredPiece != null)
 					{
-						return beta;
-					}
-					if (evaluation > alpha)
-					{
-						alpha = evaluation;
+						_moveExecutor.MakeMove(legalMove);
+
+						int evaluation = QuiescenceSearch(nextDepthPlayerPieces, alpha, beta, true);
+
+						_moveExecutor.UndoMove(legalMove);
+
+						_positionsEvaluated++;
+
+						if (evaluation <= alpha)
+						{
+							return alpha;
+						}
+						if (evaluation < beta)
+						{
+							beta = evaluation;
+						}
 					}
 				}
+
+				return beta;
 			}
-
-			return alpha;
-		}
-		else // minimizing player
-		{
-			for (int i = 0; i < legalMoves.Count; i++)
-			{
-				Move legalMove = legalMoves[i];
-
-				if (legalMove.EncounteredPiece != null)
-				{
-					_moveExecutor.MakeMove(legalMove);
-
-					int evaluation = QuiescenceSearch(nextDepthPlayerPieces, alpha, beta, true);
-
-					_moveExecutor.UndoMove(legalMove);
-
-					_positionsEvaluated++;
-
-					if (evaluation <= alpha)
-					{
-						return alpha;
-					}
-					if (evaluation < beta)
-					{
-						beta = evaluation;
-					}
-				}
-			}
-
-			return beta;
 		}
 	}
 }

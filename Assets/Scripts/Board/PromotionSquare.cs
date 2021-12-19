@@ -1,22 +1,26 @@
+using Backend;
 using UnityEngine;
 
-[RequireComponent(typeof(BoxCollider))]
-public class PromotionSquare : MonoBehaviour
+namespace Frontend
 {
-	[SerializeField] MoveType _promotionType;
-
-	PromotionPanel _promotionPanel;
-
-	void Start()
+	[RequireComponent(typeof(BoxCollider))]
+	public class PromotionSquare : MonoBehaviour
 	{
-		_promotionPanel = transform.parent.GetComponent<PromotionPanel>();
+		[SerializeField] MoveType _promotionType;
 
-		if (_promotionPanel == null) Debug.LogWarning("Couldn't find PromotionPanel");
-		if (_promotionType == MoveType.Undefinied) Debug.LogWarning("Promotion type is undefinied");
-	}
+		PromotionPanel _promotionPanel;
 
-	void OnMouseDown()
-	{
-		_promotionPanel.OnPromotionSelected(_promotionType);
+		void Start()
+		{
+			_promotionPanel = transform.parent.GetComponent<PromotionPanel>();
+
+			if (_promotionPanel == null) Debug.LogWarning("Couldn't find PromotionPanel");
+			if (_promotionType == MoveType.Undefinied) Debug.LogWarning("Promotion type is undefinied");
+		}
+
+		void OnMouseDown()
+		{
+			_promotionPanel.OnPromotionSelected(_promotionType);
+		}
 	}
 }

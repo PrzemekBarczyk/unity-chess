@@ -1,65 +1,68 @@
 ﻿using System;
 using System.Collections.Generic;
 
-public sealed class NegaMax : SearchAlgorithm
+namespace Backend
 {
-	public NegaMax(MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager) : base(moveGenerator, moveExecutor, pieceManager) { }
-
-	public override Tuple<Move, SearchStatistics> FindBestMove(uint fixedDepthSearch)
+	internal sealed class NegaMax : SearchAlgorithm
 	{
-		_bestEvaluation = 0;
-		_positionsEvaluated = 0;
-		_cutoffs = 0;
-		_transpositions = 0;
+		internal NegaMax(MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager) : base(moveGenerator, moveExecutor, pieceManager) { }
 
-		Search(_pieceManager.CurrentPieces, fixedDepthSearch, fixedDepthSearch);
-
-		return new Tuple<Move, SearchStatistics>(_bestMove, new SearchStatistics(fixedDepthSearch, _bestEvaluation, _positionsEvaluated, _cutoffs, _transpositions));
-	}
-
-	public int Search(PieceSet currentPlayerPieces, uint depth, uint maxDepth)
-	{
-		if (depth == 0)
+		internal override Tuple<Move, SearchStatistics> FindBestMove(uint fixedDepthSearch)
 		{
-			return Evaluate(currentPlayerPieces.Color);
+			_bestEvaluation = 0;
+			_positionsEvaluated = 0;
+			_cutoffs = 0;
+			_transpositions = 0;
+
+			Search(_pieceManager.CurrentPieces, fixedDepthSearch, fixedDepthSearch);
+
+			return new Tuple<Move, SearchStatistics>(_bestMove, new SearchStatistics(fixedDepthSearch, _bestEvaluation, _positionsEvaluated, _cutoffs, _transpositions));
 		}
 
-		List<Move> legalMoves = new List<Move>(_moveGenerator.GenerateLegalMoves(currentPlayerPieces));
-
-		if (legalMoves.Count == 0) // no legal moves
+		internal int Search(PieceSet currentPlayerPieces, uint depth, uint maxDepth)
 		{
-			if (currentPlayerPieces.IsKingChecked())
-				return -1000000;
-			return 0;
-		}
-
-		PieceSet nextDepthPlayerPieces = currentPlayerPieces == _whitePieces ? _blackPieces : _whitePieces;
-
-		int maxEvaluation = -10000000;
-
-		for (int i = 0; i < legalMoves.Count; i++)
-		{
-			Move legalMove = legalMoves[i];
-
-			_moveExecutor.MakeMove(legalMove);
-
-			int evaluation = -Search(nextDepthPlayerPieces, depth - 1, maxDepth);
-
-			_moveExecutor.UndoMove(legalMove);
-
-			_positionsEvaluated++;
-
-			if (evaluation > maxEvaluation)
+			if (depth == 0)
 			{
-				maxEvaluation = evaluation;
-				if (depth == maxDepth)
+				return Evaluate(currentPlayerPieces.Color);
+			}
+
+			List<Move> legalMoves = new List<Move>(_moveGenerator.GenerateLegalMoves(currentPlayerPieces));
+
+			if (legalMoves.Count == 0) // no legal moves
+			{
+				if (currentPlayerPieces.IsKingChecked())
+					return -1000000;
+				return 0;
+			}
+
+			PieceSet nextDepthPlayerPieces = currentPlayerPieces == _whitePieces ? _blackPieces : _whitePieces;
+
+			int maxEvaluation = -10000000;
+
+			for (int i = 0; i < legalMoves.Count; i++)
+			{
+				Move legalMove = legalMoves[i];
+
+				_moveExecutor.MakeMove(legalMove);
+
+				int evaluation = -Search(nextDepthPlayerPieces, depth - 1, maxDepth);
+
+				_moveExecutor.UndoMove(legalMove);
+
+				_positionsEvaluated++;
+
+				if (evaluation > maxEvaluation)
 				{
-					_bestMove = legalMove;
-					_bestEvaluation = maxEvaluation;
+					maxEvaluation = evaluation;
+					if (depth == maxDepth)
+					{
+						_bestMove = legalMove;
+						_bestEvaluation = maxEvaluation;
+					}
 				}
 			}
-		}
 
-		return maxEvaluation;
+			return maxEvaluation;
+		}
 	}
 }

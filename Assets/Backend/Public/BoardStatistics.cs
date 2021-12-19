@@ -1,13 +1,16 @@
-﻿public struct BoardStatistics
+﻿namespace Backend
 {
-	public int Evaluation;
-	public string FEN;
-	public ulong ZobristKey;
-
-	public BoardStatistics(int evaluation, string fen, ulong zobristKey)
+	public struct BoardStatistics
 	{
-		Evaluation = evaluation;
-		FEN = fen;
-		ZobristKey = zobristKey;
+		public int Evaluation;
+		public string FEN;
+		public ulong ZobristKey;
+
+		public BoardStatistics(int evaluation, string fen, ulong zobristKey)
+		{
+			Evaluation = evaluation;
+			FEN = fen;
+			ZobristKey = zobristKey;
+		}
 	}
 }

@@ -1,120 +1,123 @@
 using System;
 using System.Collections.Generic;
 
-public sealed class Perft
+namespace Backend
 {
-    MoveGenerator _moveGenerator;
-    MoveExecutor _moveExecutor;
-    PieceManager _pieceManager;
-    PieceSet _whitePieces;
-    PieceSet _blackPieces;
-
-    List<string> _divideResults = new List<string>();
-
-    public Perft(MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager)
+    public sealed class Perft
     {
-        _moveGenerator = moveGenerator;
-        _moveExecutor = moveExecutor;
-        _pieceManager = pieceManager;
-        _whitePieces = _pieceManager.WhitePieces;
-        _blackPieces = _pieceManager.BlackPieces;
-    }
+        MoveGenerator _moveGenerator;
+        MoveExecutor _moveExecutor;
+        PieceManager _pieceManager;
+        PieceSet _whitePieces;
+        PieceSet _blackPieces;
 
-    public ulong RunSinglePerft(int maxDepth)
-    {
-        return FastSearch(_pieceManager.CurrentPieces, maxDepth);
-    }
+        List<string> _divideResults = new List<string>();
 
-    public List<string> RunDivide(int maxDepth)
-    {
-        _divideResults.Clear();
-        _divideResults.Add("Nodes searched: " + Divide(_pieceManager.CurrentPieces, maxDepth, maxDepth));
-        return _divideResults;
-    }
-
-    ulong Search(PieceSet currentPieces, int depth)
-    {
-        if (depth == 0)
+        internal Perft(MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager)
         {
-            return 1;
+            _moveGenerator = moveGenerator;
+            _moveExecutor = moveExecutor;
+            _pieceManager = pieceManager;
+            _whitePieces = _pieceManager.WhitePieces;
+            _blackPieces = _pieceManager.BlackPieces;
         }
 
-        List<Move> legalMoves = new List<Move>(_moveGenerator.GenerateLegalMoves(currentPieces));
-
-        PieceSet nextPieces = currentPieces.Color == ColorType.White ? _blackPieces : _whitePieces;
-
-        ulong nodes = 0;
-
-        for (int i = 0; i < legalMoves.Count; i++)
+        public ulong RunSinglePerft(int maxDepth)
         {
-            Move legalMove = legalMoves[i];
-
-            _moveExecutor.MakeMove(legalMove);
-            nodes += Search(nextPieces, depth - 1);
-            _moveExecutor.UndoMove(legalMove);
+            return FastSearch(_pieceManager.CurrentPieces, maxDepth);
         }
 
-        return nodes;
-    }
-
-    ulong FastSearch(PieceSet currentPieces, int depth)
-    {
-        if (depth <= 0)
+        public List<string> RunDivide(int maxDepth)
         {
-            return 1;
+            _divideResults.Clear();
+            _divideResults.Add("Nodes searched: " + Divide(_pieceManager.CurrentPieces, maxDepth, maxDepth));
+            return _divideResults;
         }
 
-        List<Move> legalMoves = new List<Move>(_moveGenerator.GenerateLegalMoves(currentPieces));
-
-        if (depth == 1)
+        ulong Search(PieceSet currentPieces, int depth)
         {
-            return Convert.ToUInt64(legalMoves.Count);
-        }
-
-        PieceSet nextPieces = currentPieces.Color == ColorType.White ? _blackPieces : _whitePieces;
-
-        ulong nodes = 0;
-
-        for (int i = 0; i < legalMoves.Count; i++)
-        {
-            Move legalMove = legalMoves[i];
-
-            _moveExecutor.MakeMove(legalMove);
-            nodes += FastSearch(nextPieces, depth - 1);
-            _moveExecutor.UndoMove(legalMove);
-        }
-
-        return nodes;
-    }
-
-    ulong Divide(PieceSet currentPieces, int depth, int maxDepth)
-    {
-        if (depth == 0)
-        {
-            return 1;
-        }
-
-        List<Move> legalMoves = new List<Move>(_moveGenerator.GenerateLegalMoves(currentPieces));
-
-        PieceSet nextPieces = currentPieces.Color == ColorType.White ? _blackPieces : _whitePieces;
-
-        ulong nodes = 0;
-
-        for (int i = 0; i < legalMoves.Count; i++)
-        {
-            Move legalMove = legalMoves[i];
-
-            _moveExecutor.MakeMove(legalMove);
-            ulong localNodes = Divide(nextPieces, depth - 1, maxDepth);
-            nodes += localNodes;
-            _moveExecutor.UndoMove(legalMove);
-
-            if (depth == maxDepth)
+            if (depth == 0)
             {
-                _divideResults.Add(SimplifiedAlgebraicNotation.MoveToLongSAN(legalMove) + ": " + localNodes);
+                return 1;
             }
+
+            List<Move> legalMoves = new List<Move>(_moveGenerator.GenerateLegalMoves(currentPieces));
+
+            PieceSet nextPieces = currentPieces.Color == ColorType.White ? _blackPieces : _whitePieces;
+
+            ulong nodes = 0;
+
+            for (int i = 0; i < legalMoves.Count; i++)
+            {
+                Move legalMove = legalMoves[i];
+
+                _moveExecutor.MakeMove(legalMove);
+                nodes += Search(nextPieces, depth - 1);
+                _moveExecutor.UndoMove(legalMove);
+            }
+
+            return nodes;
         }
 
-        return nodes;
+        ulong FastSearch(PieceSet currentPieces, int depth)
+        {
+            if (depth <= 0)
+            {
+                return 1;
+            }
+
+            List<Move> legalMoves = new List<Move>(_moveGenerator.GenerateLegalMoves(currentPieces));
+
+            if (depth == 1)
+            {
+                return Convert.ToUInt64(legalMoves.Count);
+            }
+
+            PieceSet nextPieces = currentPieces.Color == ColorType.White ? _blackPieces : _whitePieces;
+
+            ulong nodes = 0;
+
+            for (int i = 0; i < legalMoves.Count; i++)
+            {
+                Move legalMove = legalMoves[i];
+
+                _moveExecutor.MakeMove(legalMove);
+                nodes += FastSearch(nextPieces, depth - 1);
+                _moveExecutor.UndoMove(legalMove);
+            }
+
+            return nodes;
+        }
+
+        ulong Divide(PieceSet currentPieces, int depth, int maxDepth)
+        {
+            if (depth == 0)
+            {
+                return 1;
+            }
+
+            List<Move> legalMoves = new List<Move>(_moveGenerator.GenerateLegalMoves(currentPieces));
+
+            PieceSet nextPieces = currentPieces.Color == ColorType.White ? _blackPieces : _whitePieces;
+
+            ulong nodes = 0;
+
+            for (int i = 0; i < legalMoves.Count; i++)
+            {
+                Move legalMove = legalMoves[i];
+
+                _moveExecutor.MakeMove(legalMove);
+                ulong localNodes = Divide(nextPieces, depth - 1, maxDepth);
+                nodes += localNodes;
+                _moveExecutor.UndoMove(legalMove);
+
+                if (depth == maxDepth)
+                {
+                    _divideResults.Add(SimplifiedAlgebraicNotation.MoveToLongSAN(legalMove) + ": " + localNodes);
+                }
+            }
+
+            return nodes;
+        }
     }
 }

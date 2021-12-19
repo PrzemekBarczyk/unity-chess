@@ -1,24 +1,28 @@
+using Backend;
 using UnityEngine;
 
-public class PromotionPanel : MonoBehaviour
+namespace Frontend
 {
-	public MoveType PromotionType { get; private set; }
-
-	bool _isPromotionSelected;
-
-	public void OnPromotionSelected(MoveType promotionSelected)
+	public class PromotionPanel : MonoBehaviour
 	{
-		PromotionType = promotionSelected;
-		_isPromotionSelected = true;
-	}
+		public MoveType PromotionType { get; private set; }
 
-	public bool IsPromotionSelected()
-	{
-		if (_isPromotionSelected)
+		bool _isPromotionSelected;
+
+		public void OnPromotionSelected(MoveType promotionSelected)
 		{
-			_isPromotionSelected = false;
-			return true;
+			PromotionType = promotionSelected;
+			_isPromotionSelected = true;
 		}
-		return false;
+
+		public bool IsPromotionSelected()
+		{
+			if (_isPromotionSelected)
+			{
+				_isPromotionSelected = false;
+				return true;
+			}
+			return false;
+		}
 	}
 }

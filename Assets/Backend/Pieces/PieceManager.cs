@@ -1,29 +1,32 @@
-public sealed class PieceManager
+namespace Backend
 {
-    public PieceSet WhitePieces { get; private set; }
-    public PieceSet BlackPieces { get; private set; }
-
-    public PieceSet CurrentPieces { get; private set; }
-    public PieceSet NextPieces { get; private set; }
-
-    public PieceManager(Board board, FENDataAdapter extractedFENData)
+    internal sealed class PieceManager
     {
-        WhitePieces = new PieceSet(board, ColorType.White, extractedFENData.Pieces);
-        BlackPieces = new PieceSet(board, ColorType.Black, extractedFENData.Pieces);
+        internal PieceSet WhitePieces { get; private set; }
+        internal PieceSet BlackPieces { get; private set; }
 
-        WhitePieces.CanKingCastleKingside = extractedFENData.HasWhiteCastleKingsideRights;
-        WhitePieces.CanKingCastleQueenside = extractedFENData.HasWhiteCastleQueensideRights;
-        BlackPieces.CanKingCastleKingside = extractedFENData.HasBlackCastleKingsideRights;
-        BlackPieces.CanKingCastleQueenside = extractedFENData.HasBlackCastleQueensideRights;
+        internal PieceSet CurrentPieces { get; private set; }
+        internal PieceSet NextPieces { get; private set; }
 
-        CurrentPieces = extractedFENData.PlayerToMoveColor == ColorType.White ? WhitePieces : BlackPieces;
-        NextPieces = extractedFENData.PlayerToMoveColor == ColorType.White ? BlackPieces : WhitePieces;
-    }
+        internal PieceManager(Board board, FENDataAdapter extractedFENData)
+        {
+            WhitePieces = new PieceSet(board, ColorType.White, extractedFENData.Pieces);
+            BlackPieces = new PieceSet(board, ColorType.Black, extractedFENData.Pieces);
 
-    public void SwitchPlayer()
-    {
-        PieceSet temp = CurrentPieces;
-        CurrentPieces = NextPieces;
-        NextPieces = temp;
+            WhitePieces.CanKingCastleKingside = extractedFENData.HasWhiteCastleKingsideRights;
+            WhitePieces.CanKingCastleQueenside = extractedFENData.HasWhiteCastleQueensideRights;
+            BlackPieces.CanKingCastleKingside = extractedFENData.HasBlackCastleKingsideRights;
+            BlackPieces.CanKingCastleQueenside = extractedFENData.HasBlackCastleQueensideRights;
+
+            CurrentPieces = extractedFENData.PlayerToMoveColor == ColorType.White ? WhitePieces : BlackPieces;
+            NextPieces = extractedFENData.PlayerToMoveColor == ColorType.White ? BlackPieces : WhitePieces;
+        }
+
+        internal void SwitchPlayer()
+        {
+            PieceSet temp = CurrentPieces;
+            CurrentPieces = NextPieces;
+            NextPieces = temp;
+        }
     }
 }

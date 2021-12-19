@@ -1,56 +1,59 @@
 ﻿using System.Collections.Generic;
 
-public sealed class OpeningBook
+namespace Backend
 {
-	Dictionary<string, List<string>> _positionsWithMoves = new Dictionary<string, List<string>>();
-
-	public OpeningBook(ChessEngine chessEngine, string openingBook)
+	internal sealed class OpeningBook
 	{
-		LoadEntriesFromFile(chessEngine, openingBook);
-	}
+		Dictionary<string, List<string>> _positionsWithMoves = new Dictionary<string, List<string>>();
 
-	void LoadEntriesFromFile(ChessEngine chessEngine, string openingBook)
-	{
-		string[] lines = openingBook.Split('\n');
-
-		for (int i = 0; i < lines.Length; i += 2)
+		internal OpeningBook(ChessEngine chessEngine, string openingBook)
 		{
-			string fen = lines[i];
-			List<string> moves = new List<string>();
+			LoadEntriesFromFile(chessEngine, openingBook);
+		}
 
-			foreach (string move in lines[i+1].Split(' '))
+		void LoadEntriesFromFile(ChessEngine chessEngine, string openingBook)
+		{
+			string[] lines = openingBook.Split('\n');
+
+			for (int i = 0; i < lines.Length; i += 2)
 			{
-				if (move == "")
-					break;
-				moves.Add(move);
+				string fen = lines[i];
+				List<string> moves = new List<string>();
+
+				foreach (string move in lines[i + 1].Split(' '))
+				{
+					if (move == "")
+						break;
+					moves.Add(move);
+				}
+
+				AddEntry(fen, moves);
 			}
+		}
 
-			AddEntry(fen, moves);
+		void AddEntry(string fen, List<string> moves)
+		{
+			if (_positionsWithMoves.ContainsKey(fen))
+			{
+				foreach (var move in moves)
+					_positionsWithMoves[fen].Add(move);
+			}
+			else
+			{
+				_positionsWithMoves.Add(fen, moves);
+			}
 		}
-	}
 
-	void AddEntry(string fen, List<string> moves)
-	{
-		if (_positionsWithMoves.ContainsKey(fen))
+		internal List<string> FindEntry(string currentFEN)
 		{
-			foreach (var move in moves)
-				_positionsWithMoves[fen].Add(move);
-		}
-		else
-		{
-			_positionsWithMoves.Add(fen, moves);
-		}
-	}
-
-	public List<string> FindEntry(string currentFEN)
-	{
-		if (_positionsWithMoves.ContainsKey(currentFEN))
-		{
-			return _positionsWithMoves[currentFEN];
-		}
-		else
-		{
-			return null;
+			if (_positionsWithMoves.ContainsKey(currentFEN))
+			{
+				return _positionsWithMoves[currentFEN];
+			}
+			else
+			{
+				return null;
+			}
 		}
 	}
 }

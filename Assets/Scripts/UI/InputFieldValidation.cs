@@ -1,33 +1,36 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(InputField))]
-public class InputFieldValidation : MonoBehaviour
+namespace Frontend
 {
-	InputField _inputField;
-
-	string _defaultValue;
-
-	void Awake()
+	[RequireComponent(typeof(InputField))]
+	public class InputFieldValidation : MonoBehaviour
 	{
-		_inputField = GetComponent<InputField>();
-		_defaultValue = _inputField.text;
-	}
+		InputField _inputField;
 
-	public void RemoveMinus()
-	{
-		_inputField.text = _inputField.text.Replace("-", "");
-	}
+		string _defaultValue;
 
-	public void RestoreDefaultIfEqualsZero()
-	{
-		if (uint.Parse(_inputField.text) == 0)
-			_inputField.text = _defaultValue;
-	}
+		void Awake()
+		{
+			_inputField = GetComponent<InputField>();
+			_defaultValue = _inputField.text;
+		}
 
-	public void RestoreDefaultValueIfEmpty()
-	{
-		if (_inputField.text.Length == 0)
-			_inputField.text = _defaultValue;
+		public void RemoveMinus()
+		{
+			_inputField.text = _inputField.text.Replace("-", "");
+		}
+
+		public void RestoreDefaultIfEqualsZero()
+		{
+			if (uint.Parse(_inputField.text) == 0)
+				_inputField.text = _defaultValue;
+		}
+
+		public void RestoreDefaultValueIfEmpty()
+		{
+			if (_inputField.text.Length == 0)
+				_inputField.text = _defaultValue;
+		}
 	}
 }

@@ -2,294 +2,297 @@ using System;
 using System.Collections.Generic;
 using Vector2Int = UnityEngine.Vector2Int;
 
-public static class FENConverter
+namespace Backend
 {
-	public static FENDataAdapter FENToBoardPositionData(string fen)
+	public static class FENConverter
 	{
-		string[] splitedFENString = fen.Split(' ');
-
-		if (splitedFENString.Length != 6)
-			throw new FormatException("FEN has to many fields");
-
-		bool[] castlingRights = ExtractCastlingRights(splitedFENString[2]);
-
-		return new FENDataAdapter(ExtractPiecePlacement(splitedFENString[0]), ExtractPlayerToMoveColor(splitedFENString[1]),
-			castlingRights[0], castlingRights[1], castlingRights[2], castlingRights[3], ExtractEnPassantTargetPiecePosition(splitedFENString[3]),
-			ExtractHalfMoveClock(splitedFENString[4]), ExtractFullMovesNumber(splitedFENString[5]));
-	}
-
-	static List<PieceData> ExtractPiecePlacement(string piecesPositions)
-	{
-		List<PieceData> piecesToCreateData = new List<PieceData>();
-
-		Vector2Int piecePosition = new Vector2Int(0, Board.RANKS - 1);
-
-		foreach (char singleChar in piecesPositions)
+		public static FENDataAdapter FENToBoardPositionData(string fen)
 		{
-			if (singleChar.Equals('/'))
+			string[] splitedFENString = fen.Split(' ');
+
+			if (splitedFENString.Length != 6)
+				throw new FormatException("FEN has to many fields");
+
+			bool[] castlingRights = ExtractCastlingRights(splitedFENString[2]);
+
+			return new FENDataAdapter(ExtractPiecePlacement(splitedFENString[0]), ExtractPlayerToMoveColor(splitedFENString[1]),
+				castlingRights[0], castlingRights[1], castlingRights[2], castlingRights[3], ExtractEnPassantTargetPiecePosition(splitedFENString[3]),
+				ExtractHalfMoveClock(splitedFENString[4]), ExtractFullMovesNumber(splitedFENString[5]));
+		}
+
+		static List<PieceData> ExtractPiecePlacement(string piecesPositions)
+		{
+			List<PieceData> piecesToCreateData = new List<PieceData>();
+
+			Vector2Int piecePosition = new Vector2Int(0, Board.RANKS - 1);
+
+			foreach (char singleChar in piecesPositions)
 			{
-				piecePosition.x = 0;
-				piecePosition.y -= 1;
-				continue;
+				if (singleChar.Equals('/'))
+				{
+					piecePosition.x = 0;
+					piecePosition.y -= 1;
+					continue;
+				}
+
+				if (char.IsNumber(singleChar))
+				{
+					piecePosition.x += (int)char.GetNumericValue(singleChar);
+					continue;
+				}
+
+				if (char.IsLetter(singleChar))
+				{
+					ColorType pieceColor = char.IsUpper(singleChar) ? ColorType.White : ColorType.Black;
+					PieceType pieceType = SelectPieceType(singleChar);
+					piecesToCreateData.Add(new PieceData(pieceColor, pieceType, piecePosition));
+					piecePosition.x += 1;
+				}
+				else
+				{
+					throw new FormatException("Forbidden char in piece placement field");
+				}
 			}
 
-			if (char.IsNumber(singleChar))
-			{
-				piecePosition.x += (int)char.GetNumericValue(singleChar);
-				continue;
-			}
+			return piecesToCreateData;
+		}
 
-			if (char.IsLetter(singleChar))
+		static PieceType SelectPieceType(char pieceChar)
+		{
+			switch (char.ToLower(pieceChar))
 			{
-				ColorType pieceColor = char.IsUpper(singleChar) ? ColorType.White : ColorType.Black;
-				PieceType pieceType = SelectPieceType(singleChar);
-				piecesToCreateData.Add(new PieceData(pieceColor, pieceType, piecePosition));
-				piecePosition.x += 1;
+				case 'p':
+					return PieceType.Pawn;
+				case 'n':
+					return PieceType.Knight;
+				case 'b':
+					return PieceType.Bishop;
+				case 'r':
+					return PieceType.Rook;
+				case 'q':
+					return PieceType.Queen;
+				case 'k':
+					return PieceType.King;
+				default:
+					throw new FormatException("Unknown piece type in piece placement");
+			}
+		}
+
+		static ColorType ExtractPlayerToMoveColor(string activeColor)
+		{
+			if (activeColor.Equals("w"))
+			{
+				return ColorType.White;
+			}
+			else if (activeColor.Equals("b"))
+			{
+				return ColorType.Black;
 			}
 			else
 			{
-				throw new FormatException("Forbidden char in piece placement field");
+				throw new FormatException("Unknown active color symbol");
 			}
 		}
 
-		return piecesToCreateData;
-	}
-
-	static PieceType SelectPieceType(char pieceChar)
-	{
-		switch (char.ToLower(pieceChar))
+		static bool[] ExtractCastlingRights(string castlingRights)
 		{
-			case 'p':
-				return PieceType.Pawn;
-			case 'n':
-				return PieceType.Knight;
-			case 'b':
-				return PieceType.Bishop;
-			case 'r':
-				return PieceType.Rook;
-			case 'q':
-				return PieceType.Queen;
-			case 'k':
-				return PieceType.King;
-			default:
-				throw new FormatException("Unknown piece type in piece placement");
-		}
-	}
+			bool[] result = new bool[4];
 
-	static ColorType ExtractPlayerToMoveColor(string activeColor)
-	{
-		if (activeColor.Equals("w"))
-		{
-			return ColorType.White;
-		}
-		else if (activeColor.Equals("b"))
-		{
-			return ColorType.Black;
-		}
-		else
-		{
-			throw new FormatException("Unknown active color symbol");
-		}
-	}
+			result[0] = castlingRights.Contains("K");
+			result[1] = castlingRights.Contains("Q");
+			result[2] = castlingRights.Contains("k");
+			result[3] = castlingRights.Contains("q");
 
-	static bool[] ExtractCastlingRights(string castlingRights)
-	{
-		bool[] result = new bool[4];
-
-		result[0] = castlingRights.Contains("K");
-		result[1] = castlingRights.Contains("Q");
-		result[2] = castlingRights.Contains("k");
-		result[3] = castlingRights.Contains("q");
-
-		return result;
-	}
-
-	static Vector2Int? ExtractEnPassantTargetPiecePosition(string enPassantSquare)
-	{
-		if (enPassantSquare[0].Equals('-'))
-		{
-			return null;
+			return result;
 		}
 
-		Vector2Int enPassantPosition;
-		try
+		static Vector2Int? ExtractEnPassantTargetPiecePosition(string enPassantSquare)
 		{
-			enPassantPosition = SimplifiedAlgebraicNotation.ShortSANToPosition(enPassantSquare);
-		}
-		catch (FormatException)
-		{
-			throw new FormatException("Uncorrect en passant position");
-		}
-
-		if (enPassantPosition.y != 2 && enPassantPosition.y != 5)
-		{
-			throw new FormatException("Uncorrect en passant position");
-		}
-
-		return enPassantPosition;
-	}
-
-	static uint ExtractHalfMoveClock(string halfMovesClock)
-	{
-		uint halfMovesClockValue;
-		bool isConvertionSuccess = uint.TryParse(halfMovesClock, out halfMovesClockValue);
-		if (!isConvertionSuccess)
-		{
-			throw new FormatException("Uncorrect half moves clock");
-		}
-		return halfMovesClockValue;
-	}
-
-	static uint ExtractFullMovesNumber(string fullMovesNumber)
-	{
-		uint fullMovesNumberValue;
-		bool isCOnvertionSuccess = uint.TryParse(fullMovesNumber, out fullMovesNumberValue);
-		if (!isCOnvertionSuccess)
-		{
-			throw new FormatException("Uncorrect full moves number");
-		}
-		return fullMovesNumberValue;
-	}
-
-	public static string BoardPositionToFEN(FENDataAdapter fenDataAdapter)
-	{
-		string fen = "";
-
-		fen += ParsePiecePlacement(fenDataAdapter.Pieces);
-		fen += " ";
-		fen += ParseSideToMove(fenDataAdapter.PlayerToMoveColor);
-		fen += " ";
-		fen += ParseCastlingRights(fenDataAdapter.HasWhiteCastleKingsideRights,
-								   fenDataAdapter.HasWhiteCastleQueensideRights,
-								   fenDataAdapter.HasBlackCastleKingsideRights,
-								   fenDataAdapter.HasBlackCastleQueensideRights);
-		fen += " ";
-		fen += ParseEnPassant(fenDataAdapter.EnPassantTargetPiecePosition);
-		fen += " ";
-		fen += ParseHalfMoveClock(fenDataAdapter.HalfMovesClock);
-		fen += " ";
-		fen += ParseFullMoveNumber(fenDataAdapter.FullMovesNumber);
-
-		return fen;
-	}
-
-	static string ParsePiecePlacement(List<PieceData> pieces)
-	{
-		string piecePlacement = "";
-
-		for (int y = Board.TOP_RANK_INDEX; y >= 0; y--)
-		{
-			uint emptySquaresInRow = 0;
-			for (int x = 0; x <= Board.RIGHT_FILE_INDEX; x++)
+			if (enPassantSquare[0].Equals('-'))
 			{
-				bool squareOccupied = false;
-				foreach (PieceData piece in pieces)
+				return null;
+			}
+
+			Vector2Int enPassantPosition;
+			try
+			{
+				enPassantPosition = SimplifiedAlgebraicNotation.ShortSANToPosition(enPassantSquare);
+			}
+			catch (FormatException)
+			{
+				throw new FormatException("Uncorrect en passant position");
+			}
+
+			if (enPassantPosition.y != 2 && enPassantPosition.y != 5)
+			{
+				throw new FormatException("Uncorrect en passant position");
+			}
+
+			return enPassantPosition;
+		}
+
+		static uint ExtractHalfMoveClock(string halfMovesClock)
+		{
+			uint halfMovesClockValue;
+			bool isConvertionSuccess = uint.TryParse(halfMovesClock, out halfMovesClockValue);
+			if (!isConvertionSuccess)
+			{
+				throw new FormatException("Uncorrect half moves clock");
+			}
+			return halfMovesClockValue;
+		}
+
+		static uint ExtractFullMovesNumber(string fullMovesNumber)
+		{
+			uint fullMovesNumberValue;
+			bool isCOnvertionSuccess = uint.TryParse(fullMovesNumber, out fullMovesNumberValue);
+			if (!isCOnvertionSuccess)
+			{
+				throw new FormatException("Uncorrect full moves number");
+			}
+			return fullMovesNumberValue;
+		}
+
+		internal static string BoardPositionToFEN(FENDataAdapter fenDataAdapter)
+		{
+			string fen = "";
+
+			fen += ParsePiecePlacement(fenDataAdapter.Pieces);
+			fen += " ";
+			fen += ParseSideToMove(fenDataAdapter.PlayerToMoveColor);
+			fen += " ";
+			fen += ParseCastlingRights(fenDataAdapter.HasWhiteCastleKingsideRights,
+									   fenDataAdapter.HasWhiteCastleQueensideRights,
+									   fenDataAdapter.HasBlackCastleKingsideRights,
+									   fenDataAdapter.HasBlackCastleQueensideRights);
+			fen += " ";
+			fen += ParseEnPassant(fenDataAdapter.EnPassantTargetPiecePosition);
+			fen += " ";
+			fen += ParseHalfMoveClock(fenDataAdapter.HalfMovesClock);
+			fen += " ";
+			fen += ParseFullMoveNumber(fenDataAdapter.FullMovesNumber);
+
+			return fen;
+		}
+
+		static string ParsePiecePlacement(List<PieceData> pieces)
+		{
+			string piecePlacement = "";
+
+			for (int y = Board.TOP_RANK_INDEX; y >= 0; y--)
+			{
+				uint emptySquaresInRow = 0;
+				for (int x = 0; x <= Board.RIGHT_FILE_INDEX; x++)
 				{
-					if (piece.Position.x == x && piece.Position.y == y)
+					bool squareOccupied = false;
+					foreach (PieceData piece in pieces)
 					{
-						squareOccupied = true;
-
-						if (emptySquaresInRow > 0)
+						if (piece.Position.x == x && piece.Position.y == y)
 						{
-							piecePlacement += emptySquaresInRow;
-							emptySquaresInRow = 0;
-						}
-						piecePlacement += SelectPieceChar(piece);
+							squareOccupied = true;
 
-						break;
+							if (emptySquaresInRow > 0)
+							{
+								piecePlacement += emptySquaresInRow;
+								emptySquaresInRow = 0;
+							}
+							piecePlacement += SelectPieceChar(piece);
+
+							break;
+						}
+					}
+
+					if (!squareOccupied)
+					{
+						emptySquaresInRow++;
 					}
 				}
 
-				if (!squareOccupied)
+				if (emptySquaresInRow > 0)
 				{
-					emptySquaresInRow++;
+					piecePlacement += emptySquaresInRow;
+				}
+
+				if (y != 0)
+				{
+					piecePlacement += "/";
 				}
 			}
 
-			if (emptySquaresInRow > 0)
+			return piecePlacement;
+		}
+
+		static char SelectPieceChar(PieceData piece)
+		{
+			char pieceChar;
+
+			switch (piece.Type)
 			{
-				piecePlacement += emptySquaresInRow;
+				case PieceType.Pawn:
+					pieceChar = 'p';
+					break;
+				case PieceType.Knight:
+					pieceChar = 'n';
+					break;
+				case PieceType.Bishop:
+					pieceChar = 'b';
+					break;
+				case PieceType.Rook:
+					pieceChar = 'r';
+					break;
+				case PieceType.Queen:
+					pieceChar = 'q';
+					break;
+				case PieceType.King:
+					pieceChar = 'k';
+					break;
+				default:
+					throw new FormatException("Unknown piece type");
 			}
 
-			if (y != 0)
+			return piece.Color == ColorType.White ? char.ToUpper(pieceChar) : pieceChar;
+		}
+
+		static char ParseSideToMove(ColorType sideToMove)
+		{
+			if (sideToMove == ColorType.White) return 'w';
+			return 'b';
+		}
+
+		static string ParseCastlingRights(bool whiteKingsideCastle, bool whiteQueensideCastle, bool blackKingsideCastle, bool blackQueensideCastle)
+		{
+			string castlingRights = "";
+
+			if (whiteKingsideCastle) castlingRights += "K";
+			if (whiteQueensideCastle) castlingRights += "Q";
+			if (blackKingsideCastle) castlingRights += "k";
+			if (blackQueensideCastle) castlingRights += "q";
+
+			if (castlingRights == "") castlingRights += "-";
+
+			return castlingRights;
+		}
+
+		static string ParseEnPassant(Vector2Int? enPassantPosition)
+		{
+			if (enPassantPosition.HasValue)
 			{
-				piecePlacement += "/";
+				return SimplifiedAlgebraicNotation.PositionToShortSAN(enPassantPosition.Value);
+			}
+			else
+			{
+				return "-";
 			}
 		}
 
-		return piecePlacement;
-	}
-
-	static char SelectPieceChar(PieceData piece)
-	{
-		char pieceChar;
-
-		switch (piece.Type)
+		static string ParseHalfMoveClock(uint halfMoveClock)
 		{
-			case PieceType.Pawn:
-				pieceChar = 'p';
-				break;
-			case PieceType.Knight:
-				pieceChar = 'n';
-				break;
-			case PieceType.Bishop:
-				pieceChar = 'b';
-				break;
-			case PieceType.Rook:
-				pieceChar = 'r';
-				break;
-			case PieceType.Queen:
-				pieceChar = 'q';
-				break;
-			case PieceType.King:
-				pieceChar = 'k';
-				break;
-			default:
-				throw new FormatException("Unknown piece type");
+			return halfMoveClock.ToString();
 		}
 
-		return piece.Color == ColorType.White ? char.ToUpper(pieceChar) : pieceChar;
-	}
-
-	static char ParseSideToMove(ColorType sideToMove)
-	{
-		if (sideToMove == ColorType.White) return 'w';
-		return 'b';
-	}
-
-	static string ParseCastlingRights(bool whiteKingsideCastle, bool whiteQueensideCastle, bool blackKingsideCastle, bool blackQueensideCastle)
-	{
-		string castlingRights = "";
-
-		if (whiteKingsideCastle) castlingRights += "K";
-		if (whiteQueensideCastle) castlingRights += "Q";
-		if (blackKingsideCastle) castlingRights += "k";
-		if (blackQueensideCastle) castlingRights += "q";
-
-		if (castlingRights == "") castlingRights += "-";
-
-		return castlingRights;
-	}
-
-	static string ParseEnPassant(Vector2Int? enPassantPosition)
-	{
-		if (enPassantPosition.HasValue)
+		static string ParseFullMoveNumber(uint fullMoveNumber)
 		{
-			return SimplifiedAlgebraicNotation.PositionToShortSAN(enPassantPosition.Value);
+			return fullMoveNumber.ToString();
 		}
-		else
-		{
-			return "-";
-		}
-	}
-
-	static string ParseHalfMoveClock(uint halfMoveClock)
-	{
-		return halfMoveClock.ToString();
-	}
-
-	static string ParseFullMoveNumber(uint fullMoveNumber)
-	{
-		return fullMoveNumber.ToString();
 	}
 }

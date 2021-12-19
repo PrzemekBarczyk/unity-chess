@@ -1,48 +1,51 @@
 using Vector2Int = UnityEngine.Vector2Int;
 
-public sealed class Board
+namespace Backend
 {
-    public const int SIZE = 64;
-
-    public const int FILES = 8;
-    public const int RANKS = 8;
-
-    public const int LEFT_FILE_INDEX = 0;
-    public const int RIGHT_FILE_INDEX = 7;
-
-    public const int TOP_RANK_INDEX = 7;
-    public const int BOTTOM_RANK_INDEX = 0;
-
-    public ulong ZobristHash { get; set; }
-
-    public Square[][] Squares { get; private set; }
-
-    public Square EnPassantTarget { get; set; }
-
-    public Board(FENDataAdapter extractedFENData)
+    internal sealed class Board
     {
-        CreateBoard(extractedFENData);
-    }
+        internal const int SIZE = 64;
 
-    void CreateBoard(FENDataAdapter extractedFENData)
-    {
-        Squares = new Square[FILES][];
-        for (int x = 0; x < FILES; x++)
+        internal const int FILES = 8;
+        internal const int RANKS = 8;
+
+        internal const int LEFT_FILE_INDEX = 0;
+        internal const int RIGHT_FILE_INDEX = 7;
+
+        internal const int TOP_RANK_INDEX = 7;
+        internal const int BOTTOM_RANK_INDEX = 0;
+
+        internal ulong ZobristHash { get; set; }
+
+        internal Square[][] Squares { get; private set; }
+
+        internal Square EnPassantTarget { get; set; }
+
+        internal Board(FENDataAdapter extractedFENData)
         {
-            Squares[x] = new Square[RANKS];
-            for (int y = 0; y < RANKS; y++)
+            CreateBoard(extractedFENData);
+        }
+
+        void CreateBoard(FENDataAdapter extractedFENData)
+        {
+            Squares = new Square[FILES][];
+            for (int x = 0; x < FILES; x++)
             {
-                Squares[x][y] = new Square(this, new Vector2Int(x, y));
+                Squares[x] = new Square[RANKS];
+                for (int y = 0; y < RANKS; y++)
+                {
+                    Squares[x][y] = new Square(this, new Vector2Int(x, y));
+                }
             }
-        }
 
-        if (extractedFENData.EnPassantTargetPiecePosition.HasValue)
-        {
-            EnPassantTarget = Squares[extractedFENData.EnPassantTargetPiecePosition.Value.x][extractedFENData.EnPassantTargetPiecePosition.Value.y];
-        }
-        else
-        {
-            EnPassantTarget = null;
+            if (extractedFENData.EnPassantTargetPiecePosition.HasValue)
+            {
+                EnPassantTarget = Squares[extractedFENData.EnPassantTargetPiecePosition.Value.x][extractedFENData.EnPassantTargetPiecePosition.Value.y];
+            }
+            else
+            {
+                EnPassantTarget = null;
+            }
         }
     }
 }

@@ -1,13 +1,16 @@
-public enum PlayerType { Undefinied, Human, Bot }
-
-public class Player
+namespace Backend
 {
-	public ColorType Color { get; private set; }
-	public PlayerType Type { get; }
+	internal enum PlayerType { Undefinied, Human, Bot }
 
-	public Player(ColorType color, PlayerType type)
+	internal class Player
 	{
-		Color = color;
-		Type = type;
+		internal ColorType Color { get; private set; }
+		internal PlayerType Type { get; }
+
+		internal Player(ColorType color, PlayerType type)
+		{
+			Color = color;
+			Type = type;
+		}
 	}
 }

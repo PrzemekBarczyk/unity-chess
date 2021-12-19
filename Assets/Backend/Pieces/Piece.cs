@@ -1,30 +1,33 @@
 using Vector2Int = UnityEngine.Vector2Int;
 
-public enum PieceType { Undefinied, Pawn, Knight, Bishop, Rook, Queen, King }
-
-public sealed class Piece
+namespace Backend
 {
-	public bool IsAlive { get; set; } = true;
+	public enum PieceType { Undefinied, Pawn, Knight, Bishop, Rook, Queen, King }
 
-    public ColorType Color { get; }
-    public PieceType Type { get; }
-	public Square Square { get; set; }
-
-	public PieceSet Pieces { get; }
-
-	protected Board _board;
-
-	public Piece(Board board, PieceSet pieces, ColorType color, PieceType type, Vector2Int position)
+	public sealed class Piece
 	{
-		_board = board;
+		internal bool IsAlive { get; set; } = true;
 
-		Pieces = pieces;
+		public ColorType Color { get; }
+		public PieceType Type { get; }
+		public Square Square { get; set; }
 
-		IsAlive = true;
-		Color = color;
-		Type = type;
+		internal PieceSet Pieces { get; }
 
-		Square = _board.Squares[position.x][position.y];
-		_board.Squares[position.x][position.y].Piece = this;
+		Board _board;
+
+		internal Piece(Board board, PieceSet pieces, ColorType color, PieceType type, Vector2Int position)
+		{
+			_board = board;
+
+			Pieces = pieces;
+
+			IsAlive = true;
+			Color = color;
+			Type = type;
+
+			Square = _board.Squares[position.x][position.y];
+			_board.Squares[position.x][position.y].Piece = this;
+		}
 	}
 }

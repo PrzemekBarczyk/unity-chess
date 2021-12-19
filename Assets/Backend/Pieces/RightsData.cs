@@ -1,13 +1,16 @@
-public struct RightsData
+namespace Backend
 {
-	public Square EnPassantTarget { get; private set; }
-	public bool CanCastleKingside { get; private set; }
-	public bool CanCastleQueenside { get; private set; }
-
-	public RightsData(Square enPassantTarget, bool canCastleKingside, bool canCastleQueenside)
+	internal struct RightsData
 	{
-		EnPassantTarget = enPassantTarget;
-		CanCastleKingside = canCastleKingside;
-		CanCastleQueenside = canCastleQueenside;
+		internal Square EnPassantTarget { get; private set; }
+		internal bool CanCastleKingside { get; private set; }
+		internal bool CanCastleQueenside { get; private set; }
+
+		internal RightsData(Square enPassantTarget, bool canCastleKingside, bool canCastleQueenside)
+		{
+			EnPassantTarget = enPassantTarget;
+			CanCastleKingside = canCastleKingside;
+			CanCastleQueenside = canCastleQueenside;
+		}
 	}
 }

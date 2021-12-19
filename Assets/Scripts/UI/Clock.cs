@@ -2,67 +2,70 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(Text))]
-public class Clock : MonoBehaviour
+namespace Frontend
 {
-	public event Action OnTimeElapsed;
-
-	Text _timeLeftText;
-
-	bool _working;
-
-	float _timeLeftInSeconds;
-	float _timeAddedAfterMove;
-
-	void Awake()
+	[RequireComponent(typeof(Text))]
+	public class Clock : MonoBehaviour
 	{
-		_timeLeftText = GetComponent<Text>();
-	}
+		public event Action OnTimeElapsed;
 
-	public void SetUp(bool useClock, float timeForPlayer, float timeAddedAfterMove)
-	{
-		if (useClock)
+		Text _timeLeftText;
+
+		bool _working;
+
+		float _timeLeftInSeconds;
+		float _timeAddedAfterMove;
+
+		void Awake()
 		{
-			gameObject.SetActive(true);
-			_timeLeftInSeconds = timeForPlayer;
-			_timeAddedAfterMove = timeAddedAfterMove;
-			UpdateGraphicalClock();
+			_timeLeftText = GetComponent<Text>();
 		}
-		else
+
+		public void SetUp(bool useClock, float timeForPlayer, float timeAddedAfterMove)
 		{
-			gameObject.SetActive(false);
-		}
-	}
-
-	void UpdateGraphicalClock()
-	{
-		TimeSpan time = new TimeSpan(0, 0, 0, Mathf.CeilToInt(_timeLeftInSeconds), 0);
-		_timeLeftText.text = String.Format("{0:00}:{1:00}", time.Minutes, time.Seconds);
-	}
-
-	public void Run()
-	{
-		_working = true;
-	}
-
-	public void Stop()
-	{
-		_working = false;
-		_timeLeftInSeconds += _timeAddedAfterMove;
-		UpdateGraphicalClock();
-	}
-
-
-	void Update()
-	{
-		if (_working)
-		{
-			_timeLeftInSeconds -= Time.deltaTime;
-			UpdateGraphicalClock();
-
-			if (_timeLeftInSeconds <= 0)
+			if (useClock)
 			{
-				OnTimeElapsed?.Invoke();
+				gameObject.SetActive(true);
+				_timeLeftInSeconds = timeForPlayer;
+				_timeAddedAfterMove = timeAddedAfterMove;
+				UpdateGraphicalClock();
+			}
+			else
+			{
+				gameObject.SetActive(false);
+			}
+		}
+
+		void UpdateGraphicalClock()
+		{
+			TimeSpan time = new TimeSpan(0, 0, 0, Mathf.CeilToInt(_timeLeftInSeconds), 0);
+			_timeLeftText.text = String.Format("{0:00}:{1:00}", time.Minutes, time.Seconds);
+		}
+
+		public void Run()
+		{
+			_working = true;
+		}
+
+		public void Stop()
+		{
+			_working = false;
+			_timeLeftInSeconds += _timeAddedAfterMove;
+			UpdateGraphicalClock();
+		}
+
+
+		void Update()
+		{
+			if (_working)
+			{
+				_timeLeftInSeconds -= Time.deltaTime;
+				UpdateGraphicalClock();
+
+				if (_timeLeftInSeconds <= 0)
+				{
+					OnTimeElapsed?.Invoke();
+				}
 			}
 		}
 	}

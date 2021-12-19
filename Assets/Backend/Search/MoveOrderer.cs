@@ -1,56 +1,59 @@
 using System.Collections.Generic;
 
-public static class MoveOrderer
+namespace Backend
 {
-	const int CAPTURED_PIECE_VALUE_MULTIPLIER = 10;
-
-	public static void EvaluateAndSort(List<Move> movesToSort)
+	internal static class MoveOrderer
 	{
-		int[] scores = new int[movesToSort.Count];
+		const int CAPTURED_PIECE_VALUE_MULTIPLIER = 10;
 
-		for (int i = 0; i < movesToSort.Count; i++)
+		internal static void EvaluateAndSort(List<Move> movesToSort)
 		{
-			scores[i] = Evaluate(movesToSort[i]);
-		}
+			int[] scores = new int[movesToSort.Count];
 
-		Sort(movesToSort, scores);
-	}
-
-	static int Evaluate(Move move)
-	{
-		int score = 0;
-
-		if (move.EncounteredPiece != null)
-		{
-			score = CAPTURED_PIECE_VALUE_MULTIPLIER * (PiecesValues.GetValue(move.EncounteredPiece) - PiecesValues.GetValue(move.Piece));
-		}
-
-		if (move.IsPromotion)
-		{
-			if (move.Type == MoveType.PromotionToQueen)
-				score += PiecesValues.QUEEN;
-			else if (move.Type == MoveType.PromotionToRook)
-				score += PiecesValues.ROOK;
-			else if (move.Type == MoveType.PromotionToBishop)
-				score += PiecesValues.BISHOP;
-			else if (move.Type == MoveType.PromotionToKnight)
-				score += PiecesValues.KNIGHT;
-		}
-
-		return score;
-	}
-
-	static void Sort(List<Move> movesToSort, int[] scores)
-	{
-		for (int i = 0; i < movesToSort.Count - 1; i++)
-		{
-			for (int j = 0; j < movesToSort.Count - 1; j++)
+			for (int i = 0; i < movesToSort.Count; i++)
 			{
-				int swapIndex = j + 1;
-				if (scores[swapIndex] < scores[j])
+				scores[i] = Evaluate(movesToSort[i]);
+			}
+
+			Sort(movesToSort, scores);
+		}
+
+		static int Evaluate(Move move)
+		{
+			int score = 0;
+
+			if (move.EncounteredPiece != null)
+			{
+				score = CAPTURED_PIECE_VALUE_MULTIPLIER * (PiecesValues.GetValue(move.EncounteredPiece) - PiecesValues.GetValue(move.Piece));
+			}
+
+			if (move.IsPromotion)
+			{
+				if (move.Type == MoveType.PromotionToQueen)
+					score += PiecesValues.QUEEN;
+				else if (move.Type == MoveType.PromotionToRook)
+					score += PiecesValues.ROOK;
+				else if (move.Type == MoveType.PromotionToBishop)
+					score += PiecesValues.BISHOP;
+				else if (move.Type == MoveType.PromotionToKnight)
+					score += PiecesValues.KNIGHT;
+			}
+
+			return score;
+		}
+
+		static void Sort(List<Move> movesToSort, int[] scores)
+		{
+			for (int i = 0; i < movesToSort.Count - 1; i++)
+			{
+				for (int j = 0; j < movesToSort.Count - 1; j++)
 				{
-					(movesToSort[j], movesToSort[swapIndex]) = (movesToSort[swapIndex], movesToSort[j]);
-					(scores[j], scores[swapIndex]) = (scores[swapIndex], scores[j]);
+					int swapIndex = j + 1;
+					if (scores[swapIndex] < scores[j])
+					{
+						(movesToSort[j], movesToSort[swapIndex]) = (movesToSort[swapIndex], movesToSort[j]);
+						(scores[j], scores[swapIndex]) = (scores[swapIndex], scores[j]);
+					}
 				}
 			}
 		}

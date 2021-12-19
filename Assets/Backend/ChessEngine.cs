@@ -5,161 +5,164 @@ using System.Threading;
 
 public enum ColorType { Undefinied, White, Black }
 
-public sealed class ChessEngine
+namespace Backend
 {
-	internal uint HalfMoveClock;
-	internal uint FullMoveNumber;
-
-	internal Board Board { get; }
-
-	PieceManager _pieceManager;
-
-	MoveGenerator _moveGenerator;
-	MoveExecutor _moveExecutor;
-
-	SearchAlgorithm _minMax;
-	SearchAlgorithm _negaMax;
-	SearchAlgorithm _alphaBeta;
-	SearchAlgorithm _negaBeta;
-	SearchAlgorithm _negaBetaTT;
-
-	public Perft Perft { get; private set; }
-
-	public ChessEngine(string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+	public sealed class ChessEngine
 	{
-		FENDataAdapter extractedFENData = FENConverter.FENToBoardPositionData(fen);
+		internal uint HalfMoveClock;
+		internal uint FullMoveNumber;
 
-		HalfMoveClock = extractedFENData.HalfMovesClock;
-		FullMoveNumber = extractedFENData.FullMovesNumber;
+		internal Board Board { get; }
 
-		Board = new Board(extractedFENData);
+		PieceManager _pieceManager;
 
-		_pieceManager = new PieceManager(Board, extractedFENData);
+		MoveGenerator _moveGenerator;
+		MoveExecutor _moveExecutor;
 
-		_moveExecutor = new MoveExecutor(Board, _pieceManager, extractedFENData.PlayerToMoveColor);
-		_moveGenerator = new MoveGenerator(Board, _moveExecutor);
+		SearchAlgorithm _minMax;
+		SearchAlgorithm _negaMax;
+		SearchAlgorithm _alphaBeta;
+		SearchAlgorithm _negaBeta;
+		SearchAlgorithm _negaBetaTT;
 
-		_minMax = new MinMax(_moveGenerator, _moveExecutor, _pieceManager);
-		_negaMax = new NegaMax(_moveGenerator, _moveExecutor, _pieceManager);
-		_alphaBeta = new AlphaBeta(_moveGenerator, _moveExecutor, _pieceManager);
-		_negaBeta = new NegaBeta(_moveGenerator, _moveExecutor, _pieceManager);
-		_negaBetaTT = new NegaBetaTT(_moveGenerator, _moveExecutor, _pieceManager, Board);
-		
-		Perft = new Perft(_moveGenerator, _moveExecutor, _pieceManager);
-	}
+		public Perft Perft { get; private set; }
 
-	public Tuple<Move, SearchStatistics> FindBestMove(uint fixedSearchDepth)
-	{
-		return _alphaBeta.FindBestMove(fixedSearchDepth);
-	}
-
-	public Tuple<Move, SearchStatistics> FindBestMove(float timeForSearchInMilliseconds)
-	{
-		Stopwatch timer = Stopwatch.StartNew();
-
-		Tuple<Move, SearchStatistics> bestMoveDataThisIteration = new Tuple<Move, SearchStatistics>(new Move(), new SearchStatistics());
-		Tuple<Move, SearchStatistics> bestMoveData = new Tuple<Move, SearchStatistics>(new Move(), new SearchStatistics());
-
-		uint currentSearchDepth = 1;
-
-		while (true)
+		public ChessEngine(string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 		{
-			Thread t = new Thread(() => bestMoveDataThisIteration = _negaBetaTT.FindBestMove(currentSearchDepth++));
-			t.Start();
+			FENDataAdapter extractedFENData = FENConverter.FENToBoardPositionData(fen);
 
-			while (t.IsAlive)
-			{
-				if (timer.ElapsedMilliseconds >= timeForSearchInMilliseconds)
-				{
-					_negaBetaTT.AbordSearch();
-					t.Join();
-					return bestMoveData;
-				}
-			}
+			HalfMoveClock = extractedFENData.HalfMovesClock;
+			FullMoveNumber = extractedFENData.FullMovesNumber;
 
-			bestMoveData = bestMoveDataThisIteration;
+			Board = new Board(extractedFENData);
+
+			_pieceManager = new PieceManager(Board, extractedFENData);
+
+			_moveExecutor = new MoveExecutor(Board, _pieceManager, extractedFENData.PlayerToMoveColor);
+			_moveGenerator = new MoveGenerator(Board, _moveExecutor);
+
+			_minMax = new MinMax(_moveGenerator, _moveExecutor, _pieceManager);
+			_negaMax = new NegaMax(_moveGenerator, _moveExecutor, _pieceManager);
+			_alphaBeta = new AlphaBeta(_moveGenerator, _moveExecutor, _pieceManager);
+			_negaBeta = new NegaBeta(_moveGenerator, _moveExecutor, _pieceManager);
+			_negaBetaTT = new NegaBetaTT(_moveGenerator, _moveExecutor, _pieceManager, Board);
+
+			Perft = new Perft(_moveGenerator, _moveExecutor, _pieceManager);
 		}
-	}
 
-
-	public List<Move> GenerateLegalMoves()
-	{
-		return _moveGenerator.GenerateLegalMoves(_pieceManager.CurrentPieces);
-	}
-
-	public List<Move> GenerateLegalMoves(ColorType player)
-	{
-		PieceSet pieces = player == ColorType.White ? _pieceManager.WhitePieces : _pieceManager.BlackPieces;
-		return _moveGenerator.GenerateLegalMoves(pieces);
-	}
-
-	public void MakeMove(Move moveToMake)
-	{
-		_moveExecutor.MakeMove(moveToMake);
-		_pieceManager.SwitchPlayer();
-	}
-
-	public bool IsKingChecked(ColorType kingColor)
-	{
-		PieceSet pieces = kingColor == ColorType.White ? _pieceManager.WhitePieces : _pieceManager.BlackPieces;
-		return pieces.IsKingChecked();
-	}
-
-	internal bool IsMaterialSufficient(ColorType playerColor)
-	{
-		PieceSet pieces = playerColor == ColorType.White ? _pieceManager.WhitePieces : _pieceManager.BlackPieces;
-		bool isMaterialSufficient = false;
-		int counter = 0;
-		foreach (var piece in pieces.AllPieces)
+		public Tuple<Move, SearchStatistics> FindBestMove(uint fixedSearchDepth)
 		{
-			if (piece.IsAlive)
+			return _alphaBeta.FindBestMove(fixedSearchDepth);
+		}
+
+		public Tuple<Move, SearchStatistics> FindBestMove(float timeForSearchInMilliseconds)
+		{
+			Stopwatch timer = Stopwatch.StartNew();
+
+			Tuple<Move, SearchStatistics> bestMoveDataThisIteration = new Tuple<Move, SearchStatistics>(new Move(), new SearchStatistics());
+			Tuple<Move, SearchStatistics> bestMoveData = new Tuple<Move, SearchStatistics>(new Move(), new SearchStatistics());
+
+			uint currentSearchDepth = 1;
+
+			while (true)
 			{
-				if (piece.Type == PieceType.Queen || piece.Type == PieceType.Rook || piece.Type == PieceType.Pawn)
+				Thread t = new Thread(() => bestMoveDataThisIteration = _negaBetaTT.FindBestMove(currentSearchDepth++));
+				t.Start();
+
+				while (t.IsAlive)
+				{
+					if (timer.ElapsedMilliseconds >= timeForSearchInMilliseconds)
+					{
+						_negaBetaTT.AbordSearch();
+						t.Join();
+						return bestMoveData;
+					}
+				}
+
+				bestMoveData = bestMoveDataThisIteration;
+			}
+		}
+
+
+		public List<Move> GenerateLegalMoves()
+		{
+			return _moveGenerator.GenerateLegalMoves(_pieceManager.CurrentPieces);
+		}
+
+		public List<Move> GenerateLegalMoves(ColorType player)
+		{
+			PieceSet pieces = player == ColorType.White ? _pieceManager.WhitePieces : _pieceManager.BlackPieces;
+			return _moveGenerator.GenerateLegalMoves(pieces);
+		}
+
+		public void MakeMove(Move moveToMake)
+		{
+			_moveExecutor.MakeMove(moveToMake);
+			_pieceManager.SwitchPlayer();
+		}
+
+		public bool IsKingChecked(ColorType kingColor)
+		{
+			PieceSet pieces = kingColor == ColorType.White ? _pieceManager.WhitePieces : _pieceManager.BlackPieces;
+			return pieces.IsKingChecked();
+		}
+
+		internal bool IsMaterialSufficient(ColorType playerColor)
+		{
+			PieceSet pieces = playerColor == ColorType.White ? _pieceManager.WhitePieces : _pieceManager.BlackPieces;
+			bool isMaterialSufficient = false;
+			int counter = 0;
+			foreach (var piece in pieces.AllPieces)
+			{
+				if (piece.IsAlive)
+				{
+					if (piece.Type == PieceType.Queen || piece.Type == PieceType.Rook || piece.Type == PieceType.Pawn)
+					{
+						isMaterialSufficient = true;
+						break;
+					}
+					counter++;
+				}
+				if (counter > 2)
 				{
 					isMaterialSufficient = true;
 					break;
 				}
-				counter++;
 			}
-			if (counter > 2)
+			return isMaterialSufficient;
+		}
+
+		internal ulong ZobristHash()
+		{
+			return Board.ZobristHash;
+		}
+
+		internal int Evaluation()
+		{
+			return _minMax.Evaluate();
+		}
+
+		public string FEN()
+		{
+			List<PieceData> alivePieces = new List<PieceData>(16);
+
+			foreach (Piece piece in _pieceManager.BlackPieces.AllPieces)
 			{
-				isMaterialSufficient = true;
-				break;
+				if (piece.IsAlive)
+					alivePieces.Add(new PieceData(piece));
 			}
+			foreach (Piece piece in _pieceManager.WhitePieces.AllPieces)
+			{
+				if (piece.IsAlive)
+					alivePieces.Add(new PieceData(piece));
+			}
+
+			return FENConverter.BoardPositionToFEN(new FENDataAdapter(alivePieces, _pieceManager.CurrentPieces.Color,
+																	  _pieceManager.WhitePieces.CanKingCastleKingside,
+																	  _pieceManager.WhitePieces.CanKingCastleQueenside,
+																	  _pieceManager.BlackPieces.CanKingCastleKingside,
+																	  _pieceManager.BlackPieces.CanKingCastleQueenside,
+																	  Board.EnPassantTarget?.Position, HalfMoveClock, FullMoveNumber));
 		}
-		return isMaterialSufficient;
-	}
-
-	internal ulong ZobristHash()
-	{
-		return Board.ZobristHash;
-	}
-
-	internal int Evaluation()
-	{
-		return _minMax.Evaluate();
-	}
-
-	public string FEN()
-	{
-		List<PieceData> alivePieces = new List<PieceData>(16);
-
-		foreach (Piece piece in _pieceManager.BlackPieces.AllPieces)
-		{
-			if (piece.IsAlive)
-				alivePieces.Add(new PieceData(piece));
-		}
-		foreach (Piece piece in _pieceManager.WhitePieces.AllPieces)
-		{
-			if (piece.IsAlive)
-				alivePieces.Add(new PieceData(piece));
-		}
-
-		return FENConverter.BoardPositionToFEN(new FENDataAdapter(alivePieces, _pieceManager.CurrentPieces.Color,
-																  _pieceManager.WhitePieces.CanKingCastleKingside,
-																  _pieceManager.WhitePieces.CanKingCastleQueenside,
-																  _pieceManager.BlackPieces.CanKingCastleKingside,
-																  _pieceManager.BlackPieces.CanKingCastleQueenside,
-																  Board.EnPassantTarget?.Position, HalfMoveClock, FullMoveNumber));
 	}
 }
