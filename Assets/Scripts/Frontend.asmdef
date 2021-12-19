@@ -1,8 +1,8 @@
 {
-    "name": "GUI",
+    "name": "Frontend",
     "rootNamespace": "",
     "references": [
-        "ChessEngine"
+        "Backend"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

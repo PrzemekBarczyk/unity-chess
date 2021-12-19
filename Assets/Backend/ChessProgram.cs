@@ -75,7 +75,9 @@ public sealed class ChessProgram
 				if (_useBook)
 				{
 					string fenPos = _chessEngine.FEN();
+
 					var movesFromBook = _book.FindEntry(fenPos.Substring(0, fenPos.Length - 4));
+
 					if (movesFromBook == null)
 					{
 						_useBook = false;
@@ -83,6 +85,7 @@ public sealed class ChessProgram
 					else
 					{
 						moveToMake = SimplifiedAlgebraicNotation.LongSANToMove(_chessEngine, movesFromBook[new Random().Next(0, movesFromBook.Count)]);
+
 						OnBotMove?.Invoke(new SearchStatistics(0, 0, 0, 0, 0));
 					}
 				}
