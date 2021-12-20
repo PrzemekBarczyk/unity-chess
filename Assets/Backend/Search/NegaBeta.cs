@@ -34,7 +34,7 @@ namespace Backend
 			if (legalMoves.Count == 0) // no legal moves
 			{
 				if (currentPlayerPieces.IsKingChecked())
-					return -1000000;
+					return -1000000 - (int)depth;
 				return 0;
 			}
 
