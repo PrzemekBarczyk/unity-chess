@@ -381,20 +381,25 @@ MonoBehaviour:
   - {fileID: 4900000, guid: 11b23b381fb2cd64ab742a080029d1d0, type: 3}
   - {fileID: 4900000, guid: 1241f5cd342aa3540ba6cf4b0a4eb2b4, type: 3}
   - {fileID: 4900000, guid: 10b3159fb032b5e4daf302babf6b1d16, type: 3}
+  - {fileID: 4900000, guid: c492a41f1bee39d478a663c334aff2a1, type: 3}
+  - {fileID: 4900000, guid: 15fde2cd10a489e42a7c849f499d2a82, type: 3}
   - {fileID: 4900000, guid: e57644dba468da440976bb2a623e07f3, type: 3}
   - {fileID: 4900000, guid: 789dfcc7f4a4ff04f8bf5691de9d180e, type: 3}
   - {fileID: 4900000, guid: 293e670613007484c831361eb1c13611, type: 3}
   - {fileID: 4900000, guid: 23b0ff3ceaf0a3644b7ab73ab5388685, type: 3}
+  - {fileID: 4900000, guid: 69dbf2688306e394aa3a903fde22da4b, type: 3}
   - {fileID: 4900000, guid: b40fa03bfc5d7304a8f5f3c2435f6ce8, type: 3}
   - {fileID: 4900000, guid: 833f6825c2f89174f8593334ee0b14fc, type: 3}
   - {fileID: 4900000, guid: 7a7bc440c981bd14fafea33022c799ca, type: 3}
   - {fileID: 4900000, guid: b52d9457dc92d9144b3efbe6245c2fdf, type: 3}
   - {fileID: 4900000, guid: 25841aaf9374bb54d95366ae0136134f, type: 3}
+  - {fileID: 4900000, guid: 38dcbfe8f2784e4468f0fffaf4bbeffd, type: 3}
   - {fileID: 4900000, guid: 8713e95450a53fe41827cdd3676f66f9, type: 3}
   - {fileID: 4900000, guid: 9b1a2ee1c401dea44b49d9d0802f9580, type: 3}
+  - {fileID: 4900000, guid: ee2883f06b0c95f4cb2f5e47bab3a200, type: 3}
   _mergedAndFormattedInputFile: {fileID: 4900000, guid: f52f3781a34d95c43807f4d5627ccdbc, type: 3}
   _bookFile: {fileID: 4900000, guid: 137b6679c805113479f9df6d7f1c4a07, type: 3}
-  _maxBookDepth: 10
+  _maxBookDepth: 14
   _resultText: {fileID: 2112459873}
 --- !u!4 &558826522
 Transform:
@@ -825,7 +830,6 @@ GameObject:
   - component: {fileID: 1209017495}
   - component: {fileID: 1209017494}
   - component: {fileID: 1209017493}
-  - component: {fileID: 1209017492}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -833,22 +837,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1209017492
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1209017491}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18670aaca633074479ce1b8fd88bd1e0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  positionWhenWhite: {x: 0.25, y: 3.5, z: -10}
-  rotationWhenWhite: {x: 0, y: 0, z: 0}
-  positionWhenBlack: {x: 6.75, y: 3.5, z: -10}
-  rotationWhenBlack: {x: 0, y: 0, z: 180}
 --- !u!81 &1209017493
 AudioListener:
   m_ObjectHideFlags: 0
