@@ -24,7 +24,7 @@ namespace Backend
 
 			if (move.EncounteredPiece != null)
 			{
-				score = CAPTURED_PIECE_VALUE_MULTIPLIER * (PiecesValues.GetValue(move.EncounteredPiece) - PiecesValues.GetValue(move.Piece));
+				score = CAPTURED_PIECE_VALUE_MULTIPLIER * PiecesValues.GetValue(move.EncounteredPiece) - PiecesValues.GetValue(move.Piece);
 			}
 
 			if (move.IsPromotion)
@@ -49,7 +49,7 @@ namespace Backend
 				for (int j = 0; j < movesToSort.Count - 1; j++)
 				{
 					int swapIndex = j + 1;
-					if (scores[swapIndex] < scores[j])
+					if (scores[swapIndex] > scores[j])
 					{
 						(movesToSort[j], movesToSort[swapIndex]) = (movesToSort[swapIndex], movesToSort[j]);
 						(scores[j], scores[swapIndex]) = (scores[swapIndex], scores[j]);
