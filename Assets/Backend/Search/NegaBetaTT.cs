@@ -5,8 +5,7 @@ namespace Backend
 {
 	internal sealed class NegaBetaTT : SearchAlgorithm
 	{
-		bool useQuiescenceSearch = false;
-
+		readonly bool USE_QUIESCENCE_SEARCH = false;
 		const int TRANSPOSITION_TABLE_SIZE = 64000;
 
 		TranspositionTable _transpositionTable;
@@ -73,7 +72,7 @@ namespace Backend
 
 			if (depth == 0)
 			{
-				if (useQuiescenceSearch) return QuiescenceSearch(currentPlayerPieces, alpha, beta);
+				if (USE_QUIESCENCE_SEARCH) return QuiescenceSearch(currentPlayerPieces, alpha, beta);
 				return Evaluate(currentPlayerPieces.Color);
 			}
 

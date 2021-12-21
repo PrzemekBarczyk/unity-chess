@@ -6,7 +6,7 @@ namespace Backend
 	public struct FENDataAdapter
 	{
 		public List<PieceData> Pieces { get; private set; }
-		internal ColorType PlayerToMoveColor { get; private set; }
+		public ColorType PlayerToMoveColor { get; private set; }
 		internal bool HasWhiteCastleKingsideRights { get; private set; }
 		internal bool HasWhiteCastleQueensideRights { get; private set; }
 		internal bool HasBlackCastleKingsideRights { get; private set; }

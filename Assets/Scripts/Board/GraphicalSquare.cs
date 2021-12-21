@@ -1,3 +1,4 @@
+using Backend;
 using UnityEngine;
 
 namespace Frontend
@@ -39,7 +40,7 @@ namespace Frontend
             if (OnTopRank || OnBottomRank)
                 CreatePromotionPanel();
 
-            _moveSelector = FindObjectOfType<MoveSelector>();
+            _moveSelector = transform.parent.GetComponent<MoveSelector>();
         }
 
         void CreatePromotionPanel()

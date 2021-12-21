@@ -9,10 +9,10 @@ namespace Backend
 {
 	public sealed class ChessEngine
 	{
-		internal uint HalfMoveClock;
-		internal uint FullMoveNumber;
+		internal uint HalfMoveClock { get; private set; }
+		internal uint FullMoveNumber { get; private set; }
 
-		internal Board Board { get; }
+		Board _board;
 
 		PieceManager _pieceManager;
 
@@ -34,25 +34,25 @@ namespace Backend
 			HalfMoveClock = extractedFENData.HalfMovesClock;
 			FullMoveNumber = extractedFENData.FullMovesNumber;
 
-			Board = new Board(extractedFENData);
+			_board = new Board(extractedFENData);
 
-			_pieceManager = new PieceManager(Board, extractedFENData);
+			_pieceManager = new PieceManager(_board, extractedFENData);
 
-			_moveExecutor = new MoveExecutor(Board, _pieceManager, extractedFENData.PlayerToMoveColor);
-			_moveGenerator = new MoveGenerator(Board, _moveExecutor);
+			_moveExecutor = new MoveExecutor(_board, _pieceManager, extractedFENData.PlayerToMoveColor);
+			_moveGenerator = new MoveGenerator(_board, _moveExecutor);
 
 			_minMax = new MinMax(_moveGenerator, _moveExecutor, _pieceManager);
 			_negaMax = new NegaMax(_moveGenerator, _moveExecutor, _pieceManager);
 			_alphaBeta = new AlphaBeta(_moveGenerator, _moveExecutor, _pieceManager);
 			_negaBeta = new NegaBeta(_moveGenerator, _moveExecutor, _pieceManager);
-			_negaBetaTT = new NegaBetaTT(_moveGenerator, _moveExecutor, _pieceManager, Board);
+			_negaBetaTT = new NegaBetaTT(_moveGenerator, _moveExecutor, _pieceManager, _board);
 
 			Perft = new Perft(_moveGenerator, _moveExecutor, _pieceManager);
 		}
 
 		public Tuple<Move, SearchStatistics> FindBestMove(uint fixedSearchDepth)
 		{
-			return _alphaBeta.FindBestMove(fixedSearchDepth);
+			return _negaBetaTT.FindBestMove(fixedSearchDepth);
 		}
 
 		public Tuple<Move, SearchStatistics> FindBestMove(float timeForSearchInMilliseconds)
@@ -64,9 +64,9 @@ namespace Backend
 
 			uint currentSearchDepth = 1;
 
-			while (true)
+			while (true) // search deeper until runs out of time
 			{
-				Thread t = new Thread(() => bestMoveDataThisIteration = _negaBetaTT.FindBestMove(currentSearchDepth++));
+				Thread t = new Thread(() => bestMoveDataThisIteration = _negaBetaTT.FindBestMove(currentSearchDepth));
 				t.Start();
 
 				while (t.IsAlive)
@@ -80,6 +80,7 @@ namespace Backend
 				}
 
 				bestMoveData = bestMoveDataThisIteration;
+				currentSearchDepth++;
 			}
 		}
 
@@ -98,6 +99,21 @@ namespace Backend
 		public void MakeMove(Move moveToMake)
 		{
 			_moveExecutor.MakeMove(moveToMake);
+
+			if (moveToMake.Piece.Type == PieceType.Pawn || moveToMake.EncounteredPiece != null)
+			{
+				HalfMoveClock = 0;
+			}
+			else
+			{
+				HalfMoveClock++;
+			}
+
+			if (moveToMake.Piece.Color == ColorType.Black)
+			{
+				FullMoveNumber++;
+			}
+
 			_pieceManager.SwitchPlayer();
 		}
 
@@ -134,7 +150,7 @@ namespace Backend
 
 		internal ulong ZobristHash()
 		{
-			return Board.ZobristHash;
+			return _board.ZobristHash;
 		}
 
 		internal int Evaluation()
@@ -162,7 +178,7 @@ namespace Backend
 																	  _pieceManager.WhitePieces.CanKingCastleQueenside,
 																	  _pieceManager.BlackPieces.CanKingCastleKingside,
 																	  _pieceManager.BlackPieces.CanKingCastleQueenside,
-																	  Board.EnPassantTarget?.Position, HalfMoveClock, FullMoveNumber));
+																	  _board.EnPassantTarget?.Position, HalfMoveClock, FullMoveNumber));
 		}
 	}
 }

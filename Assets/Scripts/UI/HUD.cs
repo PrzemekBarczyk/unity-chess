@@ -33,13 +33,13 @@ namespace Frontend
         [SerializeField] Image _resultMessageBackground;
         [SerializeField] Text _resultMessageText;
 
-        void Awake()
+        public void SetUp(GameType gameType)
         {
-            RemovePlaceholders();
-        }
+            if (gameType == GameType.BotVsBot || gameType == GameType.HumanVsBot || gameType == GameType.BotVsHuman)
+            {
+                _botStatistics.SetActive(true);
+            }
 
-        void RemovePlaceholders()
-        {
             _whitePlayerMoveList.text = "";
             _blackPlayerMoveList.text = "";
 
@@ -58,14 +58,6 @@ namespace Frontend
 
             _resultMessageBackground.gameObject.SetActive(false);
             _resultMessageText.text = "";
-        }
-
-        public void SetUp(GameSettings gameSettings)
-        {
-            if (gameSettings.GameType == GameType.BotVsBot || gameSettings.GameType == GameType.HumanVsBot || gameSettings.GameType == GameType.BotVsHuman)
-            {
-                _botStatistics.SetActive(true);
-            }
         }
 
         public void AddMoveToHistory(Move move)

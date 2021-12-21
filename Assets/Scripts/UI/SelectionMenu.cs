@@ -18,7 +18,11 @@ namespace Frontend
 		[Header("HUD")]
 		[SerializeField] HUD _hud;
 
-		GameSettings _gameSettings;
+		string _startPositionInFEN;
+		GameType _gameType;
+		bool _useClocks;
+		uint _baseTime;
+		uint _addedTime;
 
 		GameManager _gameManager;
 
@@ -30,52 +34,58 @@ namespace Frontend
 		public void HandlePlayButton()
 		{
 			SaveSettings();
-			if (_gameSettings.GameType == GameType.BotVsHuman)
-				CameraController.Instance.FlipPOV();
+			AdjustCameraPOV();
 			ChangeMenu();
 			StartGame();
 		}
 
 		void SaveSettings()
 		{
-			_gameSettings = new GameSettings();
-
-			_gameSettings.StartPositionInFEN = _fenInputField.text;
+			_startPositionInFEN = _fenInputField.text;
 
 			if (_whitePlayerDropdown.options[_whitePlayerDropdown.value].text == "Human" && _blackPlayerDropdown.options[_blackPlayerDropdown.value].text == "Human")
 			{
-				_gameSettings.GameType = GameType.HumanVsHuman;
+				_gameType = GameType.HumanVsHuman;
 			}
 			else if (_whitePlayerDropdown.options[_whitePlayerDropdown.value].text == "Bot" && _blackPlayerDropdown.options[_blackPlayerDropdown.value].text == "Bot")
 			{
-				_gameSettings.GameType = GameType.BotVsBot;
+				_gameType = GameType.BotVsBot;
 			}
 			else if (_whitePlayerDropdown.options[_whitePlayerDropdown.value].text == "Human" && _blackPlayerDropdown.options[_blackPlayerDropdown.value].text == "Bot")
 			{
-				_gameSettings.GameType = GameType.HumanVsBot;
+				_gameType = GameType.HumanVsBot;
 			}
 			else
 			{
-				_gameSettings.GameType = GameType.BotVsHuman;
+				_gameType = GameType.BotVsHuman;
 			}
 
-			_gameSettings.UseClocks = _useClockToggle.isOn;
+			_useClocks = _useClockToggle.isOn;
 
-			_gameSettings.BaseTime = uint.Parse(_baseTimeInputField.text);
+			_baseTime = uint.Parse(_baseTimeInputField.text);
 
-			_gameSettings.AddedTime = uint.Parse(_addedTimeInputField.text);
+			_addedTime = uint.Parse(_addedTimeInputField.text);
+		}
+
+		void AdjustCameraPOV()
+		{
+			if (_gameType == GameType.BotVsHuman)
+			{
+				CameraController.Instance.FlipPOV();
+			}
 		}
 
 		void ChangeMenu()
 		{
-			_hud.SetUp(_gameSettings);
+			_hud.SetUp(_gameType);
+
 			_selectionMenu.SetActive(false);
 			_hud.gameObject.SetActive(true);
 		}
 
 		void StartGame()
 		{
-			_gameManager.StartGame(_gameSettings);
+			_gameManager.StartGame(_startPositionInFEN, _gameType, _useClocks, _baseTime, _addedTime);
 		}
 
 		public void HandleExitButton()

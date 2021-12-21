@@ -5,6 +5,7 @@ namespace Frontend
 	[RequireComponent(typeof(AudioSource))]
 	public class SFXManager : MonoBehaviour
 	{
+		[Header("SFX")]
 		[SerializeField] AudioClip _captureSFX;
 		[SerializeField] AudioClip _moveSFX;
 

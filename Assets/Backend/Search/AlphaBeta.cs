@@ -5,7 +5,7 @@ namespace Backend
 {
 	internal sealed class AlphaBeta : SearchAlgorithm
 	{
-		bool useQuiescenceSearch = false;
+		readonly bool USE_QUIESCENCE_SEARCH = false;
 
 		internal AlphaBeta(MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager) : base(moveGenerator, moveExecutor, pieceManager) { }
 
@@ -32,7 +32,7 @@ namespace Backend
 		{
 			if (depth == 0)
 			{
-				if (useQuiescenceSearch) return QuiescenceSearch(currentPlayerPieces, alpha, beta, maximizingPlayer);
+				if (USE_QUIESCENCE_SEARCH) return QuiescenceSearch(currentPlayerPieces, alpha, beta, maximizingPlayer);
 				return Evaluate();
 			}
 

@@ -5,7 +5,7 @@ namespace Backend
 {
 	internal sealed class NegaBeta : SearchAlgorithm
 	{
-		bool useQuiescenceSearch = false;
+		readonly bool USE_QUIESCENCE_SEARCH = false;
 
 		internal NegaBeta(MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager) : base(moveGenerator, moveExecutor, pieceManager) { }
 
@@ -25,7 +25,7 @@ namespace Backend
 		{
 			if (depth == 0)
 			{
-				if (useQuiescenceSearch) return QuiescenceSearch(currentPlayerPieces, alpha, beta);
+				if (USE_QUIESCENCE_SEARCH) return QuiescenceSearch(currentPlayerPieces, alpha, beta);
 				return Evaluate(currentPlayerPieces.Color);
 			}
 

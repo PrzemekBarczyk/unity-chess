@@ -15,11 +15,14 @@ namespace Frontend
         public const int TOP_RANK_INDEX = 7;
         public const int BOTTOM_RANK_INDEX = 0;
 
-        [Header("Squares")]
+        [Header("Squares Prefabs")]
         [SerializeField] GraphicalSquare _whiteSquarePrefab;
         [SerializeField] GraphicalSquare _blackSquarePrefab;
 
-        [Header("Pieces")]
+        [Header("Move Selector")]
+        [SerializeField] MoveSelector _moveSelector;
+
+        [Header("Pieces Sprites")]
         [SerializeField] PiecesSprites _piecesSprites;
 
         public GraphicalSquare[,] Squares { get; } = new GraphicalSquare[FILES, RANKS];

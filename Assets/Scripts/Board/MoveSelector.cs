@@ -6,10 +6,12 @@ using UnityEngine;
 
 namespace Frontend
 {
-	public class MoveSelector : MonoSingleton<MoveSelector>
+	public class MoveSelector : MonoBehaviour
 	{
-		[Header("External Dependencies")]
+		[Header("Graphical Board")]
 		[SerializeField] GraphicalBoard _board;
+
+		[Header("Pieces Sprites")]
 		[SerializeField] PiecesSprites _piecesSprites;
 
 		[Header("Dragged Piece")]
