@@ -12,6 +12,8 @@ namespace Frontend
 
 		public event Action OnTimeElapsed;
 
+		bool _useClocks;
+
 		bool _isWhitePlayerClockWorking;
 		bool _isBlackPlayerClockWorking;
 
@@ -24,6 +26,8 @@ namespace Frontend
 		{
 			if (useClock)
 			{
+				_useClocks = true;
+
 				_timeLeftForWhitePlayer = timeForPlayer;
 				_timeLeftForBlackPlayer = timeForPlayer;
 
@@ -34,6 +38,8 @@ namespace Frontend
 			}
 			else
 			{
+				_useClocks = false;
+
 				_timeLeftForWhiteText.text = "";
 				_timeLeftForBlackText.text = "";
 			}
@@ -47,33 +53,39 @@ namespace Frontend
 
 		public void Run(ColorType color)
 		{
-			if (color == ColorType.White)
+			if (_useClocks)
 			{
-				_isWhitePlayerClockWorking = true;
-			}
-			else
-			{
-				_isBlackPlayerClockWorking = true;
+				if (color == ColorType.White)
+				{
+					_isWhitePlayerClockWorking = true;
+				}
+				else
+				{
+					_isBlackPlayerClockWorking = true;
+				}
 			}
 		}
 
 		public void Stop(ColorType color)
 		{
-			if (color == ColorType.White)
+			if (_useClocks)
 			{
-				_isWhitePlayerClockWorking = false;
+				if (color == ColorType.White)
+				{
+					_isWhitePlayerClockWorking = false;
 
-				_timeLeftForWhitePlayer += _timeAddedAfterMove;
+					_timeLeftForWhitePlayer += _timeAddedAfterMove;
 
-				UpdateGraphicalClock(_timeLeftForWhitePlayer, _timeLeftForWhiteText);
-			}
-			else
-			{
-				_isBlackPlayerClockWorking = false;
+					UpdateGraphicalClock(_timeLeftForWhitePlayer, _timeLeftForWhiteText);
+				}
+				else
+				{
+					_isBlackPlayerClockWorking = false;
 
-				_timeLeftForBlackPlayer += _timeAddedAfterMove;
+					_timeLeftForBlackPlayer += _timeAddedAfterMove;
 
-				UpdateGraphicalClock(_timeLeftForBlackPlayer, _timeLeftForBlackText);
+					UpdateGraphicalClock(_timeLeftForBlackPlayer, _timeLeftForBlackText);
+				}
 			}
 		}
 
