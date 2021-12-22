@@ -100,6 +100,8 @@ namespace Frontend
 
 				if (_timeLeftForWhitePlayer <= 0)
 				{
+					_isWhitePlayerClockWorking = false;
+					_useClocks = false;
 					OnTimeElapsed?.Invoke();
 				}
 			}
@@ -110,8 +112,10 @@ namespace Frontend
 
 				UpdateGraphicalClock(_timeLeftForBlackPlayer, _timeLeftForBlackText);
 
-				if (_timeLeftForWhitePlayer <= 0)
+				if (_timeLeftForBlackPlayer <= 0)
 				{
+					_isBlackPlayerClockWorking = false;
+					_useClocks = false;
 					OnTimeElapsed?.Invoke();
 				}
 			}
