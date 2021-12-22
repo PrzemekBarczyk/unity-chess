@@ -5,7 +5,7 @@ namespace Backend
 {
 	internal sealed class NegaBetaTT : SearchAlgorithm
 	{
-		readonly bool USE_QUIESCENCE_SEARCH = false;
+		readonly bool USE_QUIESCENCE_SEARCH = true;
 		const int TRANSPOSITION_TABLE_SIZE = 64000;
 
 		TranspositionTable _transpositionTable;
@@ -144,12 +144,14 @@ namespace Backend
 			{
 				return beta;
 			}
-			if (alpha < standPat)
+			if (standPat > alpha)
 			{
 				alpha = standPat;
 			}
 
-			List<Move> legalMoves = new List<Move>(_moveGenerator.GenerateLegalMoves(currentPlayerPieces));
+			List<Move> legalMoves = new List<Move>(_moveGenerator.GenerateLegalMoves(currentPlayerPieces, true));
+
+			MoveOrderer.EvaluateAndSort(legalMoves);
 
 			PieceSet nextDepthPlayerPieces = currentPlayerPieces == _whitePieces ? _blackPieces : _whitePieces;
 
@@ -157,24 +159,22 @@ namespace Backend
 			{
 				Move legalMove = legalMoves[i];
 
-				if (legalMove.EncounteredPiece != null)
+				_moveExecutor.MakeMove(legalMove);
+
+				int evaluation = -QuiescenceSearch(nextDepthPlayerPieces, -beta, -alpha);
+
+				_moveExecutor.UndoMove(legalMove);
+
+				_positionsEvaluated++;
+
+				if (evaluation >= beta)
 				{
-					_moveExecutor.MakeMove(legalMove);
-
-					int evaluation = -QuiescenceSearch(nextDepthPlayerPieces, -beta, -alpha);
-
-					_moveExecutor.UndoMove(legalMove);
-
-					_positionsEvaluated++;
-
-					if (evaluation >= beta)
-					{
-						return beta;
-					}
-					if (evaluation > alpha)
-					{
-						alpha = evaluation;
-					}
+					_cutoffs++;
+					return beta;
+				}
+				if (evaluation > alpha)
+				{
+					alpha = evaluation;
 				}
 			}
 

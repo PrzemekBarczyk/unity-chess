@@ -7,6 +7,8 @@ namespace Backend
 	{
 		List<Move> _legalMoves = new List<Move>(128);
 
+		bool _generateOnlyCaptures;
+
 		Board _board;
 		MoveExecutor _moveExecutor;
 
@@ -16,9 +18,11 @@ namespace Backend
 			_moveExecutor = moveExecutor;
 		}
 
-		internal List<Move> GenerateLegalMoves(PieceSet pieces)
+		internal List<Move> GenerateLegalMoves(PieceSet pieces, bool generateOnlyCaptures = false)
 		{
 			_legalMoves.Clear();
+
+			_generateOnlyCaptures = generateOnlyCaptures;
 
 			GeneratePawnMoves(pieces.Pawns, pieces.Color == ColorType.White ? 1 : -1);
 			GenerateKnightsMoves(pieces.Knights);
@@ -38,9 +42,12 @@ namespace Backend
 
 				if (pawn.IsAlive)
 				{
-					bool isPawnOnStartingPosition = pawn.Square.Position.y == (pawn.Color == ColorType.White ? 1 : 6);
-					if (isPawnOnStartingPosition) FindSlidingMoves(pawn, new Vector2Int(0, directionModifier), 2, canAttack: false, canMoveOnEmptySquare: true);
-					else FindSlidingMoves(pawn, new Vector2Int(0, directionModifier), 1, canAttack: false, canMoveOnEmptySquare: true, canPromote: true);
+					if (!_generateOnlyCaptures)
+					{
+						bool isPawnOnStartingPosition = pawn.Square.Position.y == (pawn.Color == ColorType.White ? 1 : 6);
+						if (isPawnOnStartingPosition) FindSlidingMoves(pawn, new Vector2Int(0, directionModifier), 2, canAttack: false, canMoveOnEmptySquare: true);
+						else FindSlidingMoves(pawn, new Vector2Int(0, directionModifier), 1, canAttack: false, canMoveOnEmptySquare: true, canPromote: true);
+					}
 
 					FindSlidingMoves(pawn, new Vector2Int(-1, directionModifier), 1, canAttack: true, canMoveOnEmptySquare: false, canPromote: true);
 					FindSlidingMoves(pawn, new Vector2Int(1, directionModifier), 1, canAttack: true, canMoveOnEmptySquare: false, canPromote: true);
@@ -140,8 +147,11 @@ namespace Backend
 				FindSlidingMoves(king, new Vector2Int(-1, -1), 1);
 				FindSlidingMoves(king, new Vector2Int(-1, 0), 1);
 
-				if (king.Pieces.CanKingCastleQueenside) FindCastlingMove(king, false);
-				if (king.Pieces.CanKingCastleKingside) FindCastlingMove(king, true);
+				if (!_generateOnlyCaptures)
+				{
+					if (king.Pieces.CanKingCastleQueenside) FindCastlingMove(king, false);
+					if (king.Pieces.CanKingCastleKingside) FindCastlingMove(king, true);
+				}
 			}
 		}
 
@@ -161,17 +171,20 @@ namespace Backend
 
 				if (canMoveOnEmptySquare && !checkedSquare.IsOccupied()) // empty square
 				{
-					if (canPromote && checkedSquare.IsPromotionSquare(piece.Color))
+					if (!_generateOnlyCaptures)
 					{
-						SaveMoveIfLegal(new Move(piece, piece.Square, checkedSquare, checkedSquare.Piece, MoveType.PromotionToKnight));
-						SaveMoveIfLegal(new Move(piece, piece.Square, checkedSquare, checkedSquare.Piece, MoveType.PromotionToBishop));
-						SaveMoveIfLegal(new Move(piece, piece.Square, checkedSquare, checkedSquare.Piece, MoveType.PromotionToRook));
-						SaveMoveIfLegal(new Move(piece, piece.Square, checkedSquare, checkedSquare.Piece, MoveType.PromotionToQueen));
-						return;
-					}
-					else // normal move on empty square
-					{
-						SaveMoveIfLegal(new Move(piece, piece.Square, checkedSquare, checkedSquare.Piece));
+						if (canPromote && checkedSquare.IsPromotionSquare(piece.Color))
+						{
+							SaveMoveIfLegal(new Move(piece, piece.Square, checkedSquare, checkedSquare.Piece, MoveType.PromotionToKnight));
+							SaveMoveIfLegal(new Move(piece, piece.Square, checkedSquare, checkedSquare.Piece, MoveType.PromotionToBishop));
+							SaveMoveIfLegal(new Move(piece, piece.Square, checkedSquare, checkedSquare.Piece, MoveType.PromotionToRook));
+							SaveMoveIfLegal(new Move(piece, piece.Square, checkedSquare, checkedSquare.Piece, MoveType.PromotionToQueen));
+							return;
+						}
+						else // normal move on empty square
+						{
+							SaveMoveIfLegal(new Move(piece, piece.Square, checkedSquare, checkedSquare.Piece));
+						}
 					}
 				}
 				else if (canAttack && checkedSquare.IsOccupied() && checkedSquare.Piece.Color != piece.Color) // opponent piece
@@ -206,7 +219,7 @@ namespace Backend
 
 			Square checkedSquare = _board.Squares[checkedPosition.x][checkedPosition.y];
 
-			if (!checkedSquare.IsOccupied() || // empty square
+			if (!checkedSquare.IsOccupied() && !_generateOnlyCaptures || // empty square
 				(checkedSquare.IsOccupied() && checkedSquare.Piece.Color != piece.Color)) // opponent piece
 			{
 				SaveMoveIfLegal(new Move(piece, piece.Square, checkedSquare, checkedSquare.Piece));
