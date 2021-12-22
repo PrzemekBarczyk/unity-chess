@@ -54,7 +54,7 @@ namespace Backend
 			string startingFEN = _chessEngine.FEN();
 			ulong startingZobristHash = _chessEngine.ZobristHash();
 
-			_repetitionHistory.Add(startingFEN.Remove(startingFEN.Length - 4, 4), 1);
+			_repetitionHistory.Add(string.Join(" ", startingFEN.Split(), 0, 4), 1);
 
 			OnGameStarted?.Invoke(new BoardStatistics(startingEvaluation, startingFEN, startingZobristHash));
 
@@ -126,7 +126,8 @@ namespace Backend
 
 		State CheckState(string fen)
 		{
-			string formattedFEN = fen.Remove(fen.Length - 4, 4);
+			string formattedFEN = string.Join(" ", fen.Split(), 0, 4); // removes half moves clock and full move number
+			UnityEngine.Debug.Log(formattedFEN);
 
 			List<Move> legalMoves = _chessEngine.GenerateLegalMoves(_playerManager.NextPlayer.Color);
 
