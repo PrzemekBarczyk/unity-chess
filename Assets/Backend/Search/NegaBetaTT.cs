@@ -85,7 +85,7 @@ namespace Backend
 				return 0;
 			}
 
-			MoveOrderer.EvaluateAndSort(legalMoves);
+			MoveOrderer.EvaluateAndSort(legalMoves, true, _transpositionTable);
 
 			PieceSet nextDepthPlayerPieces = currentPlayerPieces == _whitePieces ? _blackPieces : _whitePieces;
 

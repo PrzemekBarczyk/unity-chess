@@ -34,6 +34,23 @@ namespace Backend
 			RookNewSquare = rookNewSquare;
 		}
 
+		public override bool Equals(object obj)
+		{
+			return obj is Move move && 
+				move.Piece == Piece && 
+				move.OldSquare == OldSquare && 
+				move.NewSquare == NewSquare && 
+				move.EncounteredPiece == EncounteredPiece &&
+				move.Type == Type && 
+				move.RookOldSquare == RookOldSquare && 
+				move.RookNewSquare == RookNewSquare;
+		}
+
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
+		}
+
 		public override string ToString()
 		{
 			return Piece.Color + " " + Piece.Type + " " + SimplifiedAlgebraicNotation.MoveToLongSAN(this);

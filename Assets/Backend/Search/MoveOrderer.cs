@@ -6,13 +6,24 @@ namespace Backend
 	{
 		const int CAPTURED_PIECE_VALUE_MULTIPLIER = 10;
 
-		internal static void EvaluateAndSort(List<Move> movesToSort)
+		internal static void EvaluateAndSort(List<Move> movesToSort, bool useTranspositionTables = false, TranspositionTable tt = null)
 		{
 			int[] scores = new int[movesToSort.Count];
+
+			Move hashMove = new Move();
+			if (useTranspositionTables)
+			{
+				hashMove = tt.GetEntry().move;
+			}
 
 			for (int i = 0; i < movesToSort.Count; i++)
 			{
 				scores[i] = Evaluate(movesToSort[i]);
+
+				if (movesToSort[i].Equals(hashMove))
+				{
+					scores[i] += 10000;
+				}
 			}
 
 			Sort(movesToSort, scores);
