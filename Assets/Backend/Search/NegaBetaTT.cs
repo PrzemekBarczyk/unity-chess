@@ -9,10 +9,14 @@ namespace Backend
 		const int TRANSPOSITION_TABLE_SIZE = 64000;
 
 		TranspositionTable _transpositionTable;
+		ChessEngine _chessEngine;
+		Board _board;
 
-		internal NegaBetaTT(MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager, Board board) : base(moveGenerator, moveExecutor, pieceManager)
+		internal NegaBetaTT(ChessEngine chessEngine, Board board, MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager) : base(moveGenerator, moveExecutor, pieceManager)
 		{
 			_transpositionTable = new TranspositionTable(board, TRANSPOSITION_TABLE_SIZE);
+			_chessEngine = chessEngine;
+			_board = board;
 		}
 
 		internal override Tuple<Move, SearchStatistics> FindBestMove(uint fixedSearchDepth)
@@ -34,6 +38,14 @@ namespace Backend
 			if (_aboordSearch)
 			{
 				return 0;
+			}
+
+			if (depth < maxDepth)
+			{
+				if (_chessEngine.RepetitionHistory.Contains(_board.ZobristHash))
+				{
+					return 0;
+				}
 			}
 
 			int alphaOrig = alpha;

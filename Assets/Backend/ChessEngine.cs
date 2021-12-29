@@ -12,6 +12,8 @@ namespace Backend
 		internal uint HalfMoveClock { get; private set; }
 		internal uint FullMoveNumber { get; private set; }
 
+		public Stack<ulong> RepetitionHistory { get; private set; } = new Stack<ulong>(32);
+
 		Board _board;
 
 		PieceManager _pieceManager;
@@ -45,9 +47,11 @@ namespace Backend
 			_negaMax = new NegaMax(_moveGenerator, _moveExecutor, _pieceManager);
 			_alphaBeta = new AlphaBeta(_moveGenerator, _moveExecutor, _pieceManager);
 			_negaBeta = new NegaBeta(_moveGenerator, _moveExecutor, _pieceManager);
-			_negaBetaTT = new NegaBetaTT(_moveGenerator, _moveExecutor, _pieceManager, _board);
+			_negaBetaTT = new NegaBetaTT(this, _board, _moveGenerator, _moveExecutor, _pieceManager);
 
 			Perft = new Perft(_moveGenerator, _moveExecutor, _pieceManager);
+
+			RepetitionHistory.Push(_board.ZobristHash);
 		}
 
 		public Tuple<Move, SearchStatistics> FindBestMove(uint fixedSearchDepth)
@@ -102,10 +106,12 @@ namespace Backend
 
 			if (moveToMake.Piece.Type == PieceType.Pawn || moveToMake.EncounteredPiece != null)
 			{
+				RepetitionHistory.Clear();
 				HalfMoveClock = 0;
 			}
 			else
 			{
+				RepetitionHistory.Push(_board.ZobristHash);
 				HalfMoveClock++;
 			}
 
