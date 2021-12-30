@@ -43,10 +43,10 @@ namespace Backend
 			_moveExecutor = new MoveExecutor(_board, _pieceManager, extractedFENData.PlayerToMoveColor);
 			_moveGenerator = new MoveGenerator(_board, _moveExecutor);
 
-			_minMax = new MinMax(_moveGenerator, _moveExecutor, _pieceManager);
-			_negaMax = new NegaMax(_moveGenerator, _moveExecutor, _pieceManager);
-			_alphaBeta = new AlphaBeta(_moveGenerator, _moveExecutor, _pieceManager);
-			_negaBeta = new NegaBeta(_moveGenerator, _moveExecutor, _pieceManager);
+			_minMax = new MinMax(this, _board, _moveGenerator, _moveExecutor, _pieceManager);
+			_negaMax = new NegaMax(this, _board, _moveGenerator, _moveExecutor, _pieceManager);
+			_alphaBeta = new AlphaBeta(this, _board, _moveGenerator, _moveExecutor, _pieceManager);
+			_negaBeta = new NegaBeta(this, _board, _moveGenerator, _moveExecutor, _pieceManager);
 			_negaBetaTT = new NegaBetaTT(this, _board, _moveGenerator, _moveExecutor, _pieceManager);
 
 			Perft = new Perft(_moveGenerator, _moveExecutor, _pieceManager);

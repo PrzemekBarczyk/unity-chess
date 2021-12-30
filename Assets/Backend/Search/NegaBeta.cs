@@ -5,27 +5,43 @@ namespace Backend
 {
 	internal sealed class NegaBeta : SearchAlgorithm
 	{
-		readonly bool USE_QUIESCENCE_SEARCH = false;
+		readonly bool USE_QUIESCENCE_SEARCH = true;
+		readonly bool USE_MOVE_ORDERING = true;
 
-		internal NegaBeta(MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager) : base(moveGenerator, moveExecutor, pieceManager) { }
+		internal NegaBeta(ChessEngine chessEngine, Board board, MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager) : base(chessEngine, board, moveGenerator, moveExecutor, pieceManager) { }
 
-		internal override Tuple<Move, SearchStatistics> FindBestMove(uint fixedDepthSearch)
+		internal override Tuple<Move, SearchStatistics> FindBestMove(uint depth)
 		{
+			_aboardSearch = false;
+
 			_bestEvaluation = 0;
 			_positionsEvaluated = 0;
 			_cutoffs = 0;
 			_transpositions = 0;
 
-			Search(_pieceManager.CurrentPieces, fixedDepthSearch, -10000000, 10000000, fixedDepthSearch);
+			Search(_pieceManager.CurrentPieces, depth, MIN_VALUE, MAX_VALUE, depth);
 
-			return new Tuple<Move, SearchStatistics>(_bestMove, new SearchStatistics(fixedDepthSearch, _bestEvaluation, _positionsEvaluated, _cutoffs, _transpositions));
+			return new Tuple<Move, SearchStatistics>(_bestMove, new SearchStatistics(depth, _bestEvaluation, _positionsEvaluated, _cutoffs, _transpositions));
 		}
 
 		internal int Search(PieceSet currentPlayerPieces, uint depth, int alpha, int beta, uint maxDepth)
 		{
+			if (_aboardSearch)
+			{
+				return ABOARD_VALUE;
+			}
+
+			if (depth < maxDepth && _chessEngine.RepetitionHistory.Contains(_board.ZobristHash)) // simplified draw detection
+			{
+				return DRAW_SCORE;
+			}
+
 			if (depth == 0)
 			{
-				if (USE_QUIESCENCE_SEARCH) return QuiescenceSearch(currentPlayerPieces, alpha, beta);
+				if (USE_QUIESCENCE_SEARCH)
+				{
+					return QuiescenceSearch(currentPlayerPieces, alpha, beta);
+				}
 				return Evaluate(currentPlayerPieces.Color);
 			}
 
@@ -34,15 +50,21 @@ namespace Backend
 			if (legalMoves.Count == 0) // no legal moves
 			{
 				if (currentPlayerPieces.IsKingChecked())
-					return -1000000 - (int)depth;
-				return 0;
+				{
+					return MATED_SCORE + (int)(maxDepth - depth);
+				}
+				return DRAW_SCORE;
 			}
 
-			MoveOrderer.EvaluateAndSort(legalMoves);
+			if (USE_MOVE_ORDERING)
+			{
+				MoveOrderer.EvaluateAndSort(legalMoves);
+			}
 
 			PieceSet nextDepthPlayerPieces = currentPlayerPieces == _whitePieces ? _blackPieces : _whitePieces;
 
-			int bestEvaluation = -10000000;
+			int bestEvaluation = MIN_VALUE;
+
 			for (int i = 0; i < legalMoves.Count; i++)
 			{
 				Move legalMove = legalMoves[i];
@@ -58,6 +80,7 @@ namespace Backend
 				if (evaluation > bestEvaluation)
 				{
 					bestEvaluation = evaluation;
+
 					if (depth == maxDepth)
 					{
 						_bestMove = legalMove;
@@ -79,6 +102,11 @@ namespace Backend
 
 		int QuiescenceSearch(PieceSet currentPlayerPieces, int alpha, int beta)
 		{
+			if (_aboardSearch)
+			{
+				return ABOARD_VALUE;
+			}
+
 			int standPat = Evaluate(currentPlayerPieces.Color);
 
 			if (standPat >= beta)
@@ -90,7 +118,12 @@ namespace Backend
 				alpha = standPat;
 			}
 
-			List<Move> legalMoves = new List<Move>(_moveGenerator.GenerateLegalMoves(currentPlayerPieces));
+			List<Move> legalMoves = new List<Move>(_moveGenerator.GenerateLegalMoves(currentPlayerPieces, true));
+
+			if (USE_MOVE_ORDERING)
+			{
+				MoveOrderer.EvaluateAndSort(legalMoves);
+			}
 
 			PieceSet nextDepthPlayerPieces = currentPlayerPieces == _whitePieces ? _blackPieces : _whitePieces;
 
@@ -98,24 +131,22 @@ namespace Backend
 			{
 				Move legalMove = legalMoves[i];
 
-				if (legalMove.EncounteredPiece != null)
+				_moveExecutor.MakeMove(legalMove);
+
+				int evaluation = -QuiescenceSearch(nextDepthPlayerPieces, -beta, -alpha);
+
+				_moveExecutor.UndoMove(legalMove);
+
+				_positionsEvaluated++;
+
+				if (evaluation >= beta)
 				{
-					_moveExecutor.MakeMove(legalMove);
-
-					int evaluation = -QuiescenceSearch(nextDepthPlayerPieces, -beta, -alpha);
-
-					_moveExecutor.UndoMove(legalMove);
-
-					_positionsEvaluated++;
-
-					if (evaluation >= beta)
-					{
-						return beta;
-					}
-					if (evaluation > alpha)
-					{
-						alpha = evaluation;
-					}
+					_cutoffs++;
+					return beta;
+				}
+				if (evaluation > alpha)
+				{
+					alpha = evaluation;
 				}
 			}
 

@@ -5,10 +5,14 @@ namespace Backend
 {
 	internal sealed class MinMax : SearchAlgorithm
 	{
-		internal MinMax(MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager) : base(moveGenerator, moveExecutor, pieceManager) { }
+		readonly bool USE_QUIESCENCE_SEARCH = false;
 
-		internal override Tuple<Move, SearchStatistics> FindBestMove(uint fixedSearchDepth)
+		internal MinMax(ChessEngine chessEngine, Board board, MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager) : base(chessEngine, board, moveGenerator, moveExecutor, pieceManager) { }
+
+		internal override Tuple<Move, SearchStatistics> FindBestMove(uint depth)
 		{
+			_aboardSearch = false;
+
 			_bestEvaluation = 0;
 			_positionsEvaluated = 0;
 			_cutoffs = 0;
@@ -16,20 +20,34 @@ namespace Backend
 
 			if (_pieceManager.CurrentPieces.Color == MAXIMIZING_COLOR)
 			{
-				Search(_pieceManager.CurrentPieces, fixedSearchDepth, true, fixedSearchDepth);
+				Search(_pieceManager.CurrentPieces, depth, true, depth);
 			}
 			else
 			{
-				Search(_pieceManager.CurrentPieces, fixedSearchDepth, false, fixedSearchDepth);
+				Search(_pieceManager.CurrentPieces, depth, false, depth);
 			}
 
-			return new Tuple<Move, SearchStatistics>(_bestMove, new SearchStatistics(fixedSearchDepth, _bestEvaluation, _positionsEvaluated, _cutoffs, _transpositions));
+			return new Tuple<Move, SearchStatistics>(_bestMove, new SearchStatistics(depth, _bestEvaluation, _positionsEvaluated, _cutoffs, _transpositions));
 		}
 
 		internal int Search(PieceSet currentPlayerPieces, uint depth, bool maximizingPlayer, uint maxDepth)
 		{
+			if (_aboardSearch)
+			{
+				return ABOARD_VALUE;
+			}
+
+			if (depth < maxDepth && _chessEngine.RepetitionHistory.Contains(_board.ZobristHash)) // simplified draw detection
+			{
+				return DRAW_SCORE;
+			}
+
 			if (depth == 0)
 			{
+				if (USE_QUIESCENCE_SEARCH)
+				{
+					return QuiescenceSearch(currentPlayerPieces, maximizingPlayer);
+				}
 				return Evaluate();
 			}
 
@@ -38,15 +56,17 @@ namespace Backend
 			if (legalMoves.Count == 0) // no legal moves
 			{
 				if (currentPlayerPieces.IsKingChecked())
-					return maximizingPlayer ? -1000000 - (int)depth : 1000000 + (int)depth;
-				return 0;
+				{
+					return maximizingPlayer ? MATED_SCORE + (int)(maxDepth - depth) : -MATED_SCORE - (int)(maxDepth - depth);
+				}
+				return DRAW_SCORE;
 			}
 
 			PieceSet nextDepthPlayerPieces = currentPlayerPieces == _whitePieces ? _blackPieces : _whitePieces;
 
 			if (maximizingPlayer)
 			{
-				int maxEvaluation = -10000000;
+				int maxEvaluation = MIN_VALUE;
 
 				for (int i = 0; i < legalMoves.Count; i++)
 				{
@@ -63,6 +83,7 @@ namespace Backend
 					if (evaluation > maxEvaluation)
 					{
 						maxEvaluation = evaluation;
+
 						if (depth == maxDepth)
 						{
 							_bestMove = legalMove;
@@ -75,7 +96,7 @@ namespace Backend
 			}
 			else // minimizing player
 			{
-				int minEvaluation = 10000000;
+				int minEvaluation = MAX_VALUE;
 
 				for (int i = 0; i < legalMoves.Count; i++)
 				{
@@ -92,11 +113,78 @@ namespace Backend
 					if (evaluation < minEvaluation)
 					{
 						minEvaluation = evaluation;
+
 						if (depth == maxDepth)
 						{
 							_bestMove = legalMove;
 							_bestEvaluation = minEvaluation;
 						}
+					}
+				}
+
+				return minEvaluation;
+			}
+		}
+
+		int QuiescenceSearch(PieceSet currentPlayerPieces, bool maximizingPlayer)
+		{
+			if (_aboardSearch)
+			{
+				return ABOARD_VALUE;
+			}
+
+			List<Move> legalMoves = new List<Move>(_moveGenerator.GenerateLegalMoves(currentPlayerPieces, true));
+
+			if (legalMoves.Count == 0) // no legal capture moves
+			{
+				return Evaluate();
+			}
+
+			PieceSet nextDepthPlayerPieces = currentPlayerPieces == _whitePieces ? _blackPieces : _whitePieces;
+
+			if (maximizingPlayer)
+			{
+				int maxEvaluation = Evaluate();
+
+				for (int i = 0; i < legalMoves.Count; i++)
+				{
+					Move legalMove = legalMoves[i];
+
+					_moveExecutor.MakeMove(legalMove);
+
+					int evaluation = QuiescenceSearch(nextDepthPlayerPieces, false);
+
+					_moveExecutor.UndoMove(legalMove);
+
+					_positionsEvaluated++;
+
+					if (evaluation > maxEvaluation)
+					{
+						maxEvaluation = evaluation;
+					}
+				}
+
+				return maxEvaluation;
+			}
+			else // minimizing player
+			{
+				int minEvaluation = Evaluate();
+
+				for (int i = 0; i < legalMoves.Count; i++)
+				{
+					Move legalMove = legalMoves[i];
+
+					_moveExecutor.MakeMove(legalMove);
+
+					int evaluation = QuiescenceSearch(nextDepthPlayerPieces, true);
+
+					_moveExecutor.UndoMove(legalMove);
+
+					_positionsEvaluated++;
+
+					if (evaluation < minEvaluation)
+					{
+						minEvaluation = evaluation;
 					}
 				}
 

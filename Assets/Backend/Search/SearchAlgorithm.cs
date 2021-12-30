@@ -7,13 +7,23 @@ namespace Backend
 	{
 		protected const ColorType MAXIMIZING_COLOR = ColorType.Black;
 
+		protected const int DRAW_SCORE = 0;
+		protected const int MATED_SCORE = -1000000;
+
+		protected const int ABOARD_VALUE = 0;
+
+		protected const int MIN_VALUE = -10000000;
+		protected const int MAX_VALUE = 10000000;
+
+		protected ChessEngine _chessEngine;
+		protected Board _board;
 		protected MoveGenerator _moveGenerator;
 		protected MoveExecutor _moveExecutor;
 		protected PieceManager _pieceManager;
 		protected PieceSet _whitePieces;
 		protected PieceSet _blackPieces;
 
-		protected bool _aboordSearch;
+		protected bool _aboardSearch;
 
 		protected Move _bestMove;
 		protected int _bestEvaluation;
@@ -21,8 +31,10 @@ namespace Backend
 		protected uint _cutoffs;
 		protected uint _transpositions;
 
-		internal SearchAlgorithm(MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager)
+		internal SearchAlgorithm(ChessEngine chessEngine, Board board, MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager)
 		{
+			_chessEngine = chessEngine;
+			_board = board;
 			_moveGenerator = moveGenerator;
 			_moveExecutor = moveExecutor;
 			_pieceManager = pieceManager;
@@ -34,7 +46,7 @@ namespace Backend
 
 		internal void AbordSearch()
 		{
-			_aboordSearch = true;
+			_aboardSearch = true;
 		}
 
 		internal int Evaluate(ColorType maximizingPlayer = MAXIMIZING_COLOR)

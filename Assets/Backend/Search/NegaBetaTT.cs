@@ -6,51 +6,49 @@ namespace Backend
 	internal sealed class NegaBetaTT : SearchAlgorithm
 	{
 		readonly bool USE_QUIESCENCE_SEARCH = true;
+		readonly bool USE_MOVE_ORDERING = true;
 		const int TRANSPOSITION_TABLE_SIZE = 64000;
 
 		TranspositionTable _transpositionTable;
-		ChessEngine _chessEngine;
-		Board _board;
 
-		internal NegaBetaTT(ChessEngine chessEngine, Board board, MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager) : base(moveGenerator, moveExecutor, pieceManager)
+		internal NegaBetaTT(ChessEngine chessEngine, Board board, MoveGenerator moveGenerator, MoveExecutor moveExecutor, PieceManager pieceManager) : base(chessEngine, board, moveGenerator, moveExecutor, pieceManager)
 		{
 			_transpositionTable = new TranspositionTable(board, TRANSPOSITION_TABLE_SIZE);
+
 			_chessEngine = chessEngine;
 			_board = board;
 		}
 
-		internal override Tuple<Move, SearchStatistics> FindBestMove(uint fixedSearchDepth)
+		internal override Tuple<Move, SearchStatistics> FindBestMove(uint depth)
 		{
-			_aboordSearch = false;
+			_aboardSearch = false;
 
 			_bestEvaluation = 0;
 			_positionsEvaluated = 0;
 			_cutoffs = 0;
 			_transpositions = 0;
 
-			Search(_pieceManager.CurrentPieces, fixedSearchDepth, -10000000, 10000000, fixedSearchDepth);
+			Search(_pieceManager.CurrentPieces, depth, MIN_VALUE, MAX_VALUE, depth);
 
-			return new Tuple<Move, SearchStatistics>(_bestMove, new SearchStatistics(fixedSearchDepth, _bestEvaluation, _positionsEvaluated, _cutoffs, _transpositions));
+			return new Tuple<Move, SearchStatistics>(_bestMove, new SearchStatistics(depth, _bestEvaluation, _positionsEvaluated, _cutoffs, _transpositions));
 		}
 
 		internal int Search(PieceSet currentPlayerPieces, uint depth, int alpha, int beta, uint maxDepth)
 		{
-			if (_aboordSearch)
+			if (_aboardSearch)
 			{
-				return 0;
+				return ABOARD_VALUE;
 			}
 
-			if (depth < maxDepth)
+			if (depth < maxDepth && _chessEngine.RepetitionHistory.Contains(_board.ZobristHash)) // simplified draw detection
 			{
-				if (_chessEngine.RepetitionHistory.Contains(_board.ZobristHash))
-				{
-					return 0;
-				}
+				return DRAW_SCORE;
 			}
 
 			int alphaOrig = alpha;
 
 			Entry ttEntry = _transpositionTable.GetEntry();
+
 			if (!Entry.IsEntryInvalid(ttEntry) && ttEntry.depth >= depth)
 			{
 				if (ttEntry.nodeType == TranspositionTable.EXACT)
@@ -84,7 +82,10 @@ namespace Backend
 
 			if (depth == 0)
 			{
-				if (USE_QUIESCENCE_SEARCH) return QuiescenceSearch(currentPlayerPieces, alpha, beta);
+				if (USE_QUIESCENCE_SEARCH)
+				{
+					return QuiescenceSearch(currentPlayerPieces, alpha, beta);
+				}
 				return Evaluate(currentPlayerPieces.Color);
 			}
 
@@ -93,16 +94,22 @@ namespace Backend
 			if (legalMoves.Count == 0) // no legal moves
 			{
 				if (currentPlayerPieces.IsKingChecked())
-					return -1000000 - (int)depth;
-				return 0;
+				{
+					return MATED_SCORE + (int)(maxDepth - depth);
+				}
+				return DRAW_SCORE;
 			}
 
-			MoveOrderer.EvaluateAndSort(legalMoves, true, _transpositionTable);
+			if (USE_MOVE_ORDERING)
+			{
+				MoveOrderer.EvaluateAndSort(legalMoves, true, _transpositionTable);
+			}
 
 			PieceSet nextDepthPlayerPieces = currentPlayerPieces == _whitePieces ? _blackPieces : _whitePieces;
 
-			int bestEvaluation = -10000000;
+			int bestEvaluation = MIN_VALUE;
 			Move bestMoveInNode = new Move();
+
 			for (int i = 0; i < legalMoves.Count; i++)
 			{
 				Move legalMove = legalMoves[i];
@@ -119,6 +126,7 @@ namespace Backend
 				{
 					bestEvaluation = evaluation;
 					bestMoveInNode = legalMove;
+
 					if (depth == maxDepth)
 					{
 						_bestMove = bestMoveInNode;
@@ -136,12 +144,19 @@ namespace Backend
 			}
 
 			int nodeType;
+
 			if (bestEvaluation <= alphaOrig)
+			{
 				nodeType = TranspositionTable.UPPER_BOUND;
+			}
 			else if (bestEvaluation >= beta)
+			{
 				nodeType = TranspositionTable.LOWER_BOUND;
+			}
 			else
+			{
 				nodeType = TranspositionTable.EXACT;
+			}
 
 			_transpositionTable.StoreEntry(depth, bestEvaluation, nodeType, bestMoveInNode);
 
@@ -150,6 +165,11 @@ namespace Backend
 
 		int QuiescenceSearch(PieceSet currentPlayerPieces, int alpha, int beta)
 		{
+			if (_aboardSearch)
+			{
+				return ABOARD_VALUE;
+			}
+
 			int standPat = Evaluate(currentPlayerPieces.Color);
 
 			if (standPat >= beta)
@@ -163,7 +183,10 @@ namespace Backend
 
 			List<Move> legalMoves = new List<Move>(_moveGenerator.GenerateLegalMoves(currentPlayerPieces, true));
 
-			MoveOrderer.EvaluateAndSort(legalMoves);
+			if (USE_MOVE_ORDERING)
+			{
+				MoveOrderer.EvaluateAndSort(legalMoves);
+			}
 
 			PieceSet nextDepthPlayerPieces = currentPlayerPieces == _whitePieces ? _blackPieces : _whitePieces;
 
