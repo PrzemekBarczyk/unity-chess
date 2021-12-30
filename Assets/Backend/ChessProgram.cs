@@ -28,9 +28,9 @@ namespace Backend
 		OpeningBook _book;
 
 		bool _useBook = true;
-		uint _fixedSearchedDepth = 5;
+		uint _fixedSearchDepth = 5;
 		bool _useIterativeDeepening = true;
-		float _timerForSearch = 1000f; // in milliseconds
+		float _timeForSearch = 1000f; // in milliseconds
 
 		public ChessProgram(string startPositionInFEN, GameType gameType, ColorType playerToMoveColor, string openingBook)
 		{
@@ -95,11 +95,11 @@ namespace Backend
 
 						if (!_useIterativeDeepening)
 						{
-							moveToMakeWithStats = _chessEngine.FindBestMove(_fixedSearchedDepth);
+							moveToMakeWithStats = _chessEngine.FindBestMove(_fixedSearchDepth);
 						}
 						else
 						{
-							moveToMakeWithStats = _chessEngine.FindBestMove(_timerForSearch);
+							moveToMakeWithStats = _chessEngine.FindBestMove(_timeForSearch);
 						}
 
 						moveToMake = moveToMakeWithStats.Item1;
@@ -127,7 +127,6 @@ namespace Backend
 		State CheckState(string fen)
 		{
 			string formattedFEN = string.Join(" ", fen.Split(), 0, 4); // removes half moves clock and full move number
-			UnityEngine.Debug.Log(formattedFEN);
 
 			List<Move> legalMoves = _chessEngine.GenerateLegalMoves(_playerManager.NextPlayer.Color);
 

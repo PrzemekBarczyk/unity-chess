@@ -88,7 +88,6 @@ namespace Backend
 			}
 		}
 
-
 		public List<Move> GenerateLegalMoves()
 		{
 			return _moveGenerator.GenerateLegalMoves(_pieceManager.CurrentPieces);
@@ -129,7 +128,7 @@ namespace Backend
 			return pieces.IsKingChecked();
 		}
 
-		internal bool IsMaterialSufficient(ColorType playerColor)
+		public bool IsMaterialSufficient(ColorType playerColor)
 		{
 			PieceSet pieces = playerColor == ColorType.White ? _pieceManager.WhitePieces : _pieceManager.BlackPieces;
 			bool isMaterialSufficient = false;
@@ -154,12 +153,12 @@ namespace Backend
 			return isMaterialSufficient;
 		}
 
-		internal ulong ZobristHash()
+		public ulong ZobristHash()
 		{
 			return _board.ZobristHash;
 		}
 
-		internal int Evaluation()
+		public int Evaluation()
 		{
 			return _minMax.Evaluate();
 		}
