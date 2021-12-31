@@ -17,6 +17,8 @@ namespace Frontend
 		[Header("Dragged Piece")]
 		[SerializeField] SpriteRenderer _draggedPieceSpriteRenderer;
 
+		public bool Unlocked { get; set; }
+
 		List<Move> _legalMoves;
 
 		bool _isMoveSelected;
@@ -49,7 +51,7 @@ namespace Frontend
 
 		public IEnumerator OnSquareSelected(GraphicalSquare selectedSquare) // called when OnMouseDown triggered on Square
 		{
-			if (_pickingPromotion)
+			if (_pickingPromotion || !Unlocked)
 			{
 				yield break;
 			}
@@ -150,7 +152,7 @@ namespace Frontend
 
 		public IEnumerator OnPieceDrop() // called when OnMouseUp triggered on Square
 		{
-			if (_pickingPromotion)
+			if (_pickingPromotion || !Unlocked)
 			{
 				yield break;
 			}

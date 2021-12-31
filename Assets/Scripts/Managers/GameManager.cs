@@ -133,11 +133,13 @@ namespace Frontend
 
         public Move OnHumanTurnStarted(List<Move> legalMoves)
         {
+            _moveSelector.Unlocked = true;
             _moveSelector.SetLegalMoves(legalMoves);
 
             while (!_moveSelector.IsMoveSelected())
                 continue;
 
+            _moveSelector.Unlocked = false;
             return _moveSelector.GetSelectedMove();
         }
 
