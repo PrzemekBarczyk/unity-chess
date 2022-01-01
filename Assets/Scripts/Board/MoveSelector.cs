@@ -18,6 +18,7 @@ namespace Frontend
 		[SerializeField] SpriteRenderer _draggedPieceSpriteRenderer;
 
 		public bool Unlocked { get; set; }
+		public bool PieceWasDropped { get; set; }
 
 		List<Move> _legalMoves;
 
@@ -184,6 +185,7 @@ namespace Frontend
 			);
 			if (selectedLegalSquare) // piece dropped on legal square
 			{
+				PieceWasDropped = true;
 				StartCoroutine(PickPromotion(selectedGraphicalSquare));
 				yield break;
 			}

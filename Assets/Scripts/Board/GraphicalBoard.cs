@@ -1,4 +1,5 @@
 using Backend;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -18,6 +19,11 @@ namespace Frontend
         [Header("Squares Prefabs")]
         [SerializeField] GraphicalSquare _whiteSquarePrefab;
         [SerializeField] GraphicalSquare _blackSquarePrefab;
+
+        [Header("Piece Movement Animation")]
+        [SerializeField] bool _animate = true;
+        [SerializeField] SpriteRenderer _movingPiecePrefab;
+        [SerializeField] [Range(0.05f, 0.3f)] float _moveDuration = 0.2f;
 
         [Header("Move Selector")]
         [SerializeField] MoveSelector _moveSelector;
@@ -61,6 +67,17 @@ namespace Frontend
                 Squares[_lastMove.Value.NewSquare.Position.x, _lastMove.Value.NewSquare.Position.y].HideLastMoveIndicator();
             }
 
+            Squares[moveToMake.OldSquare.Position.x, moveToMake.OldSquare.Position.y].DisplayLastMoveIndicator();
+            Squares[moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y].DisplayLastMoveIndicator();
+
+            _lastMove = moveToMake;
+
+            GraphicalSquare encounteredPieceSquare = null;
+            if (moveToMake.EncounteredPiece != null)
+            {
+                encounteredPieceSquare = Squares[moveToMake.EncounteredPiece.Square.Position.x, moveToMake.EncounteredPiece.Square.Position.y];
+            }
+
             if (moveToMake.Type == MoveType.Castle)
             {
                 GraphicalSquare rookOldSquare, rookNewSquare;
@@ -74,31 +91,71 @@ namespace Frontend
                     rookOldSquare = Squares[LEFT_FILE_INDEX, moveToMake.OldSquare.Position.y];
                     rookNewSquare = Squares[moveToMake.OldSquare.Position.x - 1, moveToMake.OldSquare.Position.y];
                 }
-                rookNewSquare.PieceSprite = rookOldSquare.PieceSprite;
-                rookOldSquare.PieceSprite = null;
+
+                StartCoroutine(MovePiece(rookOldSquare, rookNewSquare, encounteredPieceSquare, rookOldSquare.PieceSprite));
             }
 
-            if (moveToMake.EncounteredPiece != null)
-            {
-                Squares[moveToMake.EncounteredPiece.Square.Position.x, moveToMake.EncounteredPiece.Square.Position.y].PieceSprite = null;
-            }
+            GraphicalSquare oldSquare = Squares[moveToMake.OldSquare.Position.x, moveToMake.OldSquare.Position.y];
+            GraphicalSquare newSquare = Squares[moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y];
 
-            Squares[moveToMake.OldSquare.Position.x, moveToMake.OldSquare.Position.y].PieceSprite = null;
             if (!moveToMake.IsPromotion)
-                Squares[moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y].PieceSprite = _piecesSprites.GetSprite(moveToMake.Piece.Color, moveToMake.Piece.Type);
+            {
+                StartCoroutine(MovePiece(oldSquare, newSquare, encounteredPieceSquare, _piecesSprites.GetSprite(moveToMake.Piece.Color, moveToMake.Piece.Type)));
+            }
             else if (moveToMake.Type == MoveType.PromotionToKnight)
-                Squares[moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y].PieceSprite = _piecesSprites.GetSprite(moveToMake.Piece.Color, PieceType.Knight);
+            {
+                StartCoroutine(MovePiece(oldSquare, newSquare, encounteredPieceSquare, _piecesSprites.GetSprite(moveToMake.Piece.Color, PieceType.Knight)));
+            }
             else if (moveToMake.Type == MoveType.PromotionToBishop)
-                Squares[moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y].PieceSprite = _piecesSprites.GetSprite(moveToMake.Piece.Color, PieceType.Bishop);
+            {
+                StartCoroutine(MovePiece(oldSquare, newSquare, encounteredPieceSquare, _piecesSprites.GetSprite(moveToMake.Piece.Color, PieceType.Bishop)));
+            }
             else if (moveToMake.Type == MoveType.PromotionToRook)
-                Squares[moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y].PieceSprite = _piecesSprites.GetSprite(moveToMake.Piece.Color, PieceType.Rook);
+            {
+                StartCoroutine(MovePiece(oldSquare, newSquare, encounteredPieceSquare, _piecesSprites.GetSprite(moveToMake.Piece.Color, PieceType.Rook)));
+            }
             else if (moveToMake.Type == MoveType.PromotionToQueen)
-                Squares[moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y].PieceSprite = _piecesSprites.GetSprite(moveToMake.Piece.Color, PieceType.Queen);
+            {
+                StartCoroutine(MovePiece(oldSquare, newSquare, encounteredPieceSquare, _piecesSprites.GetSprite(moveToMake.Piece.Color, PieceType.Queen)));
+            }
+        }
 
-            Squares[moveToMake.OldSquare.Position.x, moveToMake.OldSquare.Position.y].DisplayLastMoveIndicator();
-            Squares[moveToMake.NewSquare.Position.x, moveToMake.NewSquare.Position.y].DisplayLastMoveIndicator();
+        IEnumerator MovePiece(GraphicalSquare startSquare, GraphicalSquare endSquare, GraphicalSquare encounteredPieceSquare, Sprite finalSprite)
+		{
+            if (!_animate || _moveSelector.PieceWasDropped)
+			{
+                startSquare.PieceSprite = null;
+            }
 
-            _lastMove = moveToMake;
+            if (_animate && !_moveSelector.PieceWasDropped)
+            {
+                SpriteRenderer piece = Instantiate(_movingPiecePrefab, startSquare.transform.position, transform.rotation, transform);
+                piece.sprite = startSquare.PieceSprite;
+                if (Camera.main.transform.rotation != Quaternion.Euler(Vector3.zero))
+                {
+                    piece.transform.rotation = Camera.main.transform.rotation;
+                }
+
+                startSquare.PieceSprite = null;
+
+                float t = 0f;
+                while (t < _moveDuration)
+                {
+                    piece.transform.position = Vector2.Lerp(startSquare.transform.position, endSquare.transform.position, t / _moveDuration);
+                    t += Time.deltaTime;
+                    yield return null;
+                }
+
+                Destroy(piece.gameObject);
+            }
+
+            if (encounteredPieceSquare != null)
+            {
+                encounteredPieceSquare.PieceSprite = null;
+            }
+            endSquare.PieceSprite = finalSprite;
+
+            _moveSelector.PieceWasDropped = false;
         }
     }
 }

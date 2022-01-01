@@ -3068,7 +3068,7 @@ GameObject:
   - component: {fileID: 881900504}
   - component: {fileID: 881900503}
   m_Layer: 0
-  m_Name: Piece
+  m_Name: Dragged Piece
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5075,6 +5075,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _whiteSquarePrefab: {fileID: 2432458226126079971, guid: accd97b28b0cd5b4e96e4f4951391b83, type: 3}
   _blackSquarePrefab: {fileID: 1155649010797362021, guid: dfa98de89c561af46bc1d4da6cad7aa3, type: 3}
+  _animate: 1
+  _movingPiecePrefab: {fileID: 61379915725415012, guid: 9474f68e4180e4343afa5bb647d0c64c, type: 3}
+  _moveDuration: 0.2
   _moveSelector: {fileID: 1208830686}
   _piecesSprites: {fileID: 11400000, guid: 24e481f4ba189bf40b26ca974fbf5adb, type: 2}
 --- !u!4 &1208830685
