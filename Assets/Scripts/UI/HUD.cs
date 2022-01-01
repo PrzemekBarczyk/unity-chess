@@ -33,6 +33,8 @@ namespace Frontend
         [SerializeField] Image _resultMessageBackground;
         [SerializeField] Text _resultMessageText;
 
+        int _moveCounter = 1;
+
         public void SetUp(GameType gameType)
         {
             if (gameType == GameType.BotVsBot || gameType == GameType.HumanVsBot || gameType == GameType.BotVsHuman)
@@ -64,11 +66,12 @@ namespace Frontend
         {
             if (move.Piece.Color == ColorType.White)
             {
-                _whitePlayerMoveList.text += SimplifiedAlgebraicNotation.MoveToLongSAN(move) + "\n";
+                _whitePlayerMoveList.text += string.Format("{0,-4}", _moveCounter + ".") + "\t" + SimplifiedAlgebraicNotation.MoveToLongSAN(move) + "\n";
             }
             else
             {
                 _blackPlayerMoveList.text += SimplifiedAlgebraicNotation.MoveToLongSAN(move) + "\n";
+                _moveCounter++;
             }
             _scrollbar.value = 0f;
         }
