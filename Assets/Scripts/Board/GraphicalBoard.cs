@@ -92,7 +92,7 @@ namespace Frontend
                     rookNewSquare = Squares[moveToMake.OldSquare.Position.x - 1, moveToMake.OldSquare.Position.y];
                 }
 
-                StartCoroutine(MovePiece(rookOldSquare, rookNewSquare, encounteredPieceSquare, rookOldSquare.PieceSprite));
+                StartCoroutine(MovePiece(rookOldSquare, rookNewSquare, encounteredPieceSquare, rookOldSquare.PieceSprite, false));
             }
 
             GraphicalSquare oldSquare = Squares[moveToMake.OldSquare.Position.x, moveToMake.OldSquare.Position.y];
@@ -100,34 +100,36 @@ namespace Frontend
 
             if (!moveToMake.IsPromotion)
             {
-                StartCoroutine(MovePiece(oldSquare, newSquare, encounteredPieceSquare, _piecesSprites.GetSprite(moveToMake.Piece.Color, moveToMake.Piece.Type)));
+                StartCoroutine(MovePiece(oldSquare, newSquare, encounteredPieceSquare, _piecesSprites.GetSprite(moveToMake.Piece.Color, moveToMake.Piece.Type), _moveSelector.PieceWasDropped));
             }
             else if (moveToMake.Type == MoveType.PromotionToKnight)
             {
-                StartCoroutine(MovePiece(oldSquare, newSquare, encounteredPieceSquare, _piecesSprites.GetSprite(moveToMake.Piece.Color, PieceType.Knight)));
+                StartCoroutine(MovePiece(oldSquare, newSquare, encounteredPieceSquare, _piecesSprites.GetSprite(moveToMake.Piece.Color, PieceType.Knight), _moveSelector.PieceWasDropped));
             }
             else if (moveToMake.Type == MoveType.PromotionToBishop)
             {
-                StartCoroutine(MovePiece(oldSquare, newSquare, encounteredPieceSquare, _piecesSprites.GetSprite(moveToMake.Piece.Color, PieceType.Bishop)));
+                StartCoroutine(MovePiece(oldSquare, newSquare, encounteredPieceSquare, _piecesSprites.GetSprite(moveToMake.Piece.Color, PieceType.Bishop), _moveSelector.PieceWasDropped));
             }
             else if (moveToMake.Type == MoveType.PromotionToRook)
             {
-                StartCoroutine(MovePiece(oldSquare, newSquare, encounteredPieceSquare, _piecesSprites.GetSprite(moveToMake.Piece.Color, PieceType.Rook)));
+                StartCoroutine(MovePiece(oldSquare, newSquare, encounteredPieceSquare, _piecesSprites.GetSprite(moveToMake.Piece.Color, PieceType.Rook), _moveSelector.PieceWasDropped));
             }
             else if (moveToMake.Type == MoveType.PromotionToQueen)
             {
-                StartCoroutine(MovePiece(oldSquare, newSquare, encounteredPieceSquare, _piecesSprites.GetSprite(moveToMake.Piece.Color, PieceType.Queen)));
+                StartCoroutine(MovePiece(oldSquare, newSquare, encounteredPieceSquare, _piecesSprites.GetSprite(moveToMake.Piece.Color, PieceType.Queen), _moveSelector.PieceWasDropped));
             }
+
+            _moveSelector.PieceWasDropped = false;
         }
 
-        IEnumerator MovePiece(GraphicalSquare startSquare, GraphicalSquare endSquare, GraphicalSquare encounteredPieceSquare, Sprite finalSprite)
+        IEnumerator MovePiece(GraphicalSquare startSquare, GraphicalSquare endSquare, GraphicalSquare encounteredPieceSquare, Sprite finalSprite, bool pieceWasDropped)
 		{
-            if (!_animate || _moveSelector.PieceWasDropped)
+            if (!_animate || pieceWasDropped)
 			{
                 startSquare.PieceSprite = null;
             }
 
-            if (_animate && !_moveSelector.PieceWasDropped)
+            if (_animate && !pieceWasDropped)
             {
                 SpriteRenderer piece = Instantiate(_movingPiecePrefab, startSquare.transform.position, transform.rotation, transform);
                 piece.sprite = startSquare.PieceSprite;
@@ -154,8 +156,6 @@ namespace Frontend
                 encounteredPieceSquare.PieceSprite = null;
             }
             endSquare.PieceSprite = finalSprite;
-
-            _moveSelector.PieceWasDropped = false;
         }
     }
 }
